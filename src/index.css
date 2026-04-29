@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+    --color-botao-branco-apertado: #e5e7eb;
+    --color-botao-beje-apertado: #9e6b4c;
+    --color-preto-texto-principal: #111111;
+    --color-branco-texto-principal: #FFFFFF;
+    --color-preto-principal: #000000;
+    --color-beje-principal: #A67C52;
+    --color-fundo-principal: #FAFAF9;
+}
