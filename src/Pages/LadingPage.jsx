@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import Header from './components/Header'
-import Footer from './components/Footer'
-import imagemHero from './assets/Lading-page/hero-imagem.png'
-import imagemComoFunciona from './assets/Lading-page/como-funciona-imagem.png'
-import imagemComoFunciona2 from './assets/Lading-page/como-funciona-imagem2.png'
-import { fotosPerfis } from './assets/Lading-page/Foto-perfis/index.js';
+import Header from '../components/Header.jsx'
+import Footer from '../components/Footer.jsx'
+import imagemHero from '../assets/Lading-page/hero-imagem.png'
+import imagemComoFunciona from '../assets/Lading-page/como-funciona-imagem.png'
+import imagemComoFunciona2 from '../assets/Lading-page/como-funciona-imagem2.png'
+import { fotosPerfis } from '../assets/Lading-page/Foto-perfis/perfis.js';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
-import * as Icons from './icons/icons'
+import * as Icons from '../icons/icons.js'
 
 import 'swiper/css';
 import 'swiper/css/autoplay';
