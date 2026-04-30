@@ -3,3 +3,7 @@ export { LuTimer } from "react-icons/lu";
 export { FaMousePointer } from "react-icons/fa";
 export { IoIosUnlock } from "react-icons/io";
 export { FiEye } from "react-icons/fi"
+export { FaStar } from "react-icons/fa";
+export { FaLocationDot } from "react-icons/fa6";
+export { MdOutlineMailOutline } from "react-icons/md";
+export { FaPhone } from "react-icons/fa6";
