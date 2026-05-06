@@ -14,14 +14,14 @@
 
     --spacing-rem-2: 2rem;
     --spacing-65: 260px;
-    --spacing-500: 500px;
     --spacing-130: 520px;
     --spacing-140: 560px;
     --spacing-230: 230px;
+    --spacing-500: 500px;
     --spacing-640: 640px;
     --spacing-800: 800px;
+    --spacing-1200: 1200px;
     --spacing-1440: 1440px;
-    --spacing-1200: 1200px
 
     --keyframes-entrada-onda: {
     from { 

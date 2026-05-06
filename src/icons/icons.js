@@ -1,9 +1,15 @@
-export { LuChevronDown } from "react-icons/lu";
-export { LuTimer } from "react-icons/lu";
-export { FaMousePointer } from "react-icons/fa";
-export { IoIosUnlock } from "react-icons/io";
-export { FiEye } from "react-icons/fi"
-export { FaStar } from "react-icons/fa";
-export { FaLocationDot } from "react-icons/fa6";
-export { MdOutlineMailOutline } from "react-icons/md";
-export { FaPhone } from "react-icons/fa6";
+export { LuChevronDown } from "react-icons/lu"; {/* Ícone de seta para baixo para dropdowns */}
+export { LuTimer } from "react-icons/lu"; {/* Ícone de timer para indicar tempo de reserva */}
+export { FaMousePointer } from "react-icons/fa"; {/* Ícone de mouse para indicar clique */}
+export { IoIosUnlock } from "react-icons/io"; {/* Ícone de cadeado aberto para mostrar senha */}
+export { FiEye } from "react-icons/fi"; {/* Ícone de olho para mostrar senha */}
+export { FaStar } from "react-icons/fa"; {/* Ícone de estrela para avaliações */}
+export { FaLocationDot } from "react-icons/fa6"; {/* Ícone de localização */}
+export { MdOutlineMailOutline } from "react-icons/md"; {/* Ícone de email */}
+export { FaPhone } from "react-icons/fa6"; {/* Ícone de telefone */}
+export { IoIosArrowBack } from "react-icons/io"; {/* Ícones de seta para navegação */}
+export { IoIosArrowForward } from "react-icons/io"; {/* Ícones de seta para navegação */}
+export { IoIosBed } from "react-icons/io"; {/* Ícone de cama */}
+export { FaCar } from "react-icons/fa"; {/* Ícone de carro */}
+export { IoIosSearch } from "react-icons/io"; {/* Ícone de lupa para busca */}
+export { IoIosClose } from "react-icons/io"; {/* Ícone de fechar */}
