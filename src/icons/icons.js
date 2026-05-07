@@ -7,9 +7,12 @@ export { FaStar } from "react-icons/fa"; {/* Ícone de estrela para avaliações
 export { FaLocationDot } from "react-icons/fa6"; {/* Ícone de localização */}
 export { MdOutlineMailOutline } from "react-icons/md"; {/* Ícone de email */}
 export { FaPhone } from "react-icons/fa6"; {/* Ícone de telefone */}
-export { IoIosArrowBack } from "react-icons/io"; {/* Ícones de seta para navegação */}
-export { IoIosArrowForward } from "react-icons/io"; {/* Ícones de seta para navegação */}
-export { IoIosBed } from "react-icons/io"; {/* Ícone de cama */}
-export { FaCar } from "react-icons/fa"; {/* Ícone de carro */}
+export { IoIosArrowBack } from "react-icons/io"; {/* Ícones de seta para navegação Para Esquerda */}
+export { IoIosArrowForward } from "react-icons/io"; {/* Ícones de seta para navegação Para Direita */}
+export { IoIosArrowDown } from "react-icons/io"; {/* Ícones de seta para navegação para Baixo */}
+export { IoIosBed } from "react-icons/io"; {/* Ícone de Cama */}
+export { FaCar } from "react-icons/fa"; {/* Ícone de Carro */}
 export { IoIosSearch } from "react-icons/io"; {/* Ícone de lupa para busca */}
 export { IoIosClose } from "react-icons/io"; {/* Ícone de fechar */}
+export { FaMoneyBill1Wave } from "react-icons/fa6"; {/* Ícone de dinheiro */}
+export { FaCheck } from "react-icons/fa6"; {/* Ícone do CheckBox */}

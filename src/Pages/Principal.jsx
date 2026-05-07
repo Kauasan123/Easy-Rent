@@ -3,6 +3,7 @@ import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import * as Icons from '../icons/icons.js'
 import Hero from '../assets/TelaPrincipal/MiniHero.jpg'
+import * as Slider from '@radix-ui/react-slider';
 
 const imoveis = [
   {
@@ -73,7 +74,33 @@ const imoveis = [
   }
 ];
 
-function App() {
+// Componente CheckBox
+function CheckBox({ label, id }) {
+  return (
+    <label htmlFor={id} className="flex items-center gap-3 cursor-pointer group">
+      <div className="relative flex items-center justify-center w-5 h-5">
+        <input type="checkbox" id={id} className="peer appearance-none w-full h-full border-2 border-borda-cards rounded-md  bg-white checked:bg-beje-principal checked:border-beje-principal transition-all duration-200 cursor-pointer" />
+        <Icons.FaCheck className="absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-200" size={12.5} />
+      </div>
+      <span className="text-sm text-zinc-700 group-hover:text-beje-principal transition-colors font-medium">
+        {label}
+      </span>
+    </label>
+  );
+}
+
+// Componente Principal
+export default function Principal() {
+  const [aberto, setAberto] = useState("");
+  const [range, setRange] = useState([0, 10000]);
+
+  const imoveisFiltro = imoveis.filter(imovel => {
+    const precoLimpo = imovel.preco.replace(/\./g, '').replace(',', '.');
+    const precoNumerico = parseFloat(precoLimpo);
+
+    return precoNumerico >= range[0] && precoNumerico <= range[1];
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header>
@@ -110,16 +137,128 @@ function App() {
         {/* Conteudo Principal */}
         <section className="container-principal flex w-full max-w-[1440px] 2xl:max-w-[1700px] mx-auto gap-6 p-6">
 
-          {/* COLUNA ESQUERDA: O FILTRO (20% a 25% da largura) */}
-          <aside className="filtro-lateral w-72 hidden lg:block">
-            {/* Seu componente de Filtro entra aqui */}
-            <div className='w-full h-full border rounded'></div>
+          {/* Filtro */}
+          <aside className="w-[300px] border border-borda-cards rounded-2xl p-4 bg-fundo-cards flex flex-col gap-4">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl font-bold">Filtro</h2>
+              {/* Ícone de fechar */}
+            </div>
+
+            {/* Seção Localização */}
+            <div className="border border-borda-cards rounded-xl overflow-hidden">
+              <button onClick={() => setAberto(aberto === 'localizacao' ? '' : 'localizacao')} className="w-full flex items-center justify-between p-3 transition-colors">
+                <div className="flex items-center gap-2 font-bold">
+                  <Icons.FaLocationDot /> Localização
+                </div>
+                <Icons.IoIosArrowDown className={`transition-transform ${aberto === 'localizacao' ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`transition-all duration-300 ease-in-out overflow-hidden ${aberto === 'localizacao' ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-3 pb-3 pt-0">
+                  <input type="text" placeholder="Escreva aonde deseja procurar..." className="w-full p-2 border border-borda-cards rounded-lg text-sm outline-none focus:border-beje-principal bg-white" />
+                </div>
+              </div>
+            </div>
+
+            {/* Seção Preço */}
+            <div className="flex flex-col gap-3 p-3 border border-borda-cards rounded-xl">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 font-bold">
+                  <Icons.FaMoneyBill1Wave /> Preço
+                </div>
+                <div>
+                  <button onClick={() => setRange([0, 10000])} className="text-vermelho-cancelar text-xs font-bold hover:underline flex flex-row text-center items-center">
+                    <Icons.IoIosClose className='text-vermelho-cancelar' size={24} />
+                    Limpar
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="relative w-full">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400">R$</span>
+                  <input type="number" value={range[0]} onChange={(e) => setRange([Number(e.target.value), range[1]])} className="w-full p-2 pl-6 border rounded-lg text-xs text-center outline-none focus:border-beje-principal" />
+                </div>
+                <span>-</span>
+                <div className="relative w-full">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400">R$</span>
+                  <input type="number" value={range[1]} onChange={(e) => setRange([range[0], Number(e.target.value)])} className="w-full p-2 pl-6 border rounded-lg text-xs text-center outline-none focus:border-beje-principal" />
+                </div>
+              </div>
+
+              <Slider.Root
+                className="relative flex items-center select-none touch-none w-full h-5"
+                max={10000}
+                step={100}
+                value={range}
+                onValueChange={setRange}
+              >
+                <Slider.Track className="bg-cinza-slider relative grow rounded-full h-1.5">
+                  <Slider.Range className="absolute bg-beje-principal rounded-full h-full" />
+                </Slider.Track>
+
+                <Slider.Thumb className="block w-5 h-5 border-white border-2 bg-beje-principal shadow-md rounded-full hover:scale-110 transition-transform cursor-grab active:cursor-grabbing outline-none" />
+                <Slider.Thumb className="block w-5 h-5 border-white border-2 bg-beje-principal shadow-md rounded-full hover:scale-110 transition-transform cursor-grab active:cursor-grabbing outline-none" />
+              </Slider.Root>
+            </div>
+
+            {/* Seção Data */}
+            {/* <div className="border border-zinc-100 rounded-xl overflow-hidden">
+              <button onClick={() => setAberto(aberto === 'localizacao' ? '' : 'localizacao')} className="w-full flex items-center justify-between p-3 transition-colors">
+                <div className="flex items-center gap-2 font-bold">
+                  <Icons.FaLocationDot /> tipo do Imóvel
+                </div>
+                <Icons.FaChevronDown className={`transition-transform ${aberto === 'data' ? 'rotate-180' : ''}`} />
+              </button>
+
+              <div className={`transition-all duration-500 ease-in-out overflow-hidden ${aberto === 'data' ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="p-4 bg-zinc-50 flex flex-col items-center">
+                  Aqui você renderiza o seu componente de calendário (Filtro - Calendario Aberto.png)
+                  <div className="text-sm font-bold mb-4">Janeiro 2026</div>
+                  Mock do Calendário Grid
+                  <div className="grid grid-cols-7 gap-2 text-[10px] text-center">
+                    {["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"].map(d => <div key={d}>{d}</div>)}
+                    ... números do calendário ...
+                  </div>
+                </div>
+              </div>
+            </div> */}
+
+            {/* Seção Tipo de Imóvel */}
+            <div className="flex flex-col gap-3 p-3 border border-borda-cards rounded-xl">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <Icons.FaLocationDot /> Tipo do Imóvel
+              </div>
+
+              {/* Chamando a função (componente) que criamos */}
+              <CheckBox label="Casa" id="casa" />
+              <CheckBox label="Apartamento" id="apto" />
+            </div>
+
+            {/* Seção Capacidade */}
+            <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <Icons.FaLocationDot /> Capacidade
+              </div>
+
+              <CheckBox label="1" id="1" />
+              <CheckBox label="2" id="2" />
+              <CheckBox label="+3" id="+3" />
+            </div>
+
+            {/* Seção Avaliação */}
+            <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
+              
+            </div>
+
+            {/* Seção Comodidades */}
+            <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
+
+            </div>
           </aside>
 
-          {/* COLUNA DIREITA: O CONTEÚDO DINÂMICO (Todo o restante do espaço) */}
+          {/* Conteudo Principal */}
           <main className="conteudo-principal flex-1 flex flex-col gap-8">
-
-            {/* Busca e Ordenação */}
+            {/* Barra de Busca e Ordenação */}
             <div className="w-full flex justify-center py-6">
               <div className="flex items-center w-full max-w-[800px] 2xl:max-w-[1100px] h-12 bg-white border border-preto-principal/50 rounded-xl overflow-hidden transition-colors">
                 <div className="relative h-full border-r border-preto-principal/50">
@@ -138,7 +277,7 @@ function App() {
                   <Icons.IoIosSearch size={22} />
                 </div>
 
-                <input type="text" placeholder="Pesquisar..." className="flex-1 h-full px-3 text-base text-preto-texto-principal/50 outline-none placeholder:text-preto-texto-principal/50 bg-transparent"/>
+                <input type="text" placeholder="Pesquisar..." className="flex-1 h-full px-3 text-base text-preto-texto-principal/50 outline-none placeholder:text-preto-texto-principal/50 bg-transparent" />
                 <button className="pr-4 text-preto-texto-principal hover:text-preto-texto-principal transition-colors active:scale-90">
                   <Icons.IoIosClose size={22} />
                 </button>
@@ -223,5 +362,3 @@ function App() {
     </div >
   )
 }
-
-export default App

@@ -9,7 +9,11 @@
     --color-preto-principal: #000000;
     --color-beje-principal: #A67C52;
     --color-fundo-principal: #FAFAF9;
+    --color-fundo-cards: #FAF7F4;
+    --color-borda-cards: #BDBAB7;
     --color-icone-estrela: #FFCB45;
+    --color-vermelho-cancelar: #D93434;
+    --color-cinza-slider: #E5E5E5;
     --color-borda-preta-opaca: color-mix(in srgb, #000000 35%, transparent);
 
     --spacing-rem-2: 2rem;
