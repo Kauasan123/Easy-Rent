@@ -4,6 +4,8 @@ import Footer from '../components/Footer.jsx';
 import CheckBox from '../components/CheckBox.jsx';
 import Stepper from '../components/Stepper.jsx';
 import Calendario from '../components/Calendario.jsx';
+import CardsImoveis from '../components/CardsImoveis.jsx';
+import ModalAluguel from './ModalAluguel.jsx'
 import Hero from '../assets/TelaPrincipal/MiniHero.jpg';
 import * as Icons from '../icons/icons.js';
 import * as Slider from '@radix-ui/react-slider';
@@ -11,73 +13,87 @@ import * as Slider from '@radix-ui/react-slider';
 const imoveis = [
   {
     id: 1,
-    titulo: "Mansão com Vista Mar",
-    subtitulo: "Exclusiva residência na beira da praia com piscina infinita e deck privativo",
-    imagem: Hero,
-    nota: "5,0",
-    disponibilidade: "Disponível 12 - 20 Jul",
-    quartos: 5,
-    vagas: 4,
-    preco: "4.800,00"
+    titulo: "Apartamento Luxo Gramado",
+    subtitulo: "Avenida Central, Gramado - RS",
+    nota: "4.9",
+    preco: "850",
+    quartos: 3,
+    vagas: 2,
+    disponibilidade: "Disponível em Agosto",
+    imagens: [
+      Hero,
+      Hero,
+      Hero
+    ],
+    tipo: "Apartamento",
+    banheiros: 2,
+    area: 110,
+    temPiscina: true,
+    aceitaPet: true
   },
   {
     id: 2,
-    titulo: "Loft Industrial",
-    subtitulo: "Estilo nova-iorquino no coração da cidade",
-    imagem: Hero,
+    titulo: "Apartamento Luxo Gramado",
+    subtitulo: "Avenida Central, Gramado - RS",
     nota: "4.9",
-    disponibilidade: "Disponível agora",
-    quartos: 1,
-    vagas: 1,
-    preco: "850,00"
+    preco: "850",
+    quartos: 3,
+    vagas: 2,
+    disponibilidade: "Disponível em Agosto",
+    imagens: [
+      Hero,
+      Hero,
+      Hero
+    ],
+    tipo: "Apartamento",
+    banheiros: 2,
+    area: 110,
+    temPiscina: true,
+    aceitaPet: true
   },
   {
     id: 3,
-    titulo: "Chalé Suíço",
-    subtitulo: "Ache o refúgio perfeito nas montanhas com lareira e vista para o vale nevado",
-    imagem: Hero,
-    nota: "4.7",
-    disponibilidade: "Disponível 01 - 10 Ago",
+    titulo: "Apartamento Luxo Gramado",
+    subtitulo: "Avenida Central, Gramado - RS",
+    nota: "4.9",
+    preco: "850",
     quartos: 3,
     vagas: 2,
-    preco: "2.100,00"
+    disponibilidade: "Disponível em Agosto",
+    imagens: [
+      Hero,
+      Hero,
+      Hero
+    ],
+    tipo: "Apartamento",
+    banheiros: 2,
+    area: 110,
+    temPiscina: true,
+    aceitaPet: true
   },
   {
     id: 4,
-    titulo: "Studio Compacto",
-    subtitulo: "Praticidade total para nômades digitais",
-    imagem: Hero,
-    nota: "4.5",
-    disponibilidade: "Disponível 15 - 22 Jun",
-    quartos: 1,
-    vagas: 0,
-    preco: "450,00"
-  },
-  {
-    id: 5,
-    titulo: "Casa de Campo",
-    subtitulo: "Amplo jardim, pomar orgânico e tranquilidade absoluta para toda a família descansar",
-    imagem: Hero,
-    nota: "4.8",
-    disponibilidade: "Disponível 05 - 12 Set",
-    quartos: 4,
-    vagas: 3,
-    preco: "1.250,00"
-  },
-  {
-    id: 6,
-    titulo: "Penthouse Luxo",
-    subtitulo: "Cobertura duplex com spa",
-    imagem: Hero,
-    nota: "5,0",
-    disponibilidade: "Disponível 20 - 30 Dez",
+    titulo: "Apartamento Luxo Gramado",
+    subtitulo: "Avenida Central, Gramado - RS",
+    nota: "4.9",
+    preco: "850",
     quartos: 3,
     vagas: 2,
-    preco: "7.900,00"
-  }
+    disponibilidade: "Disponível em Agosto",
+    imagens: [
+      Hero,
+      Hero,
+      Hero
+    ],
+    tipo: "Apartamento",
+    banheiros: 2,
+    area: 110,
+    temPiscina: true,
+    aceitaPet: true
+  },
 ];
 
-// 1. Mova a função StarRating para fora
+// Função StarRating
 function StarRating({ value, onChange }) {
   const [hover, setHover] = useState(null);
 
@@ -87,21 +103,18 @@ function StarRating({ value, onChange }) {
         const starValue = index + 1;
         return (
           <div key={index} className="relative flex cursor-pointer">
-            {/* Metade Esquerda */}
             <div
               className="w-2.5 h-5 z-10"
               onMouseEnter={() => setHover(starValue - 0.5)}
               onMouseLeave={() => setHover(null)}
               onClick={() => onChange(starValue - 0.5)}
             />
-            {/* Metade Direita */}
             <div
               className="w-2.5 h-5 z-10"
               onMouseEnter={() => setHover(starValue)}
               onMouseLeave={() => setHover(null)}
               onClick={() => onChange(starValue)}
             />
-            {/* Ícones */}
             <div className="absolute inset-0">
               {(hover || value) >= starValue ? (
                 <Icons.FaStar className="text-icone-estrela" size={30} />
@@ -119,8 +132,21 @@ function StarRating({ value, onChange }) {
 }
 
 export default function Principal() {
+  //Função Modal Aluguel
+  const [imovelSelecionado, setImovelSelecionado] = useState(null);
+
   // Função Abrir e Fechar Cards
-  const [aberto, setAberto] = useState("");
+  const [calendarioAberto, setCalendarioAberto] = useState(false);
+  const [localizacaoAberta, setLocalizacaoAberta] = useState(false);
+
+  // Função troca de Pagina
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 12;
+
+  const indiceUltimoItem = paginaAtual * itensPorPagina;
+  const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
+  const imoveisExibidos = imoveis.slice(indicePrimeiroItem, indiceUltimoItem);
+  const totalPaginas = Math.ceil(imoveis.length / itensPorPagina);
 
   // Função Avaliação
   const [rating, setRating] = useState(0);
@@ -145,7 +171,7 @@ export default function Principal() {
         <Header />
       </header>
 
-      <main className="">
+      <main className="min-h-[80vh] flex flex-col justify-between">
         {/* Mini Hero Section */}
         <section className="">
           <div className="relative w-full h-72 overflow-hidden rounded-xl p-10 pt-5">
@@ -183,14 +209,15 @@ export default function Principal() {
             </div>
 
             {/* Seção Localização */}
-            <div className="border border-borda-cards rounded-xl overflow-hidden">
-              <button onClick={() => setAberto(aberto === 'localizacao' ? '' : 'localizacao')} className="w-full flex items-center justify-between p-3 transition-colors">
-                <div className="flex items-center gap-2 font-bold">
+            <div className="border border-borda-cards rounded-xl overflow-hidden bg-fundo-cards">
+              <button onClick={() => setLocalizacaoAberta(!localizacaoAberta)} className="w-full flex items-center justify-between p-3 transition-colors hover:bg-zinc-50">
+                <div className="flex items-center gap-2 font-bold text-sm text-preto-texto-principal">
                   <Icons.FaLocationDot size={18} /> Localização
                 </div>
-                <Icons.IoIosArrowDown className={`transition-transform ${aberto === 'localizacao' ? 'rotate-180' : ''}`} />
+                <Icons.IoIosArrowDown className={`transition-transform duration-300 ${localizacaoAberta ? 'rotate-180' : ''}`} />
               </button>
-              <div className={`transition-all duration-300 ease-in-out overflow-hidden ${aberto === 'localizacao' ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+
+              <div className={`transition-all duration-300 ease-in-out overflow-hidden ${localizacaoAberta ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="px-3 pb-3 pt-0">
                   <input type="text" placeholder="Escreva aonde deseja procurar..." className="w-full p-2 border border-borda-cards rounded-lg text-sm outline-none focus:border-beje-principal bg-white" />
                 </div>
@@ -240,16 +267,18 @@ export default function Principal() {
             </div>
 
             {/* Seção Data */}
-            <div className="border border-borda-cards rounded-xl overflow-hidden">
-              <button onClick={() => setAberto(aberto === 'calendario' ? null : 'calendario')} className="w-full flex items-center justify-between p-3 transition-colors">
-                <div className="flex items-center gap-2 font-bold">
+            <div className="border border-borda-cards rounded-xl overflow-hidden bg-fundo-cards">
+              <button onClick={() => setCalendarioAberto(!calendarioAberto)} className="w-full flex items-center justify-between p-3 transition-colors hover:bg-zinc-50">
+                <div className="flex items-center gap-2 font-bold text-sm text-preto-texto-principal">
                   <Icons.FaCalendarAlt size={18} /> Selecionar Datas
                 </div>
-                <Icons.IoIosArrowDown className={`transition-transform duration-300 ${aberto === 'calendario' ? 'rotate-180' : ''}`}/>
+                <Icons.IoIosArrowDown className={`transition-transform duration-300 ${calendarioAberto ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className={`transition-all duration-300 overflow-hidden ${aberto === 'calendario' ? 'max-h-[500px] opacity-100 p-3 border-t border-zinc-100' : 'max-h-0 opacity-0 invisible'}`}>
-                <Calendario />
+              <div className={`transition-all duration-300 overflow-hidden ${calendarioAberto ? 'max-h-[500px] opacity-100 border-t border-zinc-100' : 'max-h-0 opacity-0 invisible'}`}>
+                <div className="p-3">
+                  <Calendario />
+                </div>
               </div>
             </div>
 
@@ -276,8 +305,14 @@ export default function Principal() {
 
             {/* Seção Avaliação */}
             <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
-              <div className="flex items-center gap-2 font-bold text-sm">
-                <Icons.BsStars size={18} /> Avaliação
+              <div className='flex flex-row justify-between'>
+                <div className="flex items-center gap-2 font-bold">
+                  <Icons.BsStars size={18} /> Avaliação
+                </div>
+                <button onClick={() => { setRange([0, 10000]); setRating(0); }} className="text-vermelho-cancelar text-xs font-bold hover:underline flex flex-row text-center items-center">
+                  <Icons.IoIosClose className='text-vermelho-cancelar' size={24} />
+                  Limpar
+                </button>
               </div>
               <div className='flex items-center justify-start pl-0.5 pb-2'>
                 <StarRating value={rating} onChange={(val) => setRating(val)} />
@@ -351,71 +386,54 @@ export default function Principal() {
 
             {/* Grid de Imoveis */}
             <article className="grid-de-imoveis grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-3 2xl:gap-x-6 gap-y-10">
-              {imoveis.map((imovel) => (
-                <div key={imovel.id} className='relative border h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col'>
-                  <div className='relative h-[50%] w-full overflow-hidden group'>
-                    <img src={imovel.imagem} alt={imovel.titulo} className='w-full h-full object-cover transition-transform duration-300 hover:scale-110' />
-                    <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                      <button className="bg-white/70 p-1 rounded-full hover:bg-white text-preto-texto-principal pointer-events-auto">
-                        <Icons.IoIosArrowBack />
-                      </button>
-                      <button className="bg-white/70 p-1 rounded-full hover:bg-white text-preto-texto-principal pointer-events-auto">
-                        <Icons.IoIosArrowForward />
-                      </button>
-                    </div>
-                    <div className="absolute bottom-2 w-full flex justify-center gap-1 pointer-events-none">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white shadow-sm"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/60 shadow-sm"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/60 shadow-sm"></div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 2xl:p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className='flex flex-row items-center justify-between mb-1 gap-1'>
-                        <span className="text-base 2xl:text-lg font-bold text-preto-texto-principal truncate">{imovel.titulo}</span>
-                        <div className='flex flex-row items-center shrink-0'>
-                          <Icons.FaStar className='text-icone-estrela' size={16} />
-                          <span className='text-base 2xl:text-lg font-bold ml-1 text-preto-texto-principal'>{imovel.nota}</span>
-                        </div>
-                      </div>
-                      <div className='leading-tight min-h-[2.5rem] 2xl:min-h-[3rem]'>
-                        <p className='text-sm 2xl:text-base text-preto-texto-principal/50 line-clamp-2'>
-                          {imovel.subtitulo}
-                        </p>
-                      </div>
-                      <div>
-                        <span className='text-sm 2xl:text-base text-preto-texto-principal/50'>{imovel.disponibilidade}</span>
-                      </div>
-                    </div>
-
-                    <div className='flex gap-3 2xl:gap-5 my-2'>
-                      <div className='flex flex-row items-center gap-1 shrink-0'>
-                        <Icons.IoIosBed className='text-preto-principal' size={18} />
-                        <span className='text-sm 2xl:text-base font-semibold text-preto-principal'>{imovel.quartos} Quartos</span>
-                      </div>
-                      <div className='flex flex-row items-center gap-1 shrink-0'>
-                        <Icons.FaCar className='text-preto-principal' size={16} />
-                        <span className='text-sm 2xl:text-base font-semibold text-preto-principal'>{imovel.vagas} Vagas</span>
-                      </div>
-                    </div>
-
-                    <div className='flex flex-row items-center justify-between pt-1 pb-1'>
-                      <div className='flex items-center shrink-0'>
-                        <span className="text-lg text-beje-principal font-bold whitespace-nowrap">R$ {imovel.preco}</span>
-                      </div>
-                      <a href="#" className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-2 2xl:py-1.5 2xl:px-4 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
-                        Ver Detalhes
-                      </a>
-                    </div>
-                  </div>
+              {imoveisExibidos.map((imovel) => (
+                <div key={imovel.id} onClick={() => setImovelSelecionado(imovel)} className="cursor-pointer">
+                  <CardsImoveis imovel={imovel} />
                 </div>
               ))}
             </article>
 
-            {/* PARTE INFERIOR: PAGINAÇÃO */}
-            <div className="paginacao w-full flex justify-center py-10">
-              {/* Os números das páginas (1, 2, 3...) entram aqui */}
+            {/* Tela Flutuante (ModalAluguel) */}
+            {imovelSelecionado && (
+              <ModalAluguel imovel={imovelSelecionado} onClose={() => setImovelSelecionado(null)}/>
+            )}
+
+            {/* Seção Paginação */}
+            <div className="mt-auto py-12 flex items-center justify-center gap-4 select-none">
+              <button
+                onClick={() => setPaginaAtual(prev => Math.max(prev - 1, 1))}
+                disabled={paginaAtual === 1}
+                className="flex items-center gap-1 text-cinza-texto-secundario hover:text-preto-principal transition-colors text-sm font-medium group disabled:opacity-30 disabled:cursor-not-allowed">
+                <Icons.IoIosArrowBack size={16} className="transition-transform group-hover:-translate-x-1" />
+                Anterior
+              </button>
+
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((numero) => {
+                  if (numero === 1 || numero === totalPaginas || (numero >= paginaAtual - 1 && numero <= paginaAtual + 1)) {
+                    return (
+                      <button key={numero} onClick={() => setPaginaAtual(numero)} className={`w-8 h-8 flex items-center justify-center rounded-md text-sm transition-colors ${paginaAtual === numero ? 'bg-beje-principal text-white font-bold shadow-sm' : 'border border-borda-cards text-preto-principal font-medium hover:bg-fundo-cards'}`}>
+                        {numero}
+                      </button>
+                    );
+                  }
+
+                  if (numero === paginaAtual + 2 || numero === paginaAtual - 2) {
+                    return (
+                      <div key={numero} className="w-8 h-8 flex items-center justify-center border border-borda-cards text-cinza-texto-secundario rounded-md text-sm italic">
+                        ...
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })}
+              </div>
+
+              <button onClick={() => setPaginaAtual(prev => Math.min(prev + 1, totalPaginas))} disabled={paginaAtual === totalPaginas} className="flex items-center gap-1 text-preto-principal hover:text-beje-principal transition-colors text-sm font-medium group disabled:opacity-30 disabled:cursor-not-allowed">
+                Próximo
+                <Icons.IoIosArrowForward size={16} className="transition-transform group-hover:translate-x-1" />
+              </button>
             </div>
           </main>
         </section >
