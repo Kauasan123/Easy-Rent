@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import Header from '../components/Header.jsx'
-import Footer from '../components/Footer.jsx'
-import * as Icons from '../icons/icons.js'
-import Hero from '../assets/TelaPrincipal/MiniHero.jpg'
+import Header from '../components/Header.jsx';
+import Footer from '../components/Footer.jsx';
+import CheckBox from '../components/CheckBox.jsx';
+import Stepper from '../components/Stepper.jsx';
+import Calendario from '../components/Calendario.jsx';
+import Hero from '../assets/TelaPrincipal/MiniHero.jpg';
+import * as Icons from '../icons/icons.js';
 import * as Slider from '@radix-ui/react-slider';
 
 const imoveis = [
@@ -74,26 +77,61 @@ const imoveis = [
   }
 ];
 
-// Componente CheckBox
-function CheckBox({ label, id }) {
+// 1. Mova a função StarRating para fora
+function StarRating({ value, onChange }) {
+  const [hover, setHover] = useState(null);
+
   return (
-    <label htmlFor={id} className="flex items-center gap-3 cursor-pointer group">
-      <div className="relative flex items-center justify-center w-5 h-5">
-        <input type="checkbox" id={id} className="peer appearance-none w-full h-full border-2 border-borda-cards rounded-md  bg-white checked:bg-beje-principal checked:border-beje-principal transition-all duration-200 cursor-pointer" />
-        <Icons.FaCheck className="absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-200" size={12.5} />
-      </div>
-      <span className="text-sm text-zinc-700 group-hover:text-beje-principal transition-colors font-medium">
-        {label}
-      </span>
-    </label>
+    <div className="flex items-center gap-4">
+      {[...Array(5)].map((_, index) => {
+        const starValue = index + 1;
+        return (
+          <div key={index} className="relative flex cursor-pointer">
+            {/* Metade Esquerda */}
+            <div
+              className="w-2.5 h-5 z-10"
+              onMouseEnter={() => setHover(starValue - 0.5)}
+              onMouseLeave={() => setHover(null)}
+              onClick={() => onChange(starValue - 0.5)}
+            />
+            {/* Metade Direita */}
+            <div
+              className="w-2.5 h-5 z-10"
+              onMouseEnter={() => setHover(starValue)}
+              onMouseLeave={() => setHover(null)}
+              onClick={() => onChange(starValue)}
+            />
+            {/* Ícones */}
+            <div className="absolute inset-0">
+              {(hover || value) >= starValue ? (
+                <Icons.FaStar className="text-icone-estrela" size={30} />
+              ) : (hover || value) >= starValue - 0.5 ? (
+                <Icons.FaStarHalfAlt className="text-icone-estrela" size={30} />
+              ) : (
+                <Icons.FaRegStar className="text-zinc-300" size={30} />
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-// Componente Principal
 export default function Principal() {
+  // Função Abrir e Fechar Cards
   const [aberto, setAberto] = useState("");
-  const [range, setRange] = useState([0, 10000]);
 
+  // Função Avaliação
+  const [rating, setRating] = useState(0);
+
+  // Função Stepper
+  const [quartos, setQuartos] = useState(1);
+  const [banheiros, setBanheiros] = useState(1);
+  const [vagas, setVagas] = useState(1);
+
+  // Função Preço
+  const [range, setRange] = useState([0, 10000]);
   const imoveisFiltro = imoveis.filter(imovel => {
     const precoLimpo = imovel.preco.replace(/\./g, '').replace(',', '.');
     const precoNumerico = parseFloat(precoLimpo);
@@ -148,7 +186,7 @@ export default function Principal() {
             <div className="border border-borda-cards rounded-xl overflow-hidden">
               <button onClick={() => setAberto(aberto === 'localizacao' ? '' : 'localizacao')} className="w-full flex items-center justify-between p-3 transition-colors">
                 <div className="flex items-center gap-2 font-bold">
-                  <Icons.FaLocationDot /> Localização
+                  <Icons.FaLocationDot size={18} /> Localização
                 </div>
                 <Icons.IoIosArrowDown className={`transition-transform ${aberto === 'localizacao' ? 'rotate-180' : ''}`} />
               </button>
@@ -163,7 +201,7 @@ export default function Principal() {
             <div className="flex flex-col gap-3 p-3 border border-borda-cards rounded-xl">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 font-bold">
-                  <Icons.FaMoneyBill1Wave /> Preço
+                  <Icons.FaMoneyBill1Wave size={18} /> Preço
                 </div>
                 <div>
                   <button onClick={() => setRange([0, 10000])} className="text-vermelho-cancelar text-xs font-bold hover:underline flex flex-row text-center items-center">
@@ -202,34 +240,25 @@ export default function Principal() {
             </div>
 
             {/* Seção Data */}
-            {/* <div className="border border-zinc-100 rounded-xl overflow-hidden">
-              <button onClick={() => setAberto(aberto === 'localizacao' ? '' : 'localizacao')} className="w-full flex items-center justify-between p-3 transition-colors">
+            <div className="border border-borda-cards rounded-xl overflow-hidden">
+              <button onClick={() => setAberto(aberto === 'calendario' ? null : 'calendario')} className="w-full flex items-center justify-between p-3 transition-colors">
                 <div className="flex items-center gap-2 font-bold">
-                  <Icons.FaLocationDot /> tipo do Imóvel
+                  <Icons.FaCalendarAlt size={18} /> Selecionar Datas
                 </div>
-                <Icons.FaChevronDown className={`transition-transform ${aberto === 'data' ? 'rotate-180' : ''}`} />
+                <Icons.IoIosArrowDown className={`transition-transform duration-300 ${aberto === 'calendario' ? 'rotate-180' : ''}`}/>
               </button>
 
-              <div className={`transition-all duration-500 ease-in-out overflow-hidden ${aberto === 'data' ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="p-4 bg-zinc-50 flex flex-col items-center">
-                  Aqui você renderiza o seu componente de calendário (Filtro - Calendario Aberto.png)
-                  <div className="text-sm font-bold mb-4">Janeiro 2026</div>
-                  Mock do Calendário Grid
-                  <div className="grid grid-cols-7 gap-2 text-[10px] text-center">
-                    {["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"].map(d => <div key={d}>{d}</div>)}
-                    ... números do calendário ...
-                  </div>
-                </div>
+              <div className={`transition-all duration-300 overflow-hidden ${aberto === 'calendario' ? 'max-h-[500px] opacity-100 p-3 border-t border-zinc-100' : 'max-h-0 opacity-0 invisible'}`}>
+                <Calendario />
               </div>
-            </div> */}
+            </div>
 
             {/* Seção Tipo de Imóvel */}
             <div className="flex flex-col gap-3 p-3 border border-borda-cards rounded-xl">
               <div className="flex items-center gap-2 font-bold text-sm">
-                <Icons.FaLocationDot /> Tipo do Imóvel
+                <Icons.FaHouseChimney size={18} /> Tipo do Imóvel
               </div>
 
-              {/* Chamando a função (componente) que criamos */}
               <CheckBox label="Casa" id="casa" />
               <CheckBox label="Apartamento" id="apto" />
             </div>
@@ -237,7 +266,7 @@ export default function Principal() {
             {/* Seção Capacidade */}
             <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
               <div className="flex items-center gap-2 font-bold text-sm">
-                <Icons.FaLocationDot /> Capacidade
+                <Icons.IoPeopleSharp size={18} /> Capacidade
               </div>
 
               <CheckBox label="1" id="1" />
@@ -247,12 +276,48 @@ export default function Principal() {
 
             {/* Seção Avaliação */}
             <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
-              
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <Icons.BsStars size={18} /> Avaliação
+              </div>
+              <div className='flex items-center justify-start pl-0.5 pb-2'>
+                <StarRating value={rating} onChange={(val) => setRating(val)} />
+              </div>
             </div>
 
             {/* Seção Comodidades */}
             <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <Icons.TbStarsFilled size={18} /> Comodidades
+              </div>
+              <CheckBox label="Wifi" id="Wifi" />
+              <CheckBox label="Ar-condicionado" id="Ar-condicionado" />
+              <CheckBox label="Estacionamento" id="Estacionamento" />
+              <CheckBox label="Piscina" id="Piscina" />
+              <CheckBox label="TV" id="TV" />
+              <CheckBox label="Maquina de Lavar" id="Maquina de Lavar" />
+              <CheckBox label="Churrasqueira" id="Churrasqueira" />
+              <CheckBox label="Elevador" id="Elevador" />
+              <CheckBox label="Portaria 24h" id="Portaria 24h" />
 
+              <div className="flex items-center gap-2 font-bold text-sm mt-3">
+                <Icons.FaClipboardList size={18} /> Detalhes do Imóvel
+              </div>
+              <CheckBox label="Proximo ao Centro" id="Proximo ao Centro" />
+              <CheckBox label="Proximo a Praia" id="Proximo a Praia" />
+
+              <div>
+                <Stepper label="Quartos" value={quartos} onIncrease={() => setQuartos(quartos + 1)} onDecrease={() => quartos > 0 && setQuartos(quartos - 1)} />
+                <Stepper label="Banheiros" value={banheiros} onIncrease={() => setBanheiros(banheiros + 1)} onDecrease={() => banheiros > 0 && setBanheiros(banheiros - 1)} />
+                <Stepper label="Vagas" value={vagas} onIncrease={() => setVagas(vagas + 1)} onDecrease={() => vagas > 0 && setVagas(vagas - 1)} />
+              </div>
+
+              <div className="flex items-center gap-2 font-bold text-sm mt-3">
+                <Icons.FaGear size={18} /> Preferencias/Regras
+              </div>
+              <CheckBox label="Aceita Pets" id="Aceita Pets" />
+              <CheckBox label="Permite Festas" id="Permite Festas" />
+              <CheckBox label="Acessibilidade" id="Acessibilidade" />
+              <CheckBox label="Não Fumante" id="Não Fumante" />
             </div>
           </aside>
 

@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import * as Icons from '../icons/icons'
 
-function App() {
-    const [count, setCount] = useState(0)
-
+function Footer() {
     return (
         <>
             <footer className="w-full bg-white border-t border-preto-principal font-sans">
@@ -49,4 +47,4 @@ function App() {
     )
 }
 
-export default App
+export default Footer;

@@ -1,42 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-    --color-botao-branco-apertado: #e5e7eb;
-    --color-botao-beje-apertado: #9e6b4c;
-    --color-preto-texto-principal: #111111;
-    --color-branco-texto-principal: #FFFFFF;
-    --color-cinza-texto-secundario: #98A2B3;
-    --color-preto-principal: #000000;
-    --color-beje-principal: #A67C52;
-    --color-fundo-principal: #FAFAF9;
-    --color-fundo-cards: #FAF7F4;
-    --color-borda-cards: #BDBAB7;
-    --color-icone-estrela: #FFCB45;
-    --color-vermelho-cancelar: #D93434;
-    --color-cinza-slider: #E5E5E5;
-    --color-borda-preta-opaca: color-mix(in srgb, #000000 35%, transparent);
+  --color-botao-branco-apertado: #e5e7eb;
+  --color-botao-beje-apertado: #9e6b4c;
+  --color-preto-texto-principal: #111111;
+  --color-branco-texto-principal: #FFFFFF;
+  --color-cinza-texto-secundario: #98A2B3;
+  --color-preto-principal: #000000;
+  --color-beje-principal: #A67C52;
+  --color-fundo-principal: #FAFAF9;
+  --color-fundo-cards: #FAF7F4;
+  --color-borda-cards: #BDBAB7;
+  --color-icone-estrela: #FFCB45;
+  --color-vermelho-cancelar: #D93434;
+  --color-cinza-slider: #E5E5E5;
+  --color-borda-preta-opaca: color-mix(in srgb, #000000 35%, transparent);
 
-    --spacing-rem-2: 2rem;
-    --spacing-65: 260px;
-    --spacing-130: 520px;
-    --spacing-140: 560px;
-    --spacing-230: 230px;
-    --spacing-500: 500px;
-    --spacing-640: 640px;
-    --spacing-800: 800px;
-    --spacing-1200: 1200px;
-    --spacing-1440: 1440px;
+  --spacing-rem-2: 2rem;
+  --spacing-65: 260px;
+  --spacing-130: 520px;
+  --spacing-140: 560px;
+  --spacing-230: 230px;
+  --spacing-500: 500px;
+  --spacing-640: 640px;
+  --spacing-800: 800px;
+  --spacing-1200: 1200px;
+  --spacing-1440: 1440px;
 
-    --keyframes-entrada-onda: {
-    from { 
-      opacity: 0; 
-      transform: translateX(-20px); 
+  --keyframes-entrada-onda: {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
     }
-    to { 
+    to {
       opacity: 0.9;
-      transform: translateX(0); 
+      transform: translateX(0);
     }
-  };
+  }
 
   --animation-entrada: entrada-onda 1.2s ease-out forwards;
 }
