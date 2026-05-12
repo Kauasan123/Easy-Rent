@@ -25,5 +25,6 @@ export { TbStarsFilled } from "react-icons/tb"; {/* Ícone do Varias Estrelas */
 export { FaClipboardList } from "react-icons/fa"; {/* Ícone de Prancheta */}
 export { FaPlus } from "react-icons/fa"; {/* Ícone de Mais */}
 export { FaMinus } from "react-icons/fa"; {/* Ícone de Menos */}
-export { FaGear } from "react-icons/fa6"; {/* Ícone de Engrenagem*/}
-export { FaCalendarAlt } from "react-icons/fa";
+export { FaGear } from "react-icons/fa6"; {/* Ícone de Engrenagem */}
+export { FaCalendarAlt } from "react-icons/fa"; {/* Icone de Calendario */}
+export { PiBathtubFill } from "react-icons/pi"; {/* Icone de Banheira */}
