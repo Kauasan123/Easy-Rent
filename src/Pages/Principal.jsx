@@ -307,7 +307,7 @@ export default function Principal() {
             <div className="flex flex-col gap-2 p-3 border border-borda-cards rounded-xl">
               <div className='flex flex-row justify-between'>
                 <div className="flex items-center gap-2 font-bold">
-                  <Icons.BsStars size={18} /> Avaliação
+                  <Icons.FaStar size={18} /> Avaliação
                 </div>
                 <button onClick={() => { setRange([0, 10000]); setRating(0); }} className="text-vermelho-cancelar text-xs font-bold hover:underline flex flex-row text-center items-center">
                   <Icons.IoIosClose className='text-vermelho-cancelar' size={24} />

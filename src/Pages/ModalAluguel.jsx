@@ -32,13 +32,13 @@ export function ModalDetalhes({ imovel, onClose }) {
           </header>
 
           {/* Conteudo Principal */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
             {/* Coluna da Esquerda (Fotos e Infos) */}
-            <div className="lg:col-span-8 flex flex-col gap-8">
+            <div className="lg:col-span-8 flex flex-col justify-between gap-8 h-full">
 
               {/* Fotos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-[450px] overflow-hidden rounded-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-[500px] overflow-hidden rounded-2xl">
                 <div className="h-full overflow-hidden">
                   <img src={imagemPrincipal} className="w-full h-full object-cover hover:scale-105 transition-all duration-500" />
                 </div>
@@ -55,20 +55,20 @@ export function ModalDetalhes({ imovel, onClose }) {
               </div>
 
               {/* Barra de Atributos (Capacidade, Quartos, etc) */}
-              <div className="p-8 bg-fundo-cards rounded-2xl pl-12 pr-12 flex justify-between items-center border border-borda-cards">
-                <div className="flex flex-col items-center gap-1 font-bold text-zinc-800">
+              <div className="p-8 bg-fundo-cards rounded-2xl flex justify-between items-center border border-borda-cards">
+                <div className="flex flex-col items-center gap-1 font-bold text-preto-texto-principal">
                   <Icons.IoPeopleSharp size={28} />
                   <span className="text-xs uppercase tracking-tighter">5 Capacidade</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 font-bold text-zinc-800">
+                <div className="flex flex-col items-center gap-1 font-bold text-preto-texto-principal">
                   <Icons.IoIosBed size={28} />
                   <span className="text-xs uppercase tracking-tighter">2 Quartos</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 font-bold text-zinc-800">
+                <div className="flex flex-col items-center gap-1 font-bold text-preto-texto-principal">
                   <Icons.FaCar size={26} />
                   <span className="text-xs uppercase tracking-tighter">2 Vagas</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 font-bold text-zinc-800">
+                <div className="flex flex-col items-center gap-1 font-bold text-preto-texto-principal">
                   <Icons.PiBathtubFill size={28} />
                   <span className="text-xs uppercase tracking-tighter">2 Banheiros</span>
                 </div>
@@ -76,8 +76,8 @@ export function ModalDetalhes({ imovel, onClose }) {
             </div>
 
             {/* Coluna da Direita (Sidebar de Reserva) */}
-            <aside className="lg:col-span-4">
-              <div className="top-0 border border-borda-cards rounded-3xl p-6 shadow-md flex flex-col gap-4 bg-fundo-cards">
+            <aside className="lg:col-span-4 flex flex-col gap-6">
+              <div className="top-0 border border-borda-cards rounded-3xl p-6 flex flex-col gap-4 bg-fundo-cards">
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-bold">R$ {imovel.preco}</span>
                   <span className="text-cinza-texto-secundario text-sm">/ Noite</span>
@@ -127,7 +127,94 @@ export function ModalDetalhes({ imovel, onClose }) {
                   </button>
                 </div>
               </div>
+
+              <div className="border border-borda-cards rounded-3xl p-6 bg-fundo-cards flex flex-col gap-2">
+                <h3 className="font-bold text-preto-texto-principal text-lg">Localização</h3>
+
+                <div className="flex flex-col gap-1">
+                  <span className="font-bold text-sm text-preto-texto-principal">
+                    {imovel.subtitulo}
+                  </span>
+                  <p className="text-cinza-texto-secundario text-xs leading-relaxed">
+                    Próximo a praia e com acesso ao Centro da cidade.
+                  </p>
+                </div>
+              </div>
             </aside>
+          </div>
+
+          {/* Seção Sobre o Lugar (que você já fez) */}
+          <div className='pt-10'>
+            <h2 className='text-preto-texto-principal text-2xl font-semibold mb-4'>
+              Sobre o lugar
+            </h2>
+            <div className="flex flex-col gap-4">
+              <p className='text-preto-texto-principal max-w-prose leading-relaxed'>
+                Casa ampla e confortável no Laranjal, ideal para familias e grupos.
+                Possui piscina privativa, churrasqueira, Wi-Fi, Ar-condicionado e estacionamento
+                proximo a praia e ao centro.
+              </p>
+              <p className='text-preto-texto-principal'>
+                Perfeita para relaxar e aproveitar bons momentos!
+              </p>
+            </div>
+          </div>
+
+          {/* Grid de Comodidades e Regras */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+
+            {/* Card Comodidades */}
+            <div className="bg-fundo-cards border border-borda-cards rounded-3xl p-8">
+              <h3 className="text-xl font-bold mb-6">Comodidades</h3>
+              <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaWifi className="text-beje-principal" /> <span>Wi-Fi</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.LuWashingMachine className="text-beje-principal" /> <span>Máquina de Lavar</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.LuWind className="text-beje-principal" /> <span>Ar-Condicionado</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.MdOutlineOutdoorGrill className="text-beje-principal" size={18} /> <span>Churrascaria</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaCar className="text-beje-principal" /> <span>Estacionamento</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.PiElevator className="text-beje-principal" size={18} /> <span>Elevador</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaSwimmingPool className="text-beje-principal" /> <span>Piscina</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.MdOutlineShieldMoon className="text-beje-principal" /> <span>Portaria 24h</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaTv className="text-beje-principal" /> <span>TV</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Regras da Casa */}
+            <div className="bg-fundo-cards border border-borda-cards rounded-3xl p-8">
+              <h3 className="text-xl font-bold mb-6">Regras da Casa</h3>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaDog className="text-beje-principal" /> <span>Aceita Pets</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.BiParty className="text-beje-principal" /> <span>Permite Festas</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaWheelchair className="text-beje-principal" /> <span>Acessibilidade</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Icons.FaBanSmoking className="text-beje-principal" /> <span>Não Fumante</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
