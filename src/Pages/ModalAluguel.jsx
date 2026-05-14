@@ -7,6 +7,56 @@ export function ModalDetalhes({ imovel, onClose }) {
   const imagemPrincipal = imovel.imagens?.[0] || imovel.imagem;
   const imagensExtras = imovel.imagens?.slice(1, 4) || [];
 
+  // Controlar Indice de Avaliação
+  const [indiceAvaliacao, setIndiceAvaliacao] = React.useState(0);
+
+  // Lista de avaliações
+  const todasAvaliacoes = [
+    {
+      id: 1,
+      nome: "João Pedro",
+      data: "24/02/2025",
+      comentario: "A casa é excelente! Muito confortável e bem equipada. Voltarei com certeza",
+      foto: "https://i.pravatar.cc/150?u=joao",
+      nota: "5,0"
+    },
+    {
+      id: 2,
+      nome: "Mariana Santos",
+      data: "10/03/2025",
+      comentario: "Anfitriã muito atenciosa, casa linda e localização ótima!",
+      foto: "https://i.pravatar.cc/150?u=mari",
+      nota: "5,0"
+    },
+    {
+      id: 3,
+      nome: "Lucas Silva",
+      data: "18/03/2025",
+      comentario: "Tudo perfeito! piscina, churrasqueira que fizeram a diferença.",
+      foto: "https://i.pravatar.cc/150?u=lucas",
+      nota: "5,0"
+    },
+    {
+      id: 4,
+      nome: "Ana Clara",
+      data: "20/03/2025",
+      comentario: "Experiência incrível, o lugar é exatamente como nas fotos.",
+      foto: "https://i.pravatar.cc/150?u=ana",
+      nota: "5,0"
+    },
+  ];
+
+  const proximaAvaliacao = () => {
+    if (indiceAvaliacao + 3 < todasAvaliacoes.length) {
+      setIndiceAvaliacao(indiceAvaliacao + 1);
+    }
+  };
+
+  const anteriorAvaliacao = () => {
+    if (indiceAvaliacao > 0) {
+      setIndiceAvaliacao(indiceAvaliacao - 1);
+    }
+  };
   return (
     <>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-preto-principal/60 backdrop-blur-sm p-4 overflow-hidden">
@@ -25,8 +75,9 @@ export function ModalDetalhes({ imovel, onClose }) {
               </div>
               <div className="flex items-center gap-1.5 font-bold">
                 <Icons.FaStar className="text-icone-estrela" />
-                {/* Fazer que tenha mostre a quantidade de avialiaçãos daquele imovel */}
-                <span>{imovel.nota} (24 Avaliações)</span>
+                <span>
+                  {imovel.nota} ({todasAvaliacoes.length} Avaliações)
+                </span>
               </div>
             </div>
           </header>
@@ -214,6 +265,75 @@ export function ModalDetalhes({ imovel, onClose }) {
                   <Icons.FaBanSmoking className="text-beje-principal" /> <span>Não Fumante</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Seção de Avaliação */}
+          <div className="pt-10 border-borda-cards">
+
+            {/* Header com Nota Geral e Setas */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold text-preto-texto-principal">Avaliação de Hóspedes</h2>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-3xl font-bold text-preto-texto-principal">4,9</span>
+                  <div className="flex items-center text-icone-estrela">
+                    <Icons.FaStar size={20} />
+                    <Icons.FaStar size={20} />
+                    <Icons.FaStar size={20} />
+                    <Icons.FaStar size={20} />
+                    <Icons.FaStarHalfAlt size={20} />
+                  </div>
+                  <span className="text-cinza-texto-secundario text-sm font-medium">(24 Avaliações)</span>
+                </div>
+              </div>
+
+              {/* Navegação Conectada às funções anterior/proximo */}
+              <div className="flex gap-2">
+                <button onClick={anteriorAvaliacao} disabled={indiceAvaliacao === 0} className={`p-2.5 rounded-full transition-all border border-transparent hover:border-borda-cards ${indiceAvaliacao === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-cinza-fundo-x'}`}>
+                  <Icons.IoIosArrowBack size={24} className="text-cinza-texto-secundario" />
+                </button>
+                <button onClick={proximaAvaliacao} disabled={indiceAvaliacao + 3 >= todasAvaliacoes.length} className={`p-2.5 rounded-full transition-all border border-transparent hover:border-borda-cards ${indiceAvaliacao + 3 >= todasAvaliacoes.length ? 'opacity-30 cursor-not-allowed' : 'hover:bg-cinza-fundo-x'}`}>
+                  <Icons.IoIosArrowForward size={24} className="text-preto-texto-principal" />
+                </button>
+              </div>
+            </div>
+
+            {/* Grid de Avaliações */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {todasAvaliacoes.slice(indiceAvaliacao, indiceAvaliacao + 3).map((feedback) => (
+                <div key={feedback.id} className="border border-borda-cards rounded-2xl p-6 flex flex-col justify-between min-h-[200px] bg-white hover:shadow-md transition-shadow">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-12 h-12 rounded-full overflow-hidden border border-zinc-100">
+                        <img src={feedback.foto} className="w-full h-full object-cover" alt={feedback.nome} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm text-preto-texto-principal">{feedback.nome}</span>
+                        <span className="text-cinza-texto-secundario text-xs font-medium">{feedback.data}</span>
+                      </div>
+                    </div>
+
+                    {/* Texto da Avaliação */}
+                    <p className="text-sm text-preto-texto-principal leading-relaxed line-clamp-3">
+                      {feedback.comentario}
+                    </p>
+                  </div>
+
+                  {/* Nota */}
+                  <div className="flex items-center gap-1 mt-4 font-bold text-base text-preto-texto-principal">
+                    <Icons.FaStar className="text-icone-estrela" size={20} />
+                    <span>{feedback.nota}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Botão Final */}
+            <div className="mt-10">
+              <button className="bg-beje-principal text-branco-texto-principal font-bold px-10 py-3.5 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-md">
+                Fazer Avaliação
+              </button>
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ import Fundo from '../assets/LoginRegistro/Fundo.png'
 import { motion } from "framer-motion";
 
 
-function App() {
+function TelaRegistro() {
     return (
         <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-zinc-900">
             {/* 1. Imagens de Fundo */}
@@ -100,4 +100,4 @@ function App() {
     )
 }
 
-export default App
+export default TelaRegistro

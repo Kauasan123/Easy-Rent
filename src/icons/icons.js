@@ -52,3 +52,7 @@ export { FaRegStar } from "react-icons/fa"; {/* Ícone de estrela vazia para ava
 export { FaPlus } from "react-icons/fa"; {/* Ícone de Mais */}
 export { FaMinus } from "react-icons/fa"; {/* Ícone de Menos */}
 export { FaGear } from "react-icons/fa6"; {/* Ícone de Engrenagem */}
+
+export { FaPencilAlt } from "react-icons/fa";
+export { FaUser } from "react-icons/fa";
+export { FaEye } from "react-icons/fa";
