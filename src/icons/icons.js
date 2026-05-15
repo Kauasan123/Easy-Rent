@@ -5,6 +5,8 @@ export { IoIosArrowForward } from "react-icons/io"; {/* Ícones de seta para nav
 export { IoIosArrowDown } from "react-icons/io"; {/* Ícones de seta para navegação para Baixo */}
 export { IoIosSearch } from "react-icons/io"; {/* Ícone de lupa para busca */}
 export { IoIosClose } from "react-icons/io"; {/* Ícone de fechar */}
+export { FaUser } from "react-icons/fa"; {/* Ícone de Usuario */}
+export { FaEye } from "react-icons/fa"; {/* Ícone de Olho */}
 
 // --- Ícones Landing Page e Status ---
 export { LuTimer } from "react-icons/lu"; {/* Ícone de timer para indicar tempo de reserva */}
@@ -52,7 +54,9 @@ export { FaRegStar } from "react-icons/fa"; {/* Ícone de estrela vazia para ava
 export { FaPlus } from "react-icons/fa"; {/* Ícone de Mais */}
 export { FaMinus } from "react-icons/fa"; {/* Ícone de Menos */}
 export { FaGear } from "react-icons/fa6"; {/* Ícone de Engrenagem */}
+export { FaPencilAlt } from "react-icons/fa"; {/* Ícone de Pincel */}
+export { FaImage } from "react-icons/fa"; {/* Ícone de Imagem */}
+export { FaSave } from "react-icons/fa"; {/* Ícone de Salvar */}
+export { FaSignOutAlt } from "react-icons/fa"; {/* Ícone de Sair */}
+export { FaTrashAlt } from "react-icons/fa"; {/* Ícone de Lixeira */}
 
-export { FaPencilAlt } from "react-icons/fa";
-export { FaUser } from "react-icons/fa";
-export { FaEye } from "react-icons/fa";
