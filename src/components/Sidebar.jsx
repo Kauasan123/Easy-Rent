@@ -8,6 +8,7 @@ const Sidebar = () => {
     { name: 'Meus Alugueis', path: '/aluguel', icon: <Icons.FaHouseChimney size={20} /> },
     { name: 'Controle Geral', path: '/controle', icon: <Icons.FaEye size={20} /> },
     { name: 'Cadastrar Aluguel', path: '/cadastro', icon: <Icons.MdOutlineMailOutline size={20} /> },
+    { name: 'Página Principal', path: '/principal', icon: <Icons.FaSignOutAlt size={20} /> },
   ];
 
   return (

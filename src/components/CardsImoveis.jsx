@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as Icons from '../icons/icons.js';
 
-export function CardsImoveis({ imovel }) {
+export function CardsImoveis({ imovel, isGerenciamento = false, onEdit }) {
   const [fotoAtual, setFotoAtual] = useState(0);
 
   const listaImagens = imovel.imagens || [imovel.imagem];
@@ -19,7 +19,7 @@ export function CardsImoveis({ imovel }) {
   };
 
   return (
-    <div className='relative border h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col'>
+    <div className='relative border h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col bg-white'>
       <div className='relative h-[50%] w-full overflow-hidden group'>
         <img src={listaImagens[fotoAtual]} alt={imovel.titulo} className='w-full h-full object-cover transition-transform duration-300 hover:scale-110' />
         {listaImagens.length > 1 && (
@@ -27,7 +27,7 @@ export function CardsImoveis({ imovel }) {
             <button onClick={fotoAnterior} className="bg-white/70 p-1 rounded-full hover:bg-white text-preto-texto-principal transition-all active:scale-90">
               <Icons.IoIosArrowBack size={18} />
             </button>
-            <button 
+            <button
               onClick={proximaFoto}
               className="bg-white/70 p-1 rounded-full hover:bg-white text-preto-texto-principal transition-all active:scale-90"
             >
@@ -39,15 +39,15 @@ export function CardsImoveis({ imovel }) {
         {/* Indicadores (Pontinhos) */}
         <div className="absolute bottom-2 w-full flex justify-center gap-1 pointer-events-none">
           {listaImagens.map((_, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={`w-1.5 h-1.5 rounded-full shadow-sm transition-all ${index === fotoAtual ? 'bg-white w-3' : 'bg-white/60'}`}
             ></div>
           ))}
         </div>
       </div>
 
-      {/* Info do Card (Seu código original mantido) */}
+      {/* Info do Card */}
       <div className="p-3 2xl:p-4 flex-1 flex flex-col justify-between">
         <div>
           <div className='flex flex-row items-center justify-between mb-1 gap-1'>
@@ -76,11 +76,25 @@ export function CardsImoveis({ imovel }) {
           </div>
         </div>
 
+        {/* Linha de Ação Inferior Alternável */}
         <div className='flex flex-row items-center justify-between pt-1 pb-1'>
           <span className="text-lg text-beje-principal font-bold whitespace-nowrap">R$ {imovel.preco}</span>
-          <a href="#" className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-2 2xl:py-1.5 2xl:px-4 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
-            Ver Detalhes
-          </a>
+
+          {isGerenciamento ? (
+            <button type="button" onClick={(e) => {
+                e.preventDefault();
+                if (onEdit) {
+                  onEdit(imovel);
+                }
+              }}
+              className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-4 2xl:py-1.5 2xl:px-6 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
+              Editar
+            </button>
+          ) : (
+            <a href="#" className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-2 2xl:py-1.5 2xl:px-4 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
+              Ver Detalhes
+            </a>
+          )}
         </div>
       </div>
     </div>

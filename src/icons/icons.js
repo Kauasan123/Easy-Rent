@@ -49,6 +49,7 @@ export { FaClipboardList } from "react-icons/fa"; {/* Ícone de Prancheta */}
 export { FaStar } from "react-icons/fa"; {/* Ícone de estrela para avaliações */}
 export { FaStarHalfAlt } from "react-icons/fa"; {/* Ícone de meia estrela para avaliações */}
 export { FaRegStar } from "react-icons/fa"; {/* Ícone de estrela vazia para avaliações */}
+export { FaBuilding } from "react-icons/fa6"; {/* Ícone de Edificio */}
 
 // --- Ícones de Ajustes e Botões ---
 export { FaPlus } from "react-icons/fa"; {/* Ícone de Mais */}
@@ -59,4 +60,5 @@ export { FaImage } from "react-icons/fa"; {/* Ícone de Imagem */}
 export { FaSave } from "react-icons/fa"; {/* Ícone de Salvar */}
 export { FaSignOutAlt } from "react-icons/fa"; {/* Ícone de Sair */}
 export { FaTrashAlt } from "react-icons/fa"; {/* Ícone de Lixeira */}
+
 
