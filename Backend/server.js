@@ -18,5 +18,5 @@ app.get('/', async (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log("🚀 Servidor rodando na porta 5000 com a estabilidade do Prisma 6!");
+  console.log("Servidor rodando na porta 5000!");
 });

@@ -8,7 +8,76 @@ generator client {
 }
 
 model Usuario {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  nome  String
+  id           Int      @id @default(autoincrement())
+  nome         String
+  email        String   @unique
+  telefone     String?  
+  senha        String   
+  avatarPath   String?  
+  criadoEm     DateTime @default(now()) 
+  atualizadoEm DateTime @updatedAt      
+
+  imoveis      Imovel[]
+}
+
+model Imovel {
+  id           Int      @id @default(autoincrement())
+  titulo       String
+  tipo         String   
+  descricao    String   @db.VarChar(500)
+
+  // Localização
+  cidade       String
+  bairro       String
+  endereco     String
+  cep          String
+
+  // Preço e Cobrança
+  preco        Float
+  tipoCobranca String
+
+  capacidade   String
+
+  // Comodidades
+  hasWifi            Boolean @default(false)
+  hasArCondicionado  Boolean @default(false)
+  hasEstacionamento  Boolean @default(false)
+  hasPiscina         Boolean @default(false)
+  hasTv              Boolean @default(false)
+  hasMaquinaLavar    Boolean @default(false)
+  hasChurrascaria    Boolean @default(false)
+  hasElevador        Boolean @default(false)
+  hasPortaria24h     Boolean @default(false)
+
+  // Detalhes do Imóvel
+  proximoCentro      Boolean @default(false)
+  proximoPraia       Boolean @default(false)
+  quartos            Int     @default(1)
+  banheiros          Int     @default(1)
+  vagas              Int     @default(1)
+
+  // Preferências / Regras
+  aceitaPets         Boolean @default(false)
+  permiteFestas      Boolean @default(false)
+  acessibilidade     Boolean @default(false)
+  naoFumante         Boolean @default(false)
+
+  // Controle de Tempo
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  // Chave Estrangeira
+  usuarioId    Int
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // Relacionamento
+  fotos        FotoImovel[]
+}
+
+model FotoImovel {
+  id        Int    @id @default(autoincrement())
+  path      String
+  
+  imovelId  Int
+  imovel    Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
 }
