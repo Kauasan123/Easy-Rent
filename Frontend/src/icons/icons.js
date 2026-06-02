@@ -13,6 +13,7 @@ export { LuTimer } from "react-icons/lu"; {/* Ícone de timer para indicar tempo
 export { FaMousePointer } from "react-icons/fa"; {/* Ícone de mouse para indicar clique */}
 export { IoIosUnlock } from "react-icons/io"; {/* Ícone de cadeado aberto para mostrar senha */}
 export { FiEye } from "react-icons/fi"; {/* Ícone de olho para mostrar senha */}
+export { FiEyeOff } from "react-icons/fi"; {/* Ícone de olho riscado para esconder senha */}
 export { FaCheck } from "react-icons/fa6"; {/* Ícone do CheckBox */}
 
 // --- Ícones de Comodidades e Infraestrutura ---

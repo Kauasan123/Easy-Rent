@@ -1,22 +1,22 @@
 const express = require('express');
 const cors = require('cors');
-const { PrismaClient } = require('@prisma/client');
+
+const imovelRoutes = require('./routes/imovelRoutes');
+const usuarioRoutes = require('./routes/usuarioRoutes');
 
 const app = express();
-const prisma = new PrismaClient(); // No Prisma 6, isso funciona perfeitamente!
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 
-app.get('/', async (req, res) => {
-  try {
-    const usuarios = await prisma.usuario.findMany();
-    return res.json({ status: "Conectado ao Banco!", dados: usuarios });
-  } catch (error) {
-    return res.status(500).json({ status: "Erro no Banco", erro: error.message });
-  }
+app.use('/api', imovelRoutes);
+app.use('/api', usuarioRoutes);
+app.use('/uploads', express.static('uploads'));
+
+app.get('/', (req, res) => {
+  return res.json({ status: "Backend EasyRent 100% Operacional!" });
 });
 
 app.listen(5000, () => {
-  console.log("Servidor rodando na porta 5000!");
+  console.log("Servidor rodando lindamente na porta 5000!");
 });
