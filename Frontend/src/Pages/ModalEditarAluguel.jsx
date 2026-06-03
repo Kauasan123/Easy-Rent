@@ -3,7 +3,7 @@ import * as Icons from '../icons/icons'
 import CheckBox from '../components/CheckBox.jsx';
 import Stepper from '../components/Stepper.jsx';
 
-function ModalEditarAluguel({ isOpen, onClose, imovel }) {
+function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
     const [titulo, setTitulo] = useState('');
     const [tipoImovel, setTipoImovel] = useState('casa');
     const [descricao, setDescricao] = useState('');
@@ -40,15 +40,33 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
             setEndereco(imovel.endereco || '');
             setCep(imovel.cep || '');
             setPreco(imovel.preco || '');
-            setTipoPreco(imovel.tipoPreco || 'noite');
+            setTipoPreco(imovel.tipoCobranca || 'noite');
             setCapacidade(imovel.capacidade || '1-pessoa');
             setQuartos(imovel.quartos || 1);
             setBanheiros(imovel.banheiros || 1);
             setVagas(imovel.vagas || 1);
-            setImagens(imovel.imagens || []);
+            setImagens(imovel.fotos || []);
 
-            if (imovel.comodidades) setComodidades(prev => ({ ...prev, ...imovel.comodidades }));
-            if (imovel.detalhes) setDetalhes(prev => ({ ...prev, ...imovel.detalhes }));
+            setComodidades({
+                wifi: imovel.hasWifi || false,
+                lavar: imovel.hasMaquinaLavar || false,
+                ar: imovel.hasArCondicionado || false,
+                churras: imovel.hasChurrascaria || false,
+                vaga: imovel.hasEstacionamento || false,
+                elevador: imovel.hasElevador || false,
+                piscina: imovel.hasPiscina || false,
+                portaria: imovel.hasPortaria24h || false,
+                tv: imovel.hasTv || false,
+            });
+
+            setDetalhes({
+                centro: imovel.proximoCentro || false,
+                praia: imovel.proximoPraia || false,
+                pets: imovel.aceitaPets || false,
+                festas: imovel.permiteFestas || false,
+                acessibilidade: imovel.acessibilidade || false,
+                fumante: imovel.naoFumante || false
+            });
         }
     }, [imovel]);
 
@@ -65,28 +83,63 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
         setImagens((prev) => [...prev, ...files].slice(0, 4));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const dadosAtualizados = {
-            ...imovel,
-            titulo,
-            tipo: tipoImovel,
-            descricao,
-            cidade,
-            bairro,
-            endereco,
-            cep,
-            preco,
-            tipoPreco,
-            capacidade,
-            comodidades,
-            detalhes,
-            quartos,
-            banheiros,
-            vagas,
-            imagens
-        };
-        console.log("Dados prontos para salvar:", dadosAtualizados);
+        
+        const formData = new FormData();
+        formData.append('titulo', titulo);
+        formData.append('tipo', tipoImovel);
+        formData.append('descricao', descricao);
+        formData.append('cidade', cidade);
+        formData.append('bairro', bairro);
+        formData.append('endereco', endereco);
+        formData.append('cep', cep);
+        formData.append('preco', preco);
+        formData.append('tipoCobranca', tipoPreco);
+        formData.append('capacidade', capacidade);
+        formData.append('quartos', quartos);
+        formData.append('banheiros', banheiros);
+        formData.append('vagas', vagas);
+
+        formData.append('hasWifi', comodidades.wifi);
+        formData.append('hasMaquinaLavar', comodidades.lavar);
+        formData.append('hasArCondicionado', comodidades.ar);
+        formData.append('hasChurrascaria', comodidades.churras);
+        formData.append('hasEstacionamento', comodidades.vaga);
+        formData.append('hasElevador', comodidades.elevador);
+        formData.append('hasPiscina', comodidades.piscina);
+        formData.append('hasPortaria24h', comodidades.portaria);
+        formData.append('hasTv', comodidades.tv);
+
+        formData.append('proximoCentro', detalhes.centro);
+        formData.append('proximoPraia', detalhes.praia);
+        formData.append('aceitaPets', detalhes.pets);
+        formData.append('permiteFestas', detalhes.festas);
+        formData.append('acessibilidade', detalhes.acessibilidade);
+        formData.append('naoFumante', detalhes.fumante);
+
+        imagens.forEach((img) => {
+            if (img instanceof File) {
+                formData.append('imagens', img);
+            }
+        });
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/imoveis/${imovel.id}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("Imóvel atualizado com sucesso!");
+                if (onUpdateSuccess) onUpdateSuccess();
+                onClose();
+            } else {
+                alert("Erro ao atualizar o imóvel.");
+            }
+        } catch (error) {
+            console.error("Erro na requisição:", error);
+        }
     };
 
     if (!isOpen || !imovel) return null;
@@ -95,7 +148,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
         <>
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-preto-principal/60 backdrop-blur-sm p-4 overflow-hidden" onClick={onClose}>
                 <div className="bg-white w-full max-w-[1150px] h-[95vh] rounded-3xl relative overflow-y-auto p-6 md:p-10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                    <div className="px-12 py-10 flex flex-col gap-8">
+                    <form onSubmit={handleSubmit} className="px-12 py-10 flex flex-col gap-8">
 
                         {/* Header da Modal */}
                         <div className="flex justify-between items-start">
@@ -189,7 +242,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
                             </div>
                         </section>
 
-                        {/* Preço */}
+                        {/* Preço e Capacidade */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5">
                                 <h2 className="text-2xl font-bold text-preto-texto-principal">Preço</h2>
@@ -229,13 +282,12 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
                                 </div>
                             </section>
 
-                            {/* Capacidade */}
                             <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 relative overflow-hidden">
                                 <h2 className="text-2xl font-bold text-preto-texto-principal">Capacidade</h2>
                                 <div className="flex flex-col gap-4 mt-2">
-                                    <CheckBox id="1-pessoa" label="1 Pessoa" defaultChecked />
-                                    <CheckBox id="2-pessoas" label="2 Pessoas" />
-                                    <CheckBox id="3-pessoas" label="3+ Pessoas" />
+                                    <CheckBox id="1-pessoa" label="1 Pessoa" checked={capacidade === '1-pessoa'} onChange={() => setCapacidade('1-pessoa')} />
+                                    <CheckBox id="2-pessoas" label="2 Pessoas" checked={capacidade === '2-pessoas'} onChange={() => setCapacidade('2-pessoas')} />
+                                    <CheckBox id="3-pessoas" label="3+ Pessoas" checked={capacidade === '3-pessoas'} onChange={() => setCapacidade('3-pessoas')} />
                                 </div>
                             </section>
                         </div>
@@ -246,23 +298,23 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
                                 <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5">
                                     <h2 className="text-2xl font-bold text-preto-texto-principal">Comodidades</h2>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 mt-1">
-                                        <CheckBox id="wifi" label="Wi-Fi" />
-                                        <CheckBox id="lavar" label="Máquina de Lavar" />
-                                        <CheckBox id="ar" label="Ar-Condicionado" />
-                                        <CheckBox id="churras" label="Churrascaria" />
-                                        <CheckBox id="vaga" label="Estacionamento" />
-                                        <CheckBox id="elevador" label="Elevador" />
-                                        <CheckBox id="piscina" label="Piscina" />
-                                        <CheckBox id="portaria" label="Portaria 24h" />
-                                        <CheckBox id="tv" label="TV" />
+                                        <CheckBox id="wifi" label="Wi-Fi" checked={comodidades.wifi} onChange={() => handleComodidadeChange('wifi')} />
+                                        <CheckBox id="lavar" label="Máquina de Lavar" checked={comodidades.lavar} onChange={() => handleComodidadeChange('lavar')} />
+                                        <CheckBox id="ar" label="Ar-Condicionado" checked={comodidades.ar} onChange={() => handleComodidadeChange('ar')} />
+                                        <CheckBox id="churras" label="Churrascaria" checked={comodidades.churras} onChange={() => handleComodidadeChange('churras')} />
+                                        <CheckBox id="vaga" label="Estacionamento" checked={comodidades.vaga} onChange={() => handleComodidadeChange('vaga')} />
+                                        <CheckBox id="elevador" label="Elevador" checked={comodidades.elevador} onChange={() => handleComodidadeChange('elevador')} />
+                                        <CheckBox id="piscina" label="Piscina" checked={comodidades.piscina} onChange={() => handleComodidadeChange('piscina')} />
+                                        <CheckBox id="portaria" label="Portaria 24h" checked={comodidades.portaria} onChange={() => handleComodidadeChange('portaria')} />
+                                        <CheckBox id="tv" label="TV" checked={comodidades.tv} onChange={() => handleComodidadeChange('tv')} />
                                     </div>
                                 </section>
 
                                 <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5">
                                     <h2 className="text-2xl font-bold text-preto-texto-principal">Detalhes do Imóvel</h2>
                                     <div className="flex flex-col gap-3 mt-1">
-                                        <CheckBox id="centro" label="Próximo ao Centro" />
-                                        <CheckBox id="praia" label="Próximo à Praia" />
+                                        <CheckBox id="centro" label="Próximo ao Centro" checked={detalhes.centro} onChange={() => handleDetalheChange('centro')} />
+                                        <CheckBox id="praia" label="Próximo à Praia" checked={detalhes.praia} onChange={() => handleDetalheChange('praia')} />
                                     </div>
 
                                     <div className="flex flex-col gap-4">
@@ -279,12 +331,12 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
                             <h2 className="text-2xl font-bold text-preto-texto-principal">Preferência / Regras</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 mt-1">
                                 <div className="flex flex-col gap-3">
-                                    <CheckBox id="pets" label="Aceita Pets" />
-                                    <CheckBox id="festas" label="Permite Festas" />
-                                    <CheckBox id="acessibilidade" label="Acessibilidade" />
+                                    <CheckBox id="pets" label="Aceita Pets" checked={detalhes.pets} onChange={() => handleDetalheChange('pets')} />
+                                    <CheckBox id="festas" label="Permite Festas" checked={detalhes.festas} onChange={() => handleDetalheChange('festas')} />
+                                    <CheckBox id="acessibilidade" label="Acessibilidade" checked={detalhes.acessibilidade} onChange={() => handleDetalheChange('acessibilidade')} />
                                 </div>
                                 <div className="flex flex-col gap-3">
-                                    <CheckBox id="fumante" label="Não Fumante" />
+                                    <CheckBox id="fumante" label="Não Fumante" checked={detalhes.fumante} onChange={() => handleDetalheChange('fumante')} />
                                 </div>
                             </div>
                         </section>
@@ -307,11 +359,14 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
                                         <div className="grid grid-cols-2 gap-3">
                                             {[...Array(4)].map((_, index) => {
                                                 const imagemAtual = imagens[index];
-                                                const imgSrc = imagemAtual instanceof File ? URL.createObjectURL(imagemAtual) : imagemAtual;
+                                                
+                                                const imgSrc = imagemAtual instanceof File 
+                                                    ? URL.createObjectURL(imagemAtual) 
+                                                    : (imagemAtual?.path ? `http://localhost:5000${imagemAtual.path}` : '');
 
                                                 return (
                                                     <div key={index} className="bg-[#D9D9D9]/60 border border-borda-cards rounded-2xl flex items-center justify-center min-h-[96px] overflow-hidden relative group">
-                                                        {imagemAtual ? (
+                                                        {imgSrc ? (
                                                             <img src={imgSrc} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -337,7 +392,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel }) {
                             </div>
                         </section>
 
-                    </div>
+                    </form>
                 </div>
             </div>
         </>

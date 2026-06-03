@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Importado o useEffect
 import { NavLink, useNavigate } from 'react-router-dom';
 import CardsImoveis from '../components/CardsImoveis.jsx';
 import ModalEditarAluguel from '../Pages/ModalEditarAluguel.jsx';
@@ -7,56 +7,42 @@ import Hero from '../assets/TelaPrincipal/MiniHero.jpg';
 function MeusAlugueis() {
     const navigate = useNavigate();
 
-    // Estados para controlar a visibilidade e qual imóvel editar
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [imovelSelecionado, setImovelSelecionado] = useState(null);
 
-    // Função que captura o imóvel do card e ativa a modal
+    const [imoveis, setImoveis] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const carregarImoveis = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('http://localhost:5000/api/imoveis');
+            
+            if (!response.ok) {
+                throw new Error('Não foi possível carregar os imóveis.');
+            }
+
+            const dados = await response.json();
+            setImoveis(dados);
+        } catch (error) {
+            console.error("Erro ao buscar imóveis do banco:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        carregarImoveis();
+    }, []);
+
     const handleAbrirEdicao = (imovel) => {
         console.log("Pai recebeu o clique! Imóvel selecionado:", imovel.titulo);
         setImovelSelecionado(imovel);
         setIsModalOpen(true);
     };
 
-    // Array de imóveis
-    const imoveis = [
-        {
-            id: 1,
-            titulo: "Apartamento Luxo Gramado",
-            subtitulo: "Avenida Central, Gramado - RS",
-            nota: "4.9",
-            preco: "850",
-            quartos: 3,
-            vagas: 2,
-            disponibilidade: "Disponível em Agosto",
-            imagens: [Hero, Hero, Hero],
-            tipo: "Apartamento",
-            banheiros: 2,
-            area: 110,
-            temPiscina: true,
-            aceitaPet: true
-        },
-        {
-            id: 2,
-            titulo: "Apartamento Luxo Gramado",
-            subtitulo: "Avenida Central, Gramado - RS",
-            nota: "4.9",
-            preco: "850",
-            quartos: 3,
-            vagas: 2,
-            disponibilidade: "Disponível em Agosto",
-            imagens: [Hero, Hero, Hero],
-            tipo: "Apartamento",
-            banheiros: 2,
-            area: 110,
-            temPiscina: true,
-            aceitaPet: true
-        },
-    ];
-
     return (
         <div className="px-12 py-10 flex flex-col gap-6 w-full max-w-[1440px] mx-auto">
-
             {/* Título da Aba */}
             <div>
                 <h1 className="text-preto-texto-principal text-3xl font-bold">Meus Alugueis</h1>
@@ -65,19 +51,24 @@ function MeusAlugueis() {
 
             {/* Grid de Cards */}
             <div className="flex flex-wrap gap-6 items-stretch justify-start mt-2">
-
-                {/* Mapeamento dos Imóveis */}
-                {imoveis.map((imovel) => (
-                    <div key={imovel.id} className="w-full max-w-[280px] 2xl:max-w-[300px]">
-                        <CardsImoveis
-                            imovel={imovel}
-                            isGerenciamento={true}
-                            onEdit={handleAbrirEdicao}
-                        />
+                {loading ? (
+                    <div className="w-full py-10 text-center text-cinza-texto-secundario animate-pulse">
+                        Carregando seus imóveis...
                     </div>
-                ))}
+                ) : (
+                    <>
+                        {imoveis.map((imovel) => (
+                            <div key={imovel.id || imovel._id} className="w-full max-w-[280px] 2xl:max-w-[300px]">
+                                <CardsImoveis
+                                    imovel={imovel}
+                                    isGerenciamento={true}
+                                    onEdit={handleAbrirEdicao}
+                                />
+                            </div>
+                        ))}
+                    </>
+                )}
 
-                {/* Card Cinza estático de Adicionar Imóvel */}
                 <div className="h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] border border-borda-cards bg-fundo-cards rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
                     <button type="button" onClick={() => navigate('/cadastro')} className="px-5 py-2.5 bg-beje-principal hover:bg-botao-beje-apertado text-white font-bold rounded-xl flex items-center gap-2 transition-colors text-sm shadow-sm active:scale-95">
                         <span className="text-lg font-normal leading-none">&#43;</span> Adicionar Imovel
@@ -90,10 +81,12 @@ function MeusAlugueis() {
 
             </div>
 
+            {/* Modal de Edição */}
             <ModalEditarAluguel
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 imovel={imovelSelecionado}
+                onSucesso={carregarImoveis}
             />
 
         </div>

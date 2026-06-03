@@ -6,9 +6,21 @@ import { isWithinInterval } from 'date-fns';
 
 registerLocale('pt-BR', ptBR);
 
-export function Calendario({ modoVisualizacao = false, reservas = [] }) {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+export function Calendario({ 
+  modoVisualizacao = false, 
+  reservas = [],
+  startDate: propStartDate,
+  endDate: propEndDate,
+  setStartDate: propSetStartDate,
+  setEndDate: propSetEndDate
+}) {
+  const [internalStartDate, setInternalStartDate] = useState(null);
+  const [internalEndDate, setInternalEndDate] = useState(null);
+
+  const startDate = propStartDate !== undefined ? propStartDate : internalStartDate;
+  const endDate = propEndDate !== undefined ? propEndDate : internalEndDate;
+  const setStartDate = propSetStartDate || setInternalStartDate;
+  const setEndDate = propSetEndDate || setInternalEndDate;
 
   const onChange = (dates) => {
     if (modoVisualizacao) return;
@@ -17,12 +29,10 @@ export function Calendario({ modoVisualizacao = false, reservas = [] }) {
     setEndDate(end);
   };
 
-  // 1. Mapeia automaticamente os intervalos para o DatePicker bloquear os cliques neles
   const intervalosParaBloquear = reservas
     .filter(r => r.start && r.end)
     .map(r => ({ start: r.start, end: r.end }));
 
-  // 2. Descobre o status do dia para aplicar a cor certa (Verde, Amarelo ou Vermelho)
   const obterClasseStatusDia = (date) => {
     if (!modoVisualizacao || !reservas.length) return '';
     
@@ -73,7 +83,6 @@ export function Calendario({ modoVisualizacao = false, reservas = [] }) {
           border: 1px solid transparent !important;
         }
         
-        /* DIAS PASSADOS (Inativos padrão) */
         .react-datepicker__day--disabled {
           background-color: transparent !important;
           color: #cccccc !important;
@@ -85,8 +94,8 @@ export function Calendario({ modoVisualizacao = false, reservas = [] }) {
 
         /* 1. CONFIRMADA (Verde suave) */
         .reserva-confirmada {
-          background-color: #e6f4ea !important; /* bg-emerald-50 */
-          color: #137333 !important; /* text-emerald-700 */
+          background-color: #e6f4ea !important;
+          color: #137333 !important;
           font-weight: 700 !important;
           border-radius: 4px !important;
           border: 1px solid #c2e7cd !important;
@@ -95,8 +104,8 @@ export function Calendario({ modoVisualizacao = false, reservas = [] }) {
 
         /* 2. PENDENTE (Amarelo suave) */
         .reserva-pendente {
-          background-color: #fffbeb !important; /* bg-amber-50 */
-          color: #b45309 !important; /* text-amber-700 */
+          background-color: #fffbeb !important;
+          color: #b45309 !important;
           font-weight: 700 !important;
           border-radius: 4px !important;
           border: 1px solid #fde68a !important;
@@ -105,8 +114,8 @@ export function Calendario({ modoVisualizacao = false, reservas = [] }) {
 
         /* 3. CANCELADA (Vermelho suave) */
         .reserva-cancelada {
-          background-color: #fef2f2 !important; /* bg-red-50 */
-          color: #b91c1c !important; /* text-red-700 */
+          background-color: #fef2f2 !important;
+          color: #b91c1c !important;
           font-weight: 700 !important;
           border-radius: 4px !important;
           border: 1px solid #fca5a5 !important;
@@ -129,7 +138,6 @@ export function Calendario({ modoVisualizacao = false, reservas = [] }) {
           .reserva-pendente:hover { background-color: #fffbeb !important; }
           .reserva-cancelada:hover { background-color: #fef2f2 !important; }
         ` : `
-          /* Modo Seleção Principal */
           .react-datepicker__day--selected, 
           .react-datepicker__day--in-range {
             background-color: #A67C52 !important;

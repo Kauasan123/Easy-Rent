@@ -21,63 +21,49 @@ model Usuario {
 }
 
 model Imovel {
-  id           Int      @id @default(autoincrement())
-  titulo       String
-  tipo         String   
-  descricao    String   @db.VarChar(500)
-
-  // Localização
-  cidade       String
-  bairro       String
-  endereco     String
-  cep          String
-
-  // Preço e Cobrança
-  preco        Float
-  tipoCobranca String
-
-  capacidade   String
+  id            Int      @id @default(autoincrement())
+  titulo        String
+  tipo          String
+  descricao     String   @db.Text
+  cidade        String
+  bairro        String
+  endereco      String
+  cep           String
+  preco         Float
+  tipoCobranca  String
+  capacidade    String
+  quartos       Int
+  banheiros     Int
+  vagas         Int
+  proximoCentro Boolean
+  proximoPraia  Boolean
 
   // Comodidades
-  hasWifi            Boolean @default(false)
-  hasArCondicionado  Boolean @default(false)
-  hasEstacionamento  Boolean @default(false)
-  hasPiscina         Boolean @default(false)
-  hasTv              Boolean @default(false)
-  hasMaquinaLavar    Boolean @default(false)
-  hasChurrascaria    Boolean @default(false)
-  hasElevador        Boolean @default(false)
-  hasPortaria24h     Boolean @default(false)
+  hasWifi           Boolean
+  hasMaquinaLavar   Boolean
+  hasArCondicionado Boolean
+  hasChurrascaria   Boolean
+  hasEstacionamento Boolean
+  hasElevador       Boolean
+  hasPiscina        Boolean
+  hasPortaria24h    Boolean
+  hasTv             Boolean
 
-  // Detalhes do Imóvel
-  proximoCentro      Boolean @default(false)
-  proximoPraia       Boolean @default(false)
-  quartos            Int     @default(1)
-  banheiros          Int     @default(1)
-  vagas              Int     @default(1)
+  // Regras
+  aceitaPets     Boolean
+  permiteFestas  Boolean
+  acessibilidade Boolean
+  naoFumante     Boolean
 
-  // Preferências / Regras
-  aceitaPets         Boolean @default(false)
-  permiteFestas      Boolean @default(false)
-  acessibilidade     Boolean @default(false)
-  naoFumante         Boolean @default(false)
-
-  // Controle de Tempo
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
-
-  // Chave Estrangeira
-  usuarioId    Int
-  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-
-  // Relacionamento
-  fotos        FotoImovel[]
+  // Relacionamentos
+  usuarioId Int
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  imagens   Imagem[]
 }
 
-model FotoImovel {
-  id        Int    @id @default(autoincrement())
-  path      String
-  
-  imovelId  Int
-  imovel    Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+model Imagem {
+  id       Int    @id @default(autoincrement())
+  url      String
+  imovelId Int
+  imovel   Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
 }
