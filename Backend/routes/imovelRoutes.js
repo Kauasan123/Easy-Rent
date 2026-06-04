@@ -6,5 +6,6 @@ const uploadImovel = require('../config/imovelUploadConfig');
 router.post('/imoveis', uploadImovel.array('imagens', 10), imovelController.criarImovel); 
 router.get('/imoveis', imovelController.listarImoveis);
 router.put('/imoveis/:id', uploadImovel.array('imagens', 10), imovelController.atualizarImovel);
+router.get('/imoveis/:id', imovelController.buscarImovelPorId);
 
 module.exports = router;

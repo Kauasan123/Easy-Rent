@@ -6,11 +6,11 @@ const criarImovel = async (req, res) => {
     const dadosImovel = req.body;
 
     const arquivos = req.files || [];
-    const fotosDados = arquivos.map(file => ({ path: `/uploads/imoveis/${file.filename}` }));
+    const imagensDados = arquivos.map(file => ({ url: `/uploads/imoveis/${file.filename}` }));
+    const periodos = dadosImovel.periodos ? JSON.parse(dadosImovel.periodos) : [];
 
     const novoImovel = await prisma.imovel.create({
       data: {
-        // Informações básicas
         titulo: dadosImovel.titulo,
         tipo: dadosImovel.tipo,
         descricao: dadosImovel.descricao,
@@ -21,8 +21,6 @@ const criarImovel = async (req, res) => {
         preco: parseFloat(dadosImovel.preco),
         tipoCobranca: dadosImovel.tipoCobranca,
         capacidade: dadosImovel.capacidade,
-        
-        // Comodidades
         hasWifi: dadosImovel.hasWifi === 'true',
         hasArCondicionado: dadosImovel.hasArCondicionado === 'true',
         hasEstacionamento: dadosImovel.hasEstacionamento === 'true',
@@ -32,34 +30,31 @@ const criarImovel = async (req, res) => {
         hasChurrascaria: dadosImovel.hasChurrascaria === 'true',
         hasElevador: dadosImovel.hasElevador === 'true',
         hasPortaria24h: dadosImovel.hasPortaria24h === 'true',
-
-        // Detalhes
         proximoCentro: dadosImovel.proximoCentro === 'true',
         proximoPraia: dadosImovel.proximoPraia === 'true',
         quartos: parseInt(dadosImovel.quartos) || 1,
         banheiros: parseInt(dadosImovel.banheiros) || 1,
         vagas: parseInt(dadosImovel.vagas) || 1,
-
-        // Regras
         aceitaPets: dadosImovel.aceitaPets === 'true',
         permiteFestas: dadosImovel.permiteFestas === 'true',
         acessibilidade: dadosImovel.acessibilidade === 'true',
         naoFumante: dadosImovel.naoFumante === 'true',
-
         usuarioId: parseInt(dadosImovel.usuarioId) || 1,
+        imagens: { create: imagensDados },
 
-        fotos: {
-          create: fotosDados
+        periodos: {
+          create: periodos.map(p => ({
+            inicio: new Date(p.inicio),
+            fim: new Date(p.fim)
+          }))
         }
       },
-      include: {
-        fotos: true
-      }
+      include: { imagens: true, periodos: true }
     });
 
-    return res.status(201).json({ mensagem: "Imóvel cadastrado com sucesso!", imovel: novoImovel });
+    return res.status(201).json({ mensagem: "Imóvel cadastrado!", imovel: novoImovel });
   } catch (error) {
-    console.error(error);
+    console.error("ERRO NO BACKEND:", error);
     return res.status(500).json({ erro: "Erro ao cadastrar imóvel", detalhes: error.message });
   }
 };
@@ -67,9 +62,7 @@ const criarImovel = async (req, res) => {
 const listarImoveis = async (req, res) => {
   try {
     const imoveis = await prisma.imovel.findMany({
-      include: {
-        fotos: true
-      }
+      include: { imagens: true, periodos: true }
     });
     return res.json(imoveis);
   } catch (error) {
@@ -81,14 +74,13 @@ const atualizarImovel = async (req, res) => {
   try {
     const { id } = req.params;
     const dadosImovel = req.body;
-
+    const periodos = dadosImovel.periodos ? JSON.parse(dadosImovel.periodos) : [];
     const arquivos = req.files || [];
-    const novasFotos = arquivos.map(file => ({ path: `/uploads/imoveis/${file.filename}` }));
+    const novasFotos = arquivos.map(file => ({ url: `/uploads/imoveis/${file.filename}` }));
 
     const imovelAtualizado = await prisma.imovel.update({
       where: { id: parseInt(id) },
       data: {
-        // Informações básicas
         titulo: dadosImovel.titulo,
         tipo: dadosImovel.tipo,
         descricao: dadosImovel.descricao,
@@ -99,8 +91,6 @@ const atualizarImovel = async (req, res) => {
         preco: parseFloat(dadosImovel.preco),
         tipoCobranca: dadosImovel.tipoCobranca,
         capacidade: dadosImovel.capacidade,
-        
-        // Comodidades Booleans
         hasWifi: dadosImovel.hasWifi === 'true',
         hasArCondicionado: dadosImovel.hasArCondicionado === 'true',
         hasEstacionamento: dadosImovel.hasEstacionamento === 'true',
@@ -110,40 +100,58 @@ const atualizarImovel = async (req, res) => {
         hasChurrascaria: dadosImovel.hasChurrascaria === 'true',
         hasElevador: dadosImovel.hasElevador === 'true',
         hasPortaria24h: dadosImovel.hasPortaria24h === 'true',
-
-        // Detalhes
         proximoCentro: dadosImovel.proximoCentro === 'true',
         proximoPraia: dadosImovel.proximoPraia === 'true',
         quartos: parseInt(dadosImovel.quartos) || 1,
         banheiros: parseInt(dadosImovel.banheiros) || 1,
         vagas: parseInt(dadosImovel.vagas) || 1,
-
-        // Regras
         aceitaPets: dadosImovel.aceitaPets === 'true',
         permiteFestas: dadosImovel.permiteFestas === 'true',
         acessibilidade: dadosImovel.acessibilidade === 'true',
         naoFumante: dadosImovel.naoFumante === 'true',
-
-        ...(novasFotos.length > 0 && {
-          fotos: {
-            create: novasFotos
+        ...(novasFotos.length > 0 && { imagens: { create: novasFotos } }),
+        ...(periodos !== null && {
+          periodos: {
+            deleteMany: {},
+            create: periodos.map(p => ({
+              inicio: new Date(p.inicio),
+              fim: new Date(p.fim)
+            }))
           }
         })
       },
-      include: {
-        fotos: true
-      }
+      include: { imagens: true, periodos: true }
     });
 
     return res.json({ mensagem: "Imóvel atualizado com sucesso!", imovel: imovelAtualizado });
   } catch (error) {
-    console.error(error);
+    console.error("ERRO AO ATUALIZAR:", error);
     return res.status(500).json({ erro: "Erro ao atualizar imóvel", detalhes: error.message });
+  }
+};
+
+const buscarImovelPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const imovel = await prisma.imovel.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        imagens: true,
+        periodos: true
+      }
+    });
+
+    if (!imovel) return res.status(404).json({ erro: "Imóvel não encontrado" });
+
+    return res.json(imovel);
+  } catch (error) {
+    return res.status(500).json({ erro: "Erro ao buscar imóvel" });
   }
 };
 
 module.exports = {
   criarImovel,
   listarImoveis,
-  atualizarImovel
+  atualizarImovel,
+  buscarImovelPorId
 };

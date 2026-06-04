@@ -20,6 +20,14 @@ model Usuario {
   imoveis      Imovel[]
 }
 
+model Periodo {
+  id       Int      @id @default(autoincrement())
+  inicio   DateTime
+  fim      DateTime
+  imovelId Int
+  imovel   Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+}
+
 model Imovel {
   id            Int      @id @default(autoincrement())
   titulo        String
@@ -59,6 +67,7 @@ model Imovel {
   usuarioId Int
   usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   imagens   Imagem[]
+  periodos  Periodo[] // Adicione esta linha de relacionamento
 }
 
 model Imagem {

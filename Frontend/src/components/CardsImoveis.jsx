@@ -1,17 +1,76 @@
 import React, { useState } from 'react';
 import * as Icons from '../icons/icons.js';
 
-export function CardsImoveis({ imovel, isGerenciamento = false, onEdit }) {
+export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSelecionada = null, dataFim = null }) {
   const [fotoAtual, setFotoAtual] = useState(0);
 
   const listaImagens = imovel.imagens || (imovel.imagem ? [imovel.imagem] : []);
+  
+  // Função para extrair a data mais próxima disponível
+  const obterProximaDataDisponivel = () => {
+    // Se não houver períodos, retornar mensagem padrão
+    if (!imovel.periodos || imovel.periodos.length === 0) {
+      return 'Sem datas disponíveis';
+    }
 
-  const obterUrlImagem = (caminho) => {
-    if (!caminho) return 'https://via.placeholder.com/300x200?text=Sem+Imagem';
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    // Preparar períodos com datas convertidas
+    const periodosProcessados = imovel.periodos
+      .map(p => ({
+        ...p,
+        dataInicio: new Date(p.inicio),
+        dataFim: new Date(p.fim)
+      }))
+      .filter(p => p.dataFim >= hoje) // Apenas períodos que ainda não terminaram
+      .sort((a, b) => a.dataInicio - b.dataInicio);
+
+    if (periodosProcessados.length === 0) {
+      return 'Sem datas disponíveis';
+    }
+
+    let periodoSelecionado = null;
+
+    // Se o usuário selecionou uma data, encontrar um período que a contenha
+    if (dataSelecionada) {
+      const dataSelecionadaObj = new Date(dataSelecionada);
+      dataSelecionadaObj.setHours(0, 0, 0, 0);
+
+      periodoSelecionado = periodosProcessados.find(p => 
+        p.dataInicio <= dataSelecionadaObj && dataSelecionadaObj <= p.dataFim
+      );
+
+      // Se não encontrar período que contenha a data selecionada, usar o próximo
+      if (!periodoSelecionado) {
+        periodoSelecionado = periodosProcessados[0];
+      }
+    } else {
+      // Se não houver data selecionada, usar o próximo período disponível
+      periodoSelecionado = periodosProcessados[0];
+    }
+
+    // Formatar as datas
+    const diaInicio = periodoSelecionado.dataInicio.getDate();
+    const diaFim = periodoSelecionado.dataFim.getDate();
+    
+    const opcoes = { month: 'short' };
+    const mesFim = periodoSelecionado.dataFim.toLocaleDateString('pt-BR', opcoes).replace('.', '');
+
+    return `Disponível ${diaInicio} - ${diaFim} ${mesFim}`;
+  };
+
+  const obterUrlImagem = (imagem) => {
+    const caminho = typeof imagem === 'string' ? imagem : imagem?.url;
+    
+    if (!caminho) {
+      return 'https://via.placeholder.com/300x200?text=Sem+Imagem';
+    }
     if (caminho.startsWith('http://') || caminho.startsWith('https://')) {
       return caminho;
     }
-    return `http://localhost:5000/${caminho}`;
+    const urlFinal = `http://localhost:5000${caminho.startsWith('/') ? '' : '/'}${caminho}`;
+    return urlFinal;
   };
 
   const proximaFoto = (e) => {
@@ -84,7 +143,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit }) {
           
           <div>
             <span className='text-sm 2xl:text-base text-preto-texto-principal/50'>
-              {imovel.disponibilidade || "Disponível para reserva"}
+              {obterProximaDataDisponivel()}
             </span>
           </div>
         </div>

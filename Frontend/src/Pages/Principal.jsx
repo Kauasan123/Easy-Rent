@@ -139,6 +139,10 @@ export default function Principal() {
   const [calendarioAberto, setCalendarioAberto] = useState(false);
   const [localizacaoAberta, setLocalizacaoAberta] = useState(false);
 
+  // Estados para datas selecionadas
+  const [dataInicio, setDataInicio] = useState(null);
+  const [dataFim, setDataFim] = useState(null);
+
   // Função troca de Pagina
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 12;
@@ -278,7 +282,12 @@ export default function Principal() {
 
                 <div className={`transition-all duration-300 overflow-hidden ${calendarioAberto ? 'max-h-[500px] opacity-100 border-t border-zinc-100' : 'max-h-0 opacity-0 invisible'}`}>
                   <div className="p-3">
-                    <Calendario />
+                    <Calendario 
+                      startDate={dataInicio}
+                      endDate={dataFim}
+                      setStartDate={setDataInicio}
+                      setEndDate={setDataFim}
+                    />
                   </div>
                 </div>
               </div>
@@ -389,7 +398,11 @@ export default function Principal() {
               <article className="grid-de-imoveis grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-3 2xl:gap-x-6 gap-y-10">
                 {imoveisExibidos.map((imovel) => (
                   <div key={imovel.id} onClick={() => setImovelSelecionado(imovel)} className="cursor-pointer">
-                    <CardsImoveis imovel={imovel} />
+                    <CardsImoveis 
+                      imovel={imovel} 
+                      dataSelecionada={dataInicio}
+                      dataFim={dataFim}
+                    />
                   </div>
                 ))}
               </article>

@@ -123,7 +123,7 @@ function CadastrarAluguel() {
             formData.append('proximoPraia', proximoPraia);
 
             // Envia a lista acumulada de períodos como string JSON
-            formData.append('periodosDisponiveis', JSON.stringify(periodosDisponiveis));
+            formData.append('periodos', JSON.stringify(periodosDisponiveis));
 
             Object.keys(comodidades).forEach(key => {
                 formData.append(key, comodidades[key]);

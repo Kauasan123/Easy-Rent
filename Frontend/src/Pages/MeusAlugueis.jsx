@@ -36,7 +36,6 @@ function MeusAlugueis() {
     }, []);
 
     const handleAbrirEdicao = (imovel) => {
-        console.log("Pai recebeu o clique! Imóvel selecionado:", imovel.titulo);
         setImovelSelecionado(imovel);
         setIsModalOpen(true);
     };
@@ -86,7 +85,7 @@ function MeusAlugueis() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 imovel={imovelSelecionado}
-                onSucesso={carregarImoveis}
+                onUpdateSuccess={carregarImoveis}
             />
 
         </div>
