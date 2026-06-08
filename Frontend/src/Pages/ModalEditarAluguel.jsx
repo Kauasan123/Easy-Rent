@@ -197,24 +197,6 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
         formData.append('banheiros', banheiros);
         formData.append('vagas', vagas);
 
-        formData.append('hasWifi', comodidades.hasWifi);
-        formData.append('hasMaquinaLavar', comodidades.hasMaquinaLavar);
-        formData.append('hasArCondicionado', comodidades.hasArCondicionado);
-        formData.append('hasChurrascaria', comodidades.hasChurrascaria);
-        formData.append('hasEstacionamento', comodidades.hasEstacionamento);
-        formData.append('hasElevador', comodidades.hasElevador);
-        formData.append('hasPiscina', comodidades.hasPiscina);
-        formData.append('hasPortaria24h', comodidades.hasPortaria24h);
-        formData.append('hasTv', comodidades.hasTv);
-
-        formData.append('proximoCentro', proximoCentro);
-        formData.append('proximoPraia', proximoPraia);
-
-        formData.append('aceitaPets', regras.aceitaPets);
-        formData.append('permiteFestas', regras.permiteFestas);
-        formData.append('acessibilidade', regras.acessibilidade);
-        formData.append('naoFumante', regras.naoFumante);
-
         Object.keys(comodidades).forEach(key => formData.append(key, comodidades[key]));
         Object.keys(regras).forEach(key => formData.append(key, regras[key]));
 

@@ -18,6 +18,7 @@ model Usuario {
   atualizadoEm DateTime @updatedAt      
 
   imoveis      Imovel[]
+  reservas  Reserva[] @relation("ReservasComoHospede")
 }
 
 model Periodo {
@@ -67,7 +68,22 @@ model Imovel {
   usuarioId Int
   usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   imagens   Imagem[]
-  periodos  Periodo[] // Adicione esta linha de relacionamento
+  periodos  Periodo[]
+  reservas  Reserva[]
+}
+
+model Reserva {
+  id         Int      @id @default(autoincrement())
+  inicio     DateTime
+  fim        DateTime
+  status     String   @default("Pendente")
+  criadoEm  DateTime @default(now())
+
+  imovelId   Int
+  imovel     Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+
+  hospedeId  Int
+  hospede    Usuario  @relation("ReservasComoHospede", fields: [hospedeId], references: [id], onDelete: Cascade)
 }
 
 model Imagem {

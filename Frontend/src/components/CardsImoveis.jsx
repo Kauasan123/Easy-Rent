@@ -6,9 +6,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
 
   const listaImagens = imovel.imagens || (imovel.imagem ? [imovel.imagem] : []);
   
-  // Função para extrair a data mais próxima disponível
   const obterProximaDataDisponivel = () => {
-    // Se não houver períodos, retornar mensagem padrão
     if (!imovel.periodos || imovel.periodos.length === 0) {
       return 'Sem datas disponíveis';
     }
@@ -16,14 +14,13 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    // Preparar períodos com datas convertidas
     const periodosProcessados = imovel.periodos
       .map(p => ({
         ...p,
         dataInicio: new Date(p.inicio),
         dataFim: new Date(p.fim)
       }))
-      .filter(p => p.dataFim >= hoje) // Apenas períodos que ainda não terminaram
+      .filter(p => p.dataFim >= hoje)
       .sort((a, b) => a.dataInicio - b.dataInicio);
 
     if (periodosProcessados.length === 0) {
@@ -32,7 +29,6 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
 
     let periodoSelecionado = null;
 
-    // Se o usuário selecionou uma data, encontrar um período que a contenha
     if (dataSelecionada) {
       const dataSelecionadaObj = new Date(dataSelecionada);
       dataSelecionadaObj.setHours(0, 0, 0, 0);
@@ -41,12 +37,10 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
         p.dataInicio <= dataSelecionadaObj && dataSelecionadaObj <= p.dataFim
       );
 
-      // Se não encontrar período que contenha a data selecionada, usar o próximo
       if (!periodoSelecionado) {
         periodoSelecionado = periodosProcessados[0];
       }
     } else {
-      // Se não houver data selecionada, usar o próximo período disponível
       periodoSelecionado = periodosProcessados[0];
     }
 
