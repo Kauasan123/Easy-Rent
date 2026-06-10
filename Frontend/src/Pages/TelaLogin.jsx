@@ -29,6 +29,7 @@ function TelaLogin() {
             if (usuarioValido) {
                 localStorage.setItem('usuarioId', usuarioValido.id);
                 localStorage.setItem('usuarioNome', usuarioValido.nome);
+                localStorage.setItem('usuarioAvatar', usuarioValido.avatarPath || '');
                 
                 navigate('/principal');
             } else {

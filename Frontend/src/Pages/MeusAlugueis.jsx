@@ -16,14 +16,19 @@ function MeusAlugueis() {
     const carregarImoveis = async () => {
         try {
             setLoading(true);
+            const usuarioId = localStorage.getItem('usuarioId');
+
             const response = await fetch('http://localhost:5000/api/imoveis');
-            
-            if (!response.ok) {
-                throw new Error('Não foi possível carregar os imóveis.');
-            }
+
+            if (!response.ok) throw new Error('Não foi possível carregar os imóveis.');
 
             const dados = await response.json();
-            setImoveis(dados);
+
+            const imoveisDoUsuario = dados.filter(
+                (imovel) => imovel.usuarioId === parseInt(usuarioId)
+            );
+
+            setImoveis(imoveisDoUsuario);
         } catch (error) {
             console.error("Erro ao buscar imóveis do banco:", error);
         } finally {

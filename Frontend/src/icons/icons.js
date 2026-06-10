@@ -63,3 +63,4 @@ export { FaSignOutAlt } from "react-icons/fa"; {/* Ícone de Sair */}
 export { FaTrashAlt } from "react-icons/fa"; {/* Ícone de Lixeira */}
 
 export { FaCircleCheck } from "react-icons/fa6"; {/* Ícone de Check Circle */}
+export { FaUserCircle } from "react-icons/fa"; {/* Ícone de Usuario Circulo */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import Header from '../components/Header.jsx';
+import HeaderLogado from '../components/HeaderLogado.jsx';
 import Footer from '../components/Footer.jsx';
 import CheckBox from '../components/CheckBox.jsx';
 import Stepper from '../components/Stepper.jsx';
@@ -10,7 +10,7 @@ import Hero from '../assets/TelaPrincipal/MiniHero.jpg';
 import * as Icons from '../icons/icons.js';
 import * as Slider from '@radix-ui/react-slider';
 
-// Função StarRating (mantida igual)
+// Função StarRating
 function StarRating({ value, onChange }) {
   const [hover, setHover] = useState(null);
   return (
@@ -160,7 +160,7 @@ export default function Principal() {
   return (
     <>
       <div className="min-h-screen flex flex-col bg-white">
-        <header><Header /></header>
+        <header><HeaderLogado /></header>
 
         <main className="min-h-[80vh] flex flex-col justify-between">
           {/* Mini Hero */}
@@ -426,7 +426,9 @@ export default function Principal() {
           </section>
         </main>
 
-        <footer><Footer /></footer>
+        <footer>
+          <Footer />
+        </footer>
       </div>
     </>
   );

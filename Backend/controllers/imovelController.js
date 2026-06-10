@@ -62,7 +62,7 @@ const criarImovel = async (req, res) => {
 const listarImoveis = async (req, res) => {
   try {
     const imoveis = await prisma.imovel.findMany({
-      include: { imagens: true, periodos: true }
+      include: { imagens: true, periodos: true, usuario: true }
     });
     return res.json(imoveis);
   } catch (error) {
@@ -120,7 +120,9 @@ const atualizarImovel = async (req, res) => {
           }
         })
       },
-      include: { imagens: true, periodos: true }
+      include: { 
+        imagens: true, 
+        periodos: true }
     });
 
     return res.json({ mensagem: "Imóvel atualizado com sucesso!", imovel: imovelAtualizado });
@@ -135,10 +137,10 @@ const buscarImovelPorId = async (req, res) => {
     const { id } = req.params;
     const imovel = await prisma.imovel.findUnique({
       where: { id: parseInt(id) },
-      include: {
-        imagens: true,
-        periodos: true
-      }
+      include: { 
+        imagens: true, 
+        periodos: true, 
+        usuario: true }
     });
 
     if (!imovel) return res.status(404).json({ erro: "Imóvel não encontrado" });

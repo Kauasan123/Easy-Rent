@@ -19,6 +19,7 @@ model Usuario {
 
   imoveis      Imovel[]
   reservas  Reserva[] @relation("ReservasComoHospede")
+  avaliacoes Avaliacao[] @relation("AvaliacoesFeitas")
 }
 
 model Periodo {
@@ -70,6 +71,7 @@ model Imovel {
   imagens   Imagem[]
   periodos  Periodo[]
   reservas  Reserva[]
+  avaliacoes Avaliacao[]
 }
 
 model Reserva {
@@ -91,4 +93,17 @@ model Imagem {
   url      String
   imovelId Int
   imovel   Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+}
+
+model Avaliacao {
+  id          Int      @id @default(autoincrement())
+  nota        Float
+  comentario  String   @db.Text
+  criadoEm   DateTime @default(now())
+
+  imovelId    Int
+  imovel      Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+
+  autorId     Int
+  autor       Usuario  @relation("AvaliacoesFeitas", fields: [autorId], references: [id], onDelete: Cascade)
 }
