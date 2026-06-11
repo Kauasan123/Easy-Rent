@@ -27,7 +27,9 @@ function StatusImovelCard({ imovel, isAberto, onToggle }) {
     }));
 
     const urlImagem = imovel.imagens?.[0]?.url
-        ? `http://localhost:5000${imovel.imagens[0].url}`
+        ? imovel.imagens[0].url.startsWith('http')
+            ? imovel.imagens[0].url
+            : `http://localhost:5000${imovel.imagens[0].url}`
         : null;
 
     return (

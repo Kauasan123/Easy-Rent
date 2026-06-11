@@ -64,3 +64,5 @@ export { FaTrashAlt } from "react-icons/fa"; {/* Ícone de Lixeira */}
 
 export { FaCircleCheck } from "react-icons/fa6"; {/* Ícone de Check Circle */}
 export { FaUserCircle } from "react-icons/fa"; {/* Ícone de Usuario Circulo */}
+export { MdCloudUpload } from 'react-icons/md';
+export { MdImage } from "react-icons/md";

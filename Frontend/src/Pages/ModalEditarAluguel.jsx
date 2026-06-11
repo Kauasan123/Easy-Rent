@@ -56,6 +56,8 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
         const carregarDadosDoImovel = async () => {
             if (!imovel?.id) return;
 
+            setNovasImagens([]);
+
             try {
                 const response = await fetch(`http://localhost:5000/api/imoveis/${imovel.id}`);
                 const data = await response.json();
@@ -127,7 +129,13 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
             }
         };
 
-        if (isOpen) carregarDadosDoImovel();
+        if (isOpen) {
+            carregarDadosDoImovel();
+        } else {
+
+            setNovasImagens([]);
+        }
+
     }, [isOpen, imovel?.id]);
 
     const handleComodidadeChange = (key) => {
@@ -170,12 +178,21 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
 
     const handleFileChange = (e) => {
         const arquivos = Array.from(e.target.files);
-        setNovasImagens(arquivos);
+        setNovasImagens(prev => [...prev, ...arquivos].slice(0, 10));
     };
 
     const obterUrlImagem = (index) => {
-        if (novasImagens[index]) return URL.createObjectURL(novasImagens[index]);
-        if (imagensSalvas[index]) return `http://localhost:5000${imagensSalvas[index].url}`;
+        if (imagensSalvas[index]) {
+            const url = imagensSalvas[index].url;
+            if (url.startsWith('http')) return url;
+            return `http://localhost:5000${url}`;
+        }
+
+        const slotNova = index - imagensSalvas.length;
+        if (slotNova >= 0 && novasImagens[slotNova]) {
+            return URL.createObjectURL(novasImagens[slotNova]);
+        }
+
         return null;
     };
 
@@ -467,9 +484,9 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
                             </div>
                         </section>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
                             {/* Detalhes do Imóvel */}
-                            <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5">
+                            <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 h-full">
                                 <h2 className="text-2xl font-bold text-preto-texto-principal">Detalhes do Imóvel</h2>
 
                                 <div className="flex flex-col gap-3 mt-1">
@@ -493,7 +510,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
                             </section>
 
                             {/* Disponibilidade do Imóvel */}
-                            <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 w-full relative">
+                            <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 w-full relative h-full">
                                 <div>
                                     <h2 className="text-2xl font-bold text-preto-texto-principal">Disponibilidade do Imóvel</h2>
                                 </div>
@@ -589,15 +606,21 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
                                         <div className="grid grid-cols-2 gap-3">
                                             {[...Array(4)].map((_, index) => {
                                                 const urlImagem = obterUrlImagem(index);
-
                                                 return (
-                                                    <div key={index} className="bg-[#D9D9D9]/60 border border-borda-cards rounded-2xl flex items-center justify-center min-h-[96px] overflow-hidden relative group">
+                                                    <div key={index} className="relative bg-[#D9D9D9]/60 border border-borda-cards rounded-2xl flex items-center justify-center h-[140px] overflow-hidden group">
                                                         {urlImagem ? (
-                                                            <img
-                                                                src={urlImagem}
-                                                                alt={`Preview ${index + 1}`}
-                                                                className="w-full h-full object-cover"
-                                                            />
+                                                            <>
+                                                                <img src={urlImagem} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                                                                <button type="button" onClick={() => {
+                                                                    if (novasImagens[index]) {
+                                                                        setNovasImagens(prev => prev.filter((_, i) => i !== index));
+                                                                    } else if (imagensSalvas[index]) {
+                                                                        setImagensSalvas(prev => prev.filter((_, i) => i !== index));
+                                                                    }
+                                                                }} className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-500 hover:text-red-600 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all">
+                                                                    <Icons.FaTrashAlt size={12} />
+                                                                </button>
+                                                            </>
                                                         ) : (
                                                             <MdImage className="w-8 h-8 text-gray-400" />
                                                         )}

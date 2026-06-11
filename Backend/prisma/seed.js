@@ -3,7 +3,6 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-    // ==================== USUÁRIOS ====================
     const kaua = await prisma.usuario.upsert({
         where: { email: 'Exemploteste@gmail.com' },
         update: {},
@@ -34,7 +33,6 @@ async function main() {
         create: { nome: 'Lucas Pereira', email: 'lucas.pereira@gmail.com', senha: '1234', telefone: '53 955554444' }
     });
 
-    // ==================== IMÓVEIS ====================
     const dadosImoveis = [
         {
             titulo: 'Casa do Laranjal', tipo: 'casa', cidade: 'Pelotas', bairro: 'Laranjal', preco: 250, capacidade: '3+ Pessoas',
@@ -163,21 +161,19 @@ async function main() {
         imoveisCriados.push(imovel);
     }
 
-    // ==================== RESERVAS CONFIRMADAS ====================
-    // Cada usuário hóspede tem reserva confirmada em imóveis de outros donos
     const reservasData = [
-        { imovelId: imoveisCriados[0].id, hospedeId: ana.id },      // Ana reservou Casa do Laranjal (dono: Kauã)
-        { imovelId: imoveisCriados[0].id, hospedeId: carlos.id },    // Carlos reservou Casa do Laranjal (dono: Kauã)
-        { imovelId: imoveisCriados[1].id, hospedeId: kaua.id },      // Kauã reservou Apto Centro (dono: Ana)
-        { imovelId: imoveisCriados[1].id, hospedeId: lucas.id },     // Lucas reservou Apto Centro (dono: Ana)
-        { imovelId: imoveisCriados[2].id, hospedeId: mariana.id },   // Mariana reservou Casa Gramado (dono: Ana)
-        { imovelId: imoveisCriados[3].id, hospedeId: kaua.id },      // Kauã reservou Apto Canela (dono: Carlos)
-        { imovelId: imoveisCriados[4].id, hospedeId: ana.id },       // Ana reservou Casa Praia (dono: Carlos)
-        { imovelId: imoveisCriados[5].id, hospedeId: kaua.id },      // Kauã reservou Cobertura Luxo (dono: Mariana)
-        { imovelId: imoveisCriados[5].id, hospedeId: carlos.id },    // Carlos reservou Cobertura Luxo (dono: Mariana)
-        { imovelId: imoveisCriados[6].id, hospedeId: lucas.id },     // Lucas reservou Casa Simples (dono: Mariana)
-        { imovelId: imoveisCriados[7].id, hospedeId: ana.id },       // Ana reservou Flat Moderno (dono: Lucas)
-        { imovelId: imoveisCriados[7].id, hospedeId: mariana.id },   // Mariana reservou Flat Moderno (dono: Lucas)
+        { imovelId: imoveisCriados[0].id, hospedeId: ana.id },
+        { imovelId: imoveisCriados[0].id, hospedeId: carlos.id },
+        { imovelId: imoveisCriados[1].id, hospedeId: kaua.id },
+        { imovelId: imoveisCriados[1].id, hospedeId: lucas.id },
+        { imovelId: imoveisCriados[2].id, hospedeId: mariana.id },
+        { imovelId: imoveisCriados[3].id, hospedeId: kaua.id },
+        { imovelId: imoveisCriados[4].id, hospedeId: ana.id },
+        { imovelId: imoveisCriados[5].id, hospedeId: kaua.id },
+        { imovelId: imoveisCriados[5].id, hospedeId: carlos.id },
+        { imovelId: imoveisCriados[6].id, hospedeId: lucas.id },
+        { imovelId: imoveisCriados[7].id, hospedeId: ana.id },
+        { imovelId: imoveisCriados[7].id, hospedeId: mariana.id },
     ];
 
     const reservasCriadas = [];
@@ -194,7 +190,6 @@ async function main() {
         reservasCriadas.push({ ...reserva, hospedeId: dados.hospedeId });
     }
 
-    // ==================== AVALIAÇÕES ====================
     const comentarios = [
         "Lugar incrível! Muito confortável e bem localizado. Recomendo demais!",
         "Ótima experiência, o anfitrião foi muito atencioso e o espaço superou as expectativas.",

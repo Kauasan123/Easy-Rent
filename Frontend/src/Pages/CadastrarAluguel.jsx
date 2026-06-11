@@ -61,11 +61,14 @@ function CadastrarAluguel() {
     // Estados de Mídia e Envio
     const [imagens, setImagens] = useState([]);
     const [carregando, setCarregando] = useState(false);
+    const [urlsImagens, setUrlsImagens] = useState([]);
 
     // Handlers
     const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        setImagens((prev) => [...prev, ...files].slice(0, 10));
+        const arquivos = Array.from(e.target.files);
+        const novasUrls = arquivos.map(file => URL.createObjectURL(file));
+        setImagens((prev) => [...prev, ...arquivos].slice(0, 10));
+        setUrlsImagens((prev) => [...prev, ...novasUrls].slice(0, 10));
     };
 
     const handleComodidadeChange = (campo) => {
@@ -81,13 +84,12 @@ function CadastrarAluguel() {
 
         const novoPeriodo = {
             id: Date.now(),
-            inicio: dataInicio.toISOString().split('T')[0], // Mantém formato padrão YYYY-MM-DD
+            inicio: dataInicio.toISOString().split('T')[0],
             fim: dataFim.toISOString().split('T')[0]
         };
 
         setPeriodosDisponiveis([...periodosDisponiveis, novoPeriodo]);
 
-        // Reseta o estado do calendário perfeitamente
         setDataInicio(null);
         setDataFim(null);
     };
@@ -122,7 +124,6 @@ function CadastrarAluguel() {
             formData.append('proximoCentro', proximoCentro);
             formData.append('proximoPraia', proximoPraia);
 
-            // Envia a lista acumulada de períodos como string JSON
             formData.append('periodos', JSON.stringify(periodosDisponiveis));
 
             Object.keys(comodidades).forEach(key => {
@@ -390,9 +391,9 @@ function CadastrarAluguel() {
                 </div>
             </section>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
                 {/* Detalhes do Imóvel */}
-                <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5">
+                <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 h-full">
                     <h2 className="text-2xl font-bold text-preto-texto-principal">Detalhes do Imóvel</h2>
 
                     <div className="flex flex-col gap-3 mt-1">
@@ -416,7 +417,7 @@ function CadastrarAluguel() {
                 </section>
 
                 {/* Disponibilidade do Imóvel */}
-                <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 w-full relative">
+                <section className="border border-borda-cards bg-fundo-cards rounded-3xl p-8 shadow-sm flex flex-col gap-5 w-full relative h-full">
                     <div>
                         <h2 className="text-2xl font-bold text-preto-texto-principal">Disponibilidade do Imóvel</h2>
                     </div>
@@ -498,11 +499,12 @@ function CadastrarAluguel() {
                         <h2 className="text-2xl font-bold text-preto-texto-principal mb-5">Fotos do Imóvel</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <label className="border-2 border-dashed border-gray-400 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 transition-colors bg-white min-h-[200px]">
+                            <label
+                                className="border-2 border-dashed border-gray-400 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 transition-colors bg-white"
+                                style={{ height: '300px', minHeight: '300px', maxHeight: '300px' }}
+                            >
                                 <input type="file" multiple accept="image/png, image/jpeg" className="hidden" onChange={handleFileChange} />
-                                <svg className="w-12 h-12 text-black mb-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                                </svg>
+                                <Icons.MdCloudUpload size={48} className="text-black mb-3" />
                                 <span className="font-bold text-lg text-preto-texto-principal block">
                                     Clique para Enviar Fotos
                                 </span>
@@ -512,21 +514,35 @@ function CadastrarAluguel() {
                                 </span>
                             </label>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '12px', height: '300px', minHeight: '300px', maxHeight: '300px' }}>
                                 {[...Array(4)].map((_, index) => {
-                                    const imagemAtual = imagens[index];
+                                    const urlImagem = urlsImagens[index];
                                     return (
-                                        <div key={index} className="bg-[#D9D9D9]/60 border border-borda-cards rounded-2xl flex items-center justify-center min-h-[96px] overflow-hidden relative group">
-                                            {imagemAtual ? (
-                                                <img
-                                                    src={URL.createObjectURL(imagemAtual)}
-                                                    alt={`Preview ${index + 1}`}
-                                                    className="w-full h-full object-cover"
-                                                />
+                                        <div
+                                            key={index}
+                                            className="bg-[#D9D9D9]/60 border border-borda-cards flex items-center justify-center group"
+                                            style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px', minHeight: 0 }}
+                                        >
+                                            {urlImagem ? (
+                                                <>
+                                                    <img
+                                                        src={urlImagem}
+                                                        alt={`Preview ${index + 1}`}
+                                                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setImagens(prev => prev.filter((_, i) => i !== index));
+                                                            setUrlsImagens(prev => prev.filter((_, i) => i !== index));
+                                                        }}
+                                                        className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-500 hover:text-red-600 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all"
+                                                    >
+                                                        <Icons.FaTrashAlt size={12} />
+                                                    </button>
+                                                </>
                                             ) : (
-                                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                                </svg>
+                                                <Icons.MdImage size={32} className="text-gray-400" />
                                             )}
                                         </div>
                                     );
@@ -535,7 +551,6 @@ function CadastrarAluguel() {
                         </div>
                     </section>
 
-                    {/* Botões de Ação Final */}
                     <div className="flex gap-4 items-center mt-2">
                         <button
                             type="submit"
