@@ -6,13 +6,15 @@ import { isWithinInterval } from 'date-fns';
 
 registerLocale('pt-BR', ptBR);
 
-export function Calendario({ 
-  modoVisualizacao = false, 
+export function Calendario({
+  modoVisualizacao = false,
   reservas = [],
   startDate: propStartDate,
   endDate: propEndDate,
   setStartDate: propSetStartDate,
-  setEndDate: propSetEndDate
+  setEndDate: propSetEndDate,
+  minDate,
+  maxDate
 }) {
   const [internalStartDate, setInternalStartDate] = useState(null);
   const [internalEndDate, setInternalEndDate] = useState(null);
@@ -35,7 +37,7 @@ export function Calendario({
 
   const obterClasseStatusDia = (date) => {
     if (!modoVisualizacao || !reservas.length) return '';
-    
+
     const reservaEncontrada = reservas.find(reserva => {
       if (!reserva.start || !reserva.end) return false;
       return isWithinInterval(date, { start: reserva.start, end: reserva.end });
@@ -160,11 +162,12 @@ export function Calendario({
           selectsRange={!modoVisualizacao}
           inline
           monthsShown={1}
-          minDate={new Date()}
+          minDate={minDate !== undefined ? minDate : new Date()}
+          maxDate={maxDate !== undefined ? maxDate : undefined}
           locale="pt-BR"
           dateFormat="dd/MM/yyyy"
           excludeDateIntervals={intervalosParaBloquear}
-          dayClassName={obterClasseStatusDia} 
+          dayClassName={obterClasseStatusDia}
         />
       </div>
 

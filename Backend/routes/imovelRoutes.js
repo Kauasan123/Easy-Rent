@@ -7,5 +7,6 @@ router.post('/imoveis', uploadImovel.array('imagens', 10), imovelController.cria
 router.get('/imoveis', imovelController.listarImoveis);
 router.put('/imoveis/:id', uploadImovel.array('imagens', 10), imovelController.atualizarImovel);
 router.get('/imoveis/:id', imovelController.buscarImovelPorId);
+router.delete('/imoveis/imagens/:id', imovelController.deletarImagem);
 
 module.exports = router;

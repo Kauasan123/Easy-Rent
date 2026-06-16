@@ -46,7 +46,7 @@ function MeusAlugueis() {
     };
 
     return (
-        <div className="px-12 py-10 flex flex-col gap-6 w-full max-w-[1440px] mx-auto">
+        <div className="px-12 py-10 flex flex-col gap-6 w-full mx-auto">
             {/* Título da Aba */}
             <div>
                 <h1 className="text-preto-texto-principal text-3xl font-bold">Meus Alugueis</h1>

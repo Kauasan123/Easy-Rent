@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Icons from '../icons/icons.js';
+import Calendario from '../components/Calendario.jsx';
 
 export function ModalDetalhes({ imovel, onClose }) {
   if (!imovel) return null;
@@ -13,6 +14,13 @@ export function ModalDetalhes({ imovel, onClose }) {
   const [comentario, setComentario] = React.useState('');
   const [enviandoAvaliacao, setEnviandoAvaliacao] = React.useState(false);
   const [erroAvaliacao, setErroAvaliacao] = React.useState('');
+  const [checkIn, setCheckIn] = React.useState(null);
+  const [checkOut, setCheckOut] = React.useState(null);
+  const [calendarioAberto, setCalendarioAberto] = React.useState(null);
+  const [enviandoReserva, setEnviandoReserva] = React.useState(false);
+  const [erroReserva, setErroReserva] = React.useState('');
+  const [sucessoReserva, setSucessoReserva] = React.useState(false);
+  const [periodoSelecionado, setPeriodoSelecionado] = React.useState(null);
 
   const usuarioId = localStorage.getItem('usuarioId');
 
@@ -104,6 +112,93 @@ export function ModalDetalhes({ imovel, onClose }) {
     });
   };
 
+  const handleConfirmarReserva = async () => {
+    if (!checkIn || !checkOut) {
+      setErroReserva('Selecione as datas de check-in e check-out.');
+      return;
+    }
+    if (!usuarioId) {
+      setErroReserva('Você precisa estar logado para fazer uma reserva.');
+      return;
+    }
+    if (parseInt(usuarioId) === imovel.usuarioId) {
+      setErroReserva('Você não pode reservar seu próprio imóvel.');
+      return;
+    }
+    if (checkIn >= checkOut) {
+      setErroReserva('A data de check-out deve ser após o check-in.');
+      return;
+    }
+
+    // Valida se as datas estão dentro de um período disponível
+    const dentroDeUmPeriodo = imovel.periodos?.some(p => {
+      const inicio = new Date(p.inicio);
+      const fim = new Date(p.fim);
+      return checkIn >= inicio && checkOut <= fim;
+    });
+
+    if (!dentroDeUmPeriodo) {
+      setErroReserva('As datas selecionadas não estão dentro de um período disponível do imóvel.');
+      return;
+    }
+
+    try {
+      setEnviandoReserva(true);
+      setErroReserva('');
+
+      const response = await fetch('http://localhost:5000/api/reservas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inicio: checkIn.toISOString(),
+          fim: checkOut.toISOString(),
+          imovelId: imovel.id,
+          hospedeId: usuarioId
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSucessoReserva(true);
+        setCheckIn(null);
+        setCheckOut(null);
+      } else {
+        setErroReserva(data.erro || 'Erro ao criar reserva.');
+      }
+    } catch (error) {
+      setErroReserva('Erro ao conectar com o servidor.');
+    } finally {
+      setEnviandoReserva(false);
+    }
+  };
+
+  // Calcula total de dias e preço
+  const calcularDias = () => {
+    if (!checkIn || !checkOut) return 0;
+    const diff = checkOut.getTime() - checkIn.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const calcularTotal = () => {
+    return (calcularDias() * parseFloat(imovel.preco)).toFixed(2);
+  };
+
+  // Verifica se uma data está dentro dos períodos disponíveis
+  const dataDisponivel = (data) => {
+    if (!imovel.periodos || imovel.periodos.length === 0) return true;
+    return imovel.periodos.some(p => {
+      const inicio = new Date(p.inicio);
+      const fim = new Date(p.fim);
+      return data >= inicio && data <= fim;
+    });
+  };
+
+  const formatarData = (data) => {
+    if (!data) return null;
+    return data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-preto-principal/60 backdrop-blur-sm p-4 overflow-hidden">
       <div className="bg-white w-full max-w-[1150px] h-[95vh] rounded-3xl relative overflow-y-auto p-6 md:p-10 shadow-2xl">
@@ -173,32 +268,143 @@ export function ModalDetalhes({ imovel, onClose }) {
                 <span className="text-2xl font-bold">R$ {imovel.preco}</span>
                 <span className="text-cinza-texto-secundario text-sm">/ {imovel.tipoCobranca === 'mes' ? 'Mês' : 'Noite'}</span>
               </div>
-              <div className="grid grid-cols-2 border border-borda-cards rounded-xl overflow-hidden">
-                <div className="p-3 border-r border-borda-cards flex flex-col bg-white cursor-pointer">
-                  <span className="text-[10px] font-bold uppercase text-preto-texto-principal">Check-in</span>
-                  <span className="text-cinza-texto-secundario text-[11px] flex items-center gap-1 mt-1 font-medium">
-                    <Icons.FaCalendarAlt size={12} /> Adicionar Data
-                  </span>
+
+              {/* Check-in e Check-out */}
+              <div className="relative">
+                <div className="grid grid-cols-2 border border-borda-cards rounded-xl overflow-hidden">
+                  <div
+                    onClick={() => setCalendarioAberto(calendarioAberto === 'checkin' ? null : 'checkin')}
+                    className="p-3 border-r border-borda-cards flex flex-col bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-[10px] font-bold uppercase text-preto-texto-principal">Check-in</span>
+                    <span className="text-[11px] flex items-center gap-1 mt-1 font-medium text-cinza-texto-secundario">
+                      <Icons.FaCalendarAlt size={12} />
+                      {checkIn ? formatarData(checkIn) : 'Adicionar Data'}
+                    </span>
+                  </div>
+                  <div
+                    onClick={() => setCalendarioAberto(calendarioAberto === 'checkout' ? null : 'checkout')}
+                    className="p-3 flex flex-col bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-[10px] font-bold uppercase text-preto-texto-principal">Check-out</span>
+                    <span className="text-[11px] flex items-center gap-1 mt-1 font-medium text-cinza-texto-secundario">
+                      <Icons.FaCalendarAlt size={12} />
+                      {checkOut ? formatarData(checkOut) : 'Adicionar Data'}
+                    </span>
+                  </div>
                 </div>
-                <div className="p-3 flex flex-col bg-white cursor-pointer">
-                  <span className="text-[10px] font-bold uppercase text-preto-texto-principal">Check-out</span>
-                  <span className="text-cinza-texto-secundario text-[11px] flex items-center gap-1 mt-1 font-medium">
-                    <Icons.FaCalendarAlt size={12} /> Adicionar Data
-                  </span>
-                </div>
+
+                {/* Mini calendário */}
+                {calendarioAberto && (
+                  <div className="absolute z-50 top-full left-0 mt-2 bg-white border border-borda-cards rounded-2xl shadow-2xl p-4 w-full">
+                    <p className="text-xs font-bold text-cinza-texto-secundario mb-3 uppercase">
+                      Selecione um período disponível
+                    </p>
+
+                    {/* Períodos disponíveis */}
+                    {imovel.periodos && imovel.periodos.length > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        {imovel.periodos.map((p, i) => {
+                          const inicio = new Date(p.inicio);
+                          const fim = new Date(p.fim);
+                          const selecionado = periodoSelecionado?.inicio?.getTime() === inicio.getTime();
+
+                          return (
+                            <div key={i} className="flex flex-col gap-2">
+                              <button type="button" onClick={() => {
+                                  setPeriodoSelecionado({ inicio, fim });
+                                  setCheckIn(null);
+                                  setCheckOut(null);
+                                }}
+                                className={`text-left px-3 py-2 border rounded-xl text-xs font-semibold transition-all ${selecionado ? 'bg-beje-principal text-white border-beje-principal' : 'border-borda-cards text-preto-texto-principal hover:bg-beje-principal hover:text-white hover:border-beje-principal'}`}
+                              >
+                                {inicio.toLocaleDateString('pt-BR')} → {fim.toLocaleDateString('pt-BR')}
+                              </button>
+
+                              {/* Inputs de data aparecem ao selecionar o período */}
+                              {selecionado && (
+                                <div className="flex flex-col gap-2 p-3 bg-fundo-cards border border-borda-cards rounded-xl">
+                                  <Calendario
+                                    startDate={checkIn}
+                                    endDate={checkOut}
+                                    setStartDate={setCheckIn}
+                                    setEndDate={setCheckOut}
+                                    minDate={inicio}
+                                    maxDate={fim}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setCalendarioAberto(null)}
+                                    disabled={!checkIn || !checkOut}
+                                    className="w-full mt-1 bg-preto-texto-principal hover:bg-zinc-800 disabled:opacity-50 text-white py-2 rounded-lg text-xs font-bold transition-colors"
+                                  >
+                                    Confirmar datas
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-cinza-texto-secundario italic">Nenhum período disponível.</p>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => { setCalendarioAberto(null); setPeriodoSelecionado(null); }}
+                      className="w-full mt-3 text-xs text-cinza-texto-secundario hover:text-preto-texto-principal font-semibold transition-colors"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="border border-borda-cards rounded-xl p-3 flex flex-col bg-white cursor-pointer">
-                <span className="text-[10px] font-bold uppercase text-preto-texto-principal">Hóspede</span>
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-sm font-medium">2 Hóspedes</span>
-                  <Icons.IoIosArrowDown size={14} />
+
+              {/* Resumo do preço */}
+              {checkIn && checkOut && calcularDias() > 0 && (
+                <div className="bg-white border border-borda-cards rounded-xl p-3 flex flex-col gap-1">
+                  <div className="flex justify-between text-xs font-semibold text-cinza-texto-secundario">
+                    <span>R$ {imovel.preco} × {calcularDias()} {imovel.tipoCobranca === 'mes' ? 'meses' : 'noites'}</span>
+                    <span>R$ {calcularTotal()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold text-preto-texto-principal border-t border-borda-cards pt-2 mt-1">
+                    <span>Total</span>
+                    <span>R$ {calcularTotal()}</span>
+                  </div>
                 </div>
-              </div>
-              <button className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20">
-                Enviar disponibilidade
-              </button>
+              )}
+
+              {/* Erro */}
+              {erroReserva && (
+                <p className="text-xs text-red-500 font-semibold">{erroReserva}</p>
+              )}
+
+              {/* Sucesso */}
+              {sucessoReserva ? (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                  <p className="text-emerald-700 font-bold text-sm">Reserva enviada com sucesso!</p>
+                  <p className="text-emerald-600 text-xs mt-1">Aguarde a confirmação do anfitrião.</p>
+                  <button
+                    onClick={() => setSucessoReserva(false)}
+                    className="mt-2 text-xs text-emerald-700 font-bold hover:underline"
+                  >
+                    Fazer outra reserva
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleConfirmarReserva}
+                  disabled={enviandoReserva || !checkIn || !checkOut}
+                  className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {enviandoReserva ? 'Enviando...' : checkIn && checkOut ? 'Confirmar Reserva' : 'Enviar disponibilidade'}
+                </button>
+              )}
+
               <p className="text-center text-[11px] text-cinza-texto-secundario font-medium">Você ainda não será cobrado</p>
 
+              {/* Anfitrião */}
               <div className="mt-2 p-4 border border-borda-cards rounded-2xl flex flex-col gap-3 bg-white">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-sm">
@@ -223,6 +429,7 @@ export function ModalDetalhes({ imovel, onClose }) {
               </div>
             </div>
 
+            {/* Localização */}
             <div className="border border-borda-cards rounded-3xl p-6 bg-fundo-cards flex flex-col gap-2">
               <h3 className="font-bold text-preto-texto-principal text-lg">Localização</h3>
               <div className="flex flex-col gap-1">

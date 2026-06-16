@@ -56,7 +56,7 @@ export default function Principal() {
   const [imoveis, setImoveis] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  const itensPorPagina = 12;
+  const itensPorPagina = 15;
 
   // Estados para filtros
   const [tiposImovel, setTiposImovel] = useState([]);
@@ -191,7 +191,7 @@ export default function Principal() {
           <section className="container-principal flex w-full max-w-[1440px] 2xl:max-w-[1700px] mx-auto gap-6 p-6">
 
             {/* Filtro */}
-            <aside className="w-[300px] border border-borda-cards rounded-2xl p-4 bg-fundo-cards flex flex-col gap-4">
+            <aside className="w-[300px] border border-borda-cards rounded-2xl p-4 bg-fundo-cards flex flex-col gap-4 self-start">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-xl font-bold">Filtro</h2>
               </div>
@@ -378,7 +378,7 @@ export default function Principal() {
                   <p className="text-cinza-texto-secundario font-semibold">Nenhum imóvel encontrado.</p>
                 </div>
               ) : (
-                <article className="grid-de-imoveis grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-3 2xl:gap-x-6 gap-y-10">
+                <article className="grid-de-imoveis grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-3 2xl:gap-x-6 gap-y-10">
                   {imoveisExibidos.map((imovel) => (
                     <div key={imovel.id} onClick={() => setImovelSelecionado(imovel)} className="cursor-pointer">
                       <CardsImoveis

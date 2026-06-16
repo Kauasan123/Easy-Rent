@@ -196,6 +196,23 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
         return null;
     };
 
+    const handleRemoverImagem = async (index) => {
+        if (novasImagens[index - imagensSalvas.length] !== undefined) {
+            const slotNova = index - imagensSalvas.length;
+            setNovasImagens(prev => prev.filter((_, i) => i !== slotNova));
+        } else if (imagensSalvas[index]) {
+            const imagem = imagensSalvas[index];
+            try {
+                await fetch(`http://localhost:5000/api/imoveis/imagens/${imagem.id}`, {
+                    method: 'DELETE'
+                });
+                setImagensSalvas(prev => prev.filter((_, i) => i !== index));
+            } catch (error) {
+                console.error("Erro ao deletar imagem:", error);
+            }
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -611,13 +628,11 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
                                                         {urlImagem ? (
                                                             <>
                                                                 <img src={urlImagem} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                                                                <button type="button" onClick={() => {
-                                                                    if (novasImagens[index]) {
-                                                                        setNovasImagens(prev => prev.filter((_, i) => i !== index));
-                                                                    } else if (imagensSalvas[index]) {
-                                                                        setImagensSalvas(prev => prev.filter((_, i) => i !== index));
-                                                                    }
-                                                                }} className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-500 hover:text-red-600 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoverImagem(index)}
+                                                                    className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-500 hover:text-red-600 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all"
+                                                                >
                                                                     <Icons.FaTrashAlt size={12} />
                                                                 </button>
                                                             </>

@@ -151,9 +151,30 @@ const buscarImovelPorId = async (req, res) => {
   }
 };
 
+const deletarImagem = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const imagem = await prisma.imagem.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!imagem) return res.status(404).json({ erro: "Imagem não encontrada" });
+
+    await prisma.imagem.delete({
+      where: { id: parseInt(id) }
+    });
+
+    return res.json({ mensagem: "Imagem deletada com sucesso!" });
+  } catch (error) {
+    return res.status(500).json({ erro: "Erro ao deletar imagem", detalhes: error.message });
+  }
+};
+
 module.exports = {
   criarImovel,
   listarImoveis,
   atualizarImovel,
-  buscarImovelPorId
+  buscarImovelPorId,
+  deletarImagem
 };
