@@ -120,9 +120,10 @@ const atualizarImovel = async (req, res) => {
           }
         })
       },
-      include: { 
-        imagens: true, 
-        periodos: true }
+      include: {
+        imagens: true,
+        periodos: true
+      }
     });
 
     return res.json({ mensagem: "Imóvel atualizado com sucesso!", imovel: imovelAtualizado });
@@ -137,10 +138,11 @@ const buscarImovelPorId = async (req, res) => {
     const { id } = req.params;
     const imovel = await prisma.imovel.findUnique({
       where: { id: parseInt(id) },
-      include: { 
-        imagens: true, 
-        periodos: true, 
-        usuario: true }
+      include: {
+        imagens: true,
+        periodos: true,
+        usuario: true
+      }
     });
 
     if (!imovel) return res.status(404).json({ erro: "Imóvel não encontrado" });
@@ -171,10 +173,31 @@ const deletarImagem = async (req, res) => {
   }
 };
 
+const deletarImovel = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const imovel = await prisma.imovel.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!imovel) return res.status(404).json({ erro: "Imóvel não encontrado" });
+
+    await prisma.imovel.delete({
+      where: { id: parseInt(id) }
+    });
+
+    return res.json({ mensagem: "Imóvel deletado com sucesso!" });
+  } catch (error) {
+    return res.status(500).json({ erro: "Erro ao deletar imóvel", detalhes: error.message });
+  }
+};
+
 module.exports = {
   criarImovel,
   listarImoveis,
   atualizarImovel,
   buscarImovelPorId,
-  deletarImagem
+  deletarImagem,
+  deletarImovel
 };

@@ -4,6 +4,7 @@ import * as Icons from '../icons/icons'
 import CheckBox from '../components/CheckBox.jsx';
 import Stepper from '../components/Stepper.jsx';
 import Calendario from '../components/Calendario.jsx';
+import toast from 'react-hot-toast';
 
 function CadastrarAluguel() {
     const navigate = useNavigate();
@@ -62,6 +63,45 @@ function CadastrarAluguel() {
     const [imagens, setImagens] = useState([]);
     const [carregando, setCarregando] = useState(false);
     const [urlsImagens, setUrlsImagens] = useState([]);
+
+    const preencherAutomatico = () => {
+        setTitulo('Casa de Praia Vista Mar');
+        setTipoImovel('casa');
+        setDescricao('Casa espaçosa com vista incrível para o mar, totalmente equipada e ideal para famílias. Ambiente tranquilo, perfeito para relaxar durante as férias.');
+        setCidade('Pelotas');
+        setBairro('Laranjal');
+        setEndereco('Av. Praia, 456');
+        setCep('96015-200');
+        setPreco('320');
+        setTipoPreco('noite');
+        setCapacidade('3+ Pessoas');
+        setComodidades({
+            hasWifi: true,
+            hasMaquinaLavar: true,
+            hasArCondicionado: true,
+            hasChurrascaria: true,
+            hasEstacionamento: true,
+            hasElevador: false,
+            hasPiscina: true,
+            hasPortaria24h: false,
+            hasTv: true
+        });
+        setProximoCentro(true);
+        setProximoPraia(true);
+        setQuartos(3);
+        setBanheiros(2);
+        setVagas(2);
+        setRegras({
+            aceitaPets: true,
+            permiteFestas: false,
+            acessibilidade: false,
+            naoFumante: true
+        });
+        setPeriodosDisponiveis([
+            { id: Date.now(), inicio: '2026-07-10', fim: '2026-07-25' },
+            { id: Date.now() + 1, inicio: '2026-08-05', fim: '2026-08-20' }
+        ]);
+    };
 
     // Handlers
     const handleFileChange = (e) => {
@@ -146,14 +186,14 @@ function CadastrarAluguel() {
             const data = await response.json();
 
             if (response.ok) {
-                alert('Imóvel anunciado com sucesso!');
+                toast.success('Imóvel anunciado com sucesso!');
                 navigate('/aluguel');
             } else {
-                alert(`Erro: ${data.erro || 'Falha ao cadastrar imóvel'}`);
+                toast.error(`Erro: ${data.erro || 'Falha ao cadastrar imóvel'}`);
             }
         } catch (error) {
             console.error("Erro ao enviar formulário:", error);
-            alert("Erro de conexão com o servidor.");
+            toast.error("Erro de conexão com o servidor.");
         } finally {
             setCarregando(false);
         }
@@ -162,7 +202,9 @@ function CadastrarAluguel() {
     return (
         <form onSubmit={handleSubmit} className="px-12 py-10 flex flex-col gap-8">
             <div>
-                <h1 className='text-preto-texto-principal text-3xl font-bold'>Cadastro de Aluguel</h1>
+                <h1 onClick={preencherAutomatico} className='text-preto-texto-principal text-3xl font-bold cursor-pointer hover:text-beje-principal transition-colors' title="Clique para preencher automaticamente">
+                    Cadastro de Aluguel
+                </h1>
                 <p className='text-cinza-texto-secundario'>Aba para Cadastrar novos Alugueis</p>
             </div>
 

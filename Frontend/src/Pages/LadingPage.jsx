@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom';
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import imagemHero from '../assets/Lading-page/hero-imagem.png'
 import imagemComoFunciona from '../assets/Lading-page/como-funciona-imagem.png'
 import imagemComoFunciona2 from '../assets/Lading-page/como-funciona-imagem2.png'
+import HeaderLogado from '../components/HeaderLogado.jsx'
 import { fotosPerfis } from '../assets/Lading-page/Foto-perfis/perfis.js';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
@@ -25,6 +27,19 @@ const depoimentos = [
 function App() {
   const [count, setCount] = useState(0)
 
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const element = document.getElementById(hash.replace('#', ''));
+      
+      setTimeout(() => {
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [hash]);
+
   return (
     <>
       <header>
@@ -32,7 +47,7 @@ function App() {
       </header>
       
       {/* Hero */}
-      <section className='grid grid-cols-[520px_560px] justify-center items-center mx-auto pt-20 pb-15 px-10 gap-10 lg:gap-20 xl:gap-32 2xl:gap-58'>
+      <section id="Sobre" className='grid grid-cols-[520px_560px] justify-center items-center mx-auto pt-20 pb-15 px-10 gap-10 lg:gap-20 xl:gap-32 2xl:gap-58'>
         <div className='flex flex-col items-start gap-6 max-w-130'>
           <div className='text-5xl font-bold text-preto-texto-principal leading-[1.1]'>
             <h1>
@@ -97,7 +112,7 @@ function App() {
       </section>
 
       {/* Seção como Funciona Alugar - How it Works */}
-      <section className='grid grid-cols-[520px_560px] justify-center items-center mx-auto pt-20 pb-15 px-10 gap-10 lg:gap-20 xl:gap-32 2xl:gap-58'>
+      <section id="Alugar" className='grid grid-cols-[520px_560px] justify-center items-center mx-auto pt-20 pb-15 px-10 gap-10 lg:gap-20 xl:gap-32 2xl:gap-58'>
 
         <div className='flex flex-col items-start gap-6 max-w-130'>
           <div className='text-preto-texto-principal text-5xl font-bold leading-[1.1]'>
@@ -150,7 +165,7 @@ function App() {
       </section>
 
       {/* Seção como Funciona Anuncio - How it Works */}
-      <section className='grid grid-cols-[520px_560px] justify-center items-center mx-auto pt-20 pb-15 px-10 gap-10 lg:gap-20 xl:gap-32 2xl:gap-58'>
+      <section id="Anunciar" className='grid grid-cols-[520px_560px] justify-center items-center mx-auto pt-20 pb-15 px-10 gap-10 lg:gap-20 xl:gap-32 2xl:gap-58'>
         <div className='flex justify-end'>
           <img src={imagemComoFunciona2} alt="Interior moderno" className='w-560 h-640 object-cover rounded-[2.5rem] shadow-sm' />
         </div>

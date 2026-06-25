@@ -5,6 +5,7 @@ import Stepper from '../components/Stepper.jsx';
 import Calendario from '../components/Calendario.jsx';
 import { MdImage } from 'react-icons/md';
 import { MdCloudUpload } from 'react-icons/md';
+import toast from 'react-hot-toast';
 
 function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
     const [passoAtual, setPassoAtual] = useState(1);
@@ -246,16 +247,16 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
             });
 
             if (response.ok) {
-                alert("Imóvel atualizado com sucesso!");
+                toast.success("Imóvel atualizado com sucesso!");
                 if (onUpdateSuccess) onUpdateSuccess();
                 onClose();
             } else {
                 const errorData = await response.json();
-                alert(`Erro ao atualizar o imóvel: ${errorData.message || 'Erro desconhecido'}`);
+                toast.error(`Erro ao atualizar o imóvel: ${errorData.message || 'Erro desconhecido'}`);
             }
         } catch (error) {
             console.error("Erro na requisição:", error);
-            alert("Erro ao conectar com o servidor");
+            toast.error("Erro ao conectar com o servidor");
         } finally {
             setCarregando(false);
         }

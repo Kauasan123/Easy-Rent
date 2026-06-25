@@ -8,5 +8,6 @@ router.get('/imoveis', imovelController.listarImoveis);
 router.put('/imoveis/:id', uploadImovel.array('imagens', 10), imovelController.atualizarImovel);
 router.get('/imoveis/:id', imovelController.buscarImovelPorId);
 router.delete('/imoveis/imagens/:id', imovelController.deletarImagem);
+router.delete('/imoveis/:id', imovelController.deletarImovel);
 
 module.exports = router;

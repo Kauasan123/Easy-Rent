@@ -11,6 +11,7 @@ import Perfil from './Pages/Perfil'
 import MeusAlugueis from './Pages/MeusAlugueis';
 import ControleGeral from './Pages/ControleGeral';
 import CadastrarAluguel from './Pages/CadastrarAluguel';
+import ToasterConfig from './components/ToasterConfig.jsx';
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

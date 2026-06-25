@@ -19,6 +19,13 @@ function TelaRegistro() {
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
 
+    const preencherAutomatico = () => {
+        setNome('Eduardo');
+        setEmail(`teste@gmail.com`);
+        setSenha('123456');
+        setConfirmarSenha('123456');
+    };
+
     const handleRegistro = async (e) => {
         e.preventDefault();
         setErro('');
@@ -87,11 +94,13 @@ function TelaRegistro() {
 
                 <main className="relative z-20 bg-white p-10 shadow-2xl w-[90%] max-w-md rounded-xl">
                     <h2 className="text-2xl font-bold text-center mb-8 text-preto-principal">
-                        Faça <span className="text-beje-principal">Registro</span> da sua conta
+                        Faça{' '} <span onClick={preencherAutomatico} className="text-beje-principal cursor-pointer" title="Clique para preencher automaticamente">
+                            Registro
+                        </span>
+                        {' '}da sua conta
                     </h2>
-                    
                     <form onSubmit={handleRegistro} className="flex flex-col gap-5">
-                        
+
                         {erro && (
                             <div className="bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-lg border border-red-200">
                                 {erro}
@@ -106,13 +115,13 @@ function TelaRegistro() {
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-cinza-texto-secundario ml-1">Nome</label>
                             <div className="flex items-center border border-borda-preta-opaca rounded-lg px-3 py-2.5 focus-within:border-beje-principal transition-all bg-white text-preto-principal">
-                                <input 
-                                    type="text" 
-                                    placeholder="Seu Nome Completo" 
+                                <input
+                                    type="text"
+                                    placeholder="Seu Nome Completo"
                                     value={nome}
                                     onChange={(e) => setNome(e.target.value)}
                                     required
-                                    className="w-full outline-none text-sm bg-transparent" 
+                                    className="w-full outline-none text-sm bg-transparent"
                                 />
                             </div>
                         </div>
@@ -120,13 +129,13 @@ function TelaRegistro() {
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-cinza-texto-secundario ml-1">Email</label>
                             <div className="flex items-center border border-borda-preta-opaca rounded-lg px-3 py-2.5 focus-within:border-beje-principal transition-all bg-white text-preto-principal">
-                                <input 
-                                    type="email" 
-                                    placeholder="exemplo@gmail.com" 
+                                <input
+                                    type="email"
+                                    placeholder="exemplo@gmail.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="w-full outline-none text-sm bg-transparent" 
+                                    className="w-full outline-none text-sm bg-transparent"
                                 />
                             </div>
                         </div>
@@ -134,13 +143,13 @@ function TelaRegistro() {
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-cinza-texto-secundario ml-1">Senha</label>
                             <div className="flex items-center border border-borda-preta-opaca rounded-lg px-3 py-2.5 focus-within:border-beje-principal transition-all bg-white text-preto-principal">
-                                <input 
-                                    type={mostrarSenha ? "text" : "password"} 
-                                    placeholder="Coloque sua Senha" 
+                                <input
+                                    type={mostrarSenha ? "text" : "password"}
+                                    placeholder="Coloque sua Senha"
                                     value={senha}
                                     onChange={(e) => setSenha(e.target.value)}
                                     required
-                                    className="w-full outline-none text-sm bg-transparent" 
+                                    className="w-full outline-none text-sm bg-transparent"
                                 />
                                 <div onClick={() => setMostrarSenha(!mostrarSenha)} className="cursor-pointer text-cinza-texto-secundario hover:text-beje-principal transition-colors">
                                     {mostrarSenha ? <Icons.FiEyeOff size={22} /> : <Icons.FiEye size={22} />}
@@ -151,13 +160,13 @@ function TelaRegistro() {
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-cinza-texto-secundario ml-1">Confirmar Senha</label>
                             <div className="flex items-center border border-borda-preta-opaca rounded-lg px-3 py-2.5 focus-within:border-beje-principal transition-all bg-white text-preto-principal">
-                                <input 
-                                    type={mostrarConfirmarSenha ? "text" : "password"} 
-                                    placeholder="Confirme sua Senha" 
+                                <input
+                                    type={mostrarConfirmarSenha ? "text" : "password"}
+                                    placeholder="Confirme sua Senha"
                                     value={confirmarSenha}
                                     onChange={(e) => setConfirmarSenha(e.target.value)}
                                     required
-                                    className="w-full outline-none text-sm bg-transparent" 
+                                    className="w-full outline-none text-sm bg-transparent"
                                 />
                                 <div onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)} className="cursor-pointer text-cinza-texto-secundario hover:text-beje-principal transition-colors">
                                     {mostrarConfirmarSenha ? <Icons.FiEyeOff size={22} /> : <Icons.FiEye size={22} />}

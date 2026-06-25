@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react'; // Importado o useEffect
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import CardsImoveis from '../components/CardsImoveis.jsx';
 import ModalEditarAluguel from '../Pages/ModalEditarAluguel.jsx';
 import Hero from '../assets/TelaPrincipal/MiniHero.jpg';
+import * as Icons from '../icons/icons.js';
+import toast from 'react-hot-toast';
+import ModalConfirmacao from '../components/ModalConfirmacao.jsx';
 
 function MeusAlugueis() {
     const navigate = useNavigate();
@@ -12,6 +15,36 @@ function MeusAlugueis() {
 
     const [imoveis, setImoveis] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [modalConfirmacaoAberto, setModalConfirmacaoAberto] = useState(false);
+    const [imovelParaExcluir, setImovelParaExcluir] = useState(null);  
+
+    const handleExcluirImovel = (id, e) => {
+        e.stopPropagation();
+        setImovelParaExcluir(id);
+        setModalConfirmacaoAberto(true);
+    };
+
+    const confirmarExclusao = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/imoveis/${imovelParaExcluir}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                toast.success('Imóvel excluído com sucesso!');
+                carregarImoveis();
+            } else {
+                toast.error('Erro ao excluir o imóvel.');
+            }
+        } catch (error) {
+            console.error("Erro ao excluir imóvel:", error);
+            toast.error('Erro ao conectar com o servidor.');
+        } finally {
+            setModalConfirmacaoAberto(false);
+            setImovelParaExcluir(null);
+        }
+    };
 
     const carregarImoveis = async () => {
         try {
@@ -62,12 +95,19 @@ function MeusAlugueis() {
                 ) : (
                     <>
                         {imoveis.map((imovel) => (
-                            <div key={imovel.id || imovel._id} className="w-full max-w-[280px] 2xl:max-w-[300px]">
+                            <div key={imovel.id || imovel._id} className="relative group w-full max-w-[280px] 2xl:max-w-[300px]">
                                 <CardsImoveis
                                     imovel={imovel}
                                     isGerenciamento={true}
                                     onEdit={handleAbrirEdicao}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={(e) => handleExcluirImovel(imovel.id, e)}
+                                    className="absolute top-3 right-3 bg-white hover:bg-white text-red-500 hover:text-red-600 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all z-10"
+                                >
+                                    <Icons.FaTrashAlt size={14} />
+                                </button>
                             </div>
                         ))}
                     </>
@@ -93,6 +133,13 @@ function MeusAlugueis() {
                 onUpdateSuccess={carregarImoveis}
             />
 
+            <ModalConfirmacao
+                isOpen={modalConfirmacaoAberto}
+                onClose={() => setModalConfirmacaoAberto(false)}
+                onConfirm={confirmarExclusao}
+                titulo="Excluir Imóvel"
+                mensagem="Tem certeza que deseja excluir este imóvel? Essa ação não pode ser desfeita."
+            />
         </div>
     );
 }

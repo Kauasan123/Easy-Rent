@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import * as Icons from '../icons/icons'
+import Logo from '../assets/ImagensExtras/LogoEasy-rent.png'
 
 function Footer() {
     return (
         <>
-            <footer className="w-full bg-white border-t border-preto-principal font-sans">
+            <footer id="Contatos" className="w-full bg-white border-t border-preto-principal font-sans">
                 <div className="max-w-1200 mx-auto py-12 px-6 flex flex-col md:flex-row justify-between items-center gap-10">
-                    <div className="text-4xl font-bold text-black">
-                        Logo
-                    </div>
+                    <img className='pl-4 h-20' src={Logo} alt="Logo de EasyRent" />
                     <div className="flex flex-col gap-y-4 mr-40">
                         <div className="flex items-center gap-3">
                             <Icons.FaLocationDot className="text-black" size={24} />

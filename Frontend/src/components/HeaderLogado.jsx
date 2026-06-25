@@ -1,27 +1,35 @@
 import { useState } from 'react'
 import * as Icons from '../icons/icons'
+import Logo from '../assets/ImagensExtras/LogoEasy-rent.png'
+import { Link } from 'react-router-dom';
 
 const HeaderLogado = () => {
     const usuarioNome = localStorage.getItem('usuarioNome') || 'Usuário';
     const usuarioAvatar = localStorage.getItem('usuarioAvatar');
 
     const [avatarErro, setAvatarErro] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
         <>
             <div className='pb-3 pt-3 flex flex-row items-center justify-between border-b border-preto-principal text-preto-texto-principal mx-10'>
-                {/* Logo */}
-                <h1 className='pl-15 text-3xl font-bold'>Logo</h1>
-
+                <img className='pl-4 h-20' src={Logo} alt="Logo de EasyRent" />
                 <div className='flex flex-row items-center gap-11.5'>
-                    {/* Navegação */}
-                    <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal'>
-                        <a href="#">Home</a>
-                        <a href="#">Sobre</a>
-                        <a href="#" className='flex items-center gap-0.5'>
-                            Serviços <Icons.LuChevronDown size={16} />
-                        </a>
-                        <a href="#">Contatos</a>
+                    <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal '>
+                        <Link to="/" className='hover:text-beje-principal transition-colors'>Home</Link>
+                        <Link to="/#Sobre" className='hover:text-beje-principal transition-colors'>Sobre</Link>
+                        <div className='relative'>
+                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className='flex items-center gap-0.5 hover:text-beje-principal transition-colors'>
+                                Serviços <Icons.LuChevronDown size={16} className={`transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            {isMenuOpen && (
+                                <div className='absolute top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50'>
+                                    <Link to="/#Alugar" className='block px-4 py-2 hover:bg-gray-100'>Alugar um imóvel</Link>
+                                    <Link to="/#Anunciar" className='block px-4 py-2 hover:bg-gray-100'>Anunciar imóvel</Link>
+                                </div>
+                            )}
+                        </div>
+                        <Link to="#Contatos" className='hover:text-beje-principal transition-colors'>Contatos</Link>
                     </div>
 
                     {/* Usuário Logado */}
