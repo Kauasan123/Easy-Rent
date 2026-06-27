@@ -142,6 +142,14 @@ function CadastrarAluguel() {
         e.preventDefault();
         setCarregando(true);
 
+        const usuarioId = localStorage.getItem('usuarioId');
+
+        if (!usuarioId) {
+            toast.error('Você precisa estar logado para cadastrar um imóvel.');
+            setCarregando(false);
+            return;
+        }
+
         try {
             const formData = new FormData();
 
@@ -159,7 +167,7 @@ function CadastrarAluguel() {
             formData.append('quartos', quartos);
             formData.append('banheiros', banheiros);
             formData.append('vagas', vagas);
-            formData.append('usuarioId', 1);
+            formData.append('usuarioId', usuarioId);
 
             formData.append('proximoCentro', proximoCentro);
             formData.append('proximoPraia', proximoPraia);
