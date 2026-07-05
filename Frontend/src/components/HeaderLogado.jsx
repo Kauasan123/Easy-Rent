@@ -12,10 +12,11 @@ const HeaderLogado = () => {
 
     return (
         <>
-            <div className='pb-3 pt-3 flex flex-row items-center justify-between border-b border-preto-principal text-preto-texto-principal mx-10'>
-                <img className='pl-4 h-20' src={Logo} alt="Logo de EasyRent" />
-                <div className='flex flex-row items-center gap-11.5'>
-                    <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal '>
+            <div className='pb-3 pt-3 flex flex-row items-center justify-between border-b border-preto-principal text-preto-texto-principal px-10'>
+                <img className='h-20' src={Logo} alt="Logo de EasyRent" />
+
+                <div className='flex flex-row items-center gap-10'>
+                    <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal'>
                         <Link to="/" className='hover:text-beje-principal transition-colors'>Home</Link>
                         <Link to="/#Sobre" className='hover:text-beje-principal transition-colors'>Sobre</Link>
                         <div className='relative'>
@@ -33,10 +34,9 @@ const HeaderLogado = () => {
                     </div>
 
                     {/* Usuário Logado */}
-                    <div className='flex items-center gap-3 pr-15'>
-                        {/* Avatar */}
+                    <div className='flex items-center gap-3'>
                         <div className='w-10 h-10 rounded-full overflow-hidden border-2 border-beje-principal shrink-0'>
-                            {usuarioAvatar ? (
+                            {usuarioAvatar && !avatarErro ? (
                                 <img
                                     src={`http://localhost:5000${usuarioAvatar}`}
                                     alt={usuarioNome}
@@ -50,7 +50,6 @@ const HeaderLogado = () => {
                             )}
                         </div>
 
-                        {/* Nome e Link de Perfil */}
                         <div className='flex flex-col leading-tight'>
                             <span className='font-bold text-sm text-preto-texto-principal'>
                                 {usuarioNome}
@@ -61,7 +60,7 @@ const HeaderLogado = () => {
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
         </>
     );
 };

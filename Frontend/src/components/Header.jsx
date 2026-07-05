@@ -8,11 +8,11 @@ function Header() {
 
     return (
         <>
-            <div className='pb-3 pt-3 flex flex-row items-center justify-between border-b border-preto-principal text-preto-texto-principal mx-10'>
-                <img className='pl-4 h-20' src={Logo} alt="Logo de EasyRent" />
+            <div className='pb-3 pt-3 flex flex-row items-center justify-between border-b border-preto-principal text-preto-texto-principal px-10'>
+                <img className='h-20' src={Logo} alt="Logo de EasyRent" />
 
-                <div className='flex flex-row items-center gap-8 pr-4'>
-                    <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal '>
+                <div className='flex flex-row items-center gap-8'>
+                    <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal'>
                         <Link to="/" className='hover:text-beje-principal transition-colors'>Home</Link>
                         <Link to="#Sobre" className='hover:text-beje-principal transition-colors'>Sobre</Link>
                         <div className='relative'>
@@ -30,10 +30,10 @@ function Header() {
                     </div>
 
                     <div className='flex items-center gap-5 font-medium text-[1.125rem]'>
-                        <a href="/login" className='hover:bg-botao-branco-apertado text-preto-texto-principal border border-preto-principal rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all '>
+                        <a href="/login" className='hover:bg-botao-branco-apertado text-preto-texto-principal border border-preto-principal rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all'>
                             Login
                         </a>
-                        <a href="/registro" className='border border-beje-principal text-branco-texto-principal bg-beje-principal hover:bg-botao-beje-apertado rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all '>
+                        <a href="/registro" className='border border-beje-principal text-branco-texto-principal bg-beje-principal hover:bg-botao-beje-apertado rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all'>
                             Registrar
                         </a>
                     </div>
