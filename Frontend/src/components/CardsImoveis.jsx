@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import * as Icons from '../icons/icons.js';
+import { Link } from 'react-router-dom';
 
 export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSelecionada = null, dataFim = null }) {
   const [fotoAtual, setFotoAtual] = useState(0);

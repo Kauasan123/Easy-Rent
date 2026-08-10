@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom';
 import HeaderLogado from '../components/HeaderLogado.jsx';
 import Footer from '../components/Footer.jsx';
 import CheckBox from '../components/CheckBox.jsx';
