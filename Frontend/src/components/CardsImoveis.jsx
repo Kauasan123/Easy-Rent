@@ -175,9 +175,9 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
               Editar
             </button>
           ) : (
-            <a href="#" className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-2 2xl:py-1.5 2xl:px-4 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
+            <Link to="#" className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-2 2xl:py-1.5 2xl:px-4 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
               Ver Detalhes
-            </a>
+            </Link>
           )}
         </div>
       </div>

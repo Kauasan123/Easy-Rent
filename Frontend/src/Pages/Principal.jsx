@@ -177,9 +177,9 @@ export default function Principal() {
                       </h2>
                     </div>
                     <div className='shrink-0'>
-                      <a href="/aluguel" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border-2 rounded-lg text-xl md:text-3xl py-4 px-10 cursor-pointer active:scale-95 transition-all whitespace-nowrap inline-block font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'>
+                      <Link to="/aluguel" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border-2 rounded-lg text-xl md:text-3xl py-4 px-10 cursor-pointer active:scale-95 transition-all whitespace-nowrap inline-block font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'>
                         Clique Aqui
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>

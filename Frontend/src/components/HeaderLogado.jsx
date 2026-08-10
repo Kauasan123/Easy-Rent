@@ -54,9 +54,9 @@ const HeaderLogado = () => {
                             <span className='font-bold text-sm text-preto-texto-principal'>
                                 {usuarioNome}
                             </span>
-                            <a href="/Perfil" className='text-xs text-beje-principal font-semibold hover:underline transition-all'>
+                            <Link to="/Perfil" className='text-xs text-beje-principal font-semibold hover:underline transition-all'>
                                 Ver Perfil
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
