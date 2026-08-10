@@ -51,7 +51,7 @@ function MeusAlugueis() {
             setLoading(true);
             const usuarioId = localStorage.getItem('usuarioId');
 
-            const response = await fetch('${import.meta.env.VITE_API_URL}/api/imoveis');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis`);
 
             if (!response.ok) throw new Error('Não foi possível carregar os imóveis.');
 

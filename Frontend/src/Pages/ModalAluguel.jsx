@@ -54,7 +54,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoAvaliacao(true);
       setErroAvaliacao('');
 
-      const response = await fetch('${import.meta.env.VITE_API_URL}/api/avaliacoes', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/avaliacoes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -146,7 +146,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoReserva(true);
       setErroReserva('');
 
-      const response = await fetch('${import.meta.env.VITE_API_URL}/api/reservas', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

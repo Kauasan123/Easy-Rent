@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import * as Icons from '../icons/icons'
-import Logo from '../assets/ImagensExtras/LogoEasy-rent.png'
+import Logo from "../assets/ImagensExtras/LogoEasy-Rent.png";
 import { Link } from 'react-router-dom';
 
 function Header() {
