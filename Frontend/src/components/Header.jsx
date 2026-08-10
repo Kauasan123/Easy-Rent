@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import * as Icons from '../icons/icons'
 import Logo from "../assets/ImagensExtras/LogoEasy-Rent.png";
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 
 function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,12 +30,12 @@ function Header() {
                     </div>
 
                     <div className='flex items-center gap-5 font-medium text-[1.125rem]'>
-                        <a href="/login" className='hover:bg-botao-branco-apertado text-preto-texto-principal border border-preto-principal rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all'>
+                        <Link to="/login" className='hover:bg-botao-branco-apertado text-preto-texto-principal border border-preto-principal rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all'>
                             Login
-                        </a>
-                        <a href="/registro" className='border border-beje-principal text-branco-texto-principal bg-beje-principal hover:bg-botao-beje-apertado rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all'>
+                        </Link>
+                        <Link to="/registro" className='border border-beje-principal text-branco-texto-principal bg-beje-principal hover:bg-botao-beje-apertado rounded-[0.313rem] py-1.5 px-5 cursor-pointer active:scale-95 transition-all'>
                             Registrar
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

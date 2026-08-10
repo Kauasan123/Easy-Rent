@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import imagemHero from '../assets/Lading-page/hero-imagem.png'
@@ -59,9 +59,9 @@ function App() {
             O Easy Rent transforma a forma de lidar com imóveis: uma plataforma rápida, intuitiva e centralizada para quem quer reservar um lugar ideal ou anunciar seu próprio espaço sem complicação. Aqui, tudo é simples, direto e sem burocracia.
           </p>
           <div className='flex gap-6 pt-1.5'>
-            <a href="/registro" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 pl-rem-2 pr-rem-2 cursor-pointer active:scale-95 transition-all whitespace-nowrap'>
+            <Link to="/registro" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 pl-rem-2 pr-rem-2 cursor-pointer active:scale-95 transition-all whitespace-nowrap'>
               Registrar-se
-            </a>
+            </Link>
             <p className='text-center text-preto-texto-principal max-w-230'>
               <span className='text-beje-principal'>+5,000 pessoas</span> como tu já usaram este produto.
             </p>
@@ -154,9 +154,9 @@ function App() {
               </div>
             </div>
           </div>
-          <a href="/login" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 pl-rem-2 pr-rem-2 cursor-pointer active:scale-95 transition-all whitespace-nowrap'>
+          <Link to="/login" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 pl-rem-2 pr-rem-2 cursor-pointer active:scale-95 transition-all whitespace-nowrap'>
             Começar Agora
-          </a>
+          </Link>
         </div>
 
         <div className='flex justify-end'>
@@ -210,9 +210,9 @@ function App() {
               </div>
             </div>
           </div>
-          <a href="/login" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 pl-rem-2 pr-rem-2 cursor-pointer active:scale-95 transition-all whitespace-nowrap'>
+          <Link to="/login" className='hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 pl-rem-2 pr-rem-2 cursor-pointer active:scale-95 transition-all whitespace-nowrap'>
             Começar Agora
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -280,9 +280,9 @@ function App() {
             Leva menos de alguns minutos para começar. Simples, rápido e sem complicação.
           </p>
           <div className='flex justify-center'>
-            <a href="/registro" className='inline-block hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 px-8 cursor-pointer active:scale-95 transition-all whitespace-nowrap shadow-sm'>
+            <Link to="/registro" className='inline-block hover:bg-botao-beje-apertado bg-beje-principal text-branco-texto-principal border-preto-principal border rounded-[0.313rem] text-[1.150rem] py-3 px-8 cursor-pointer active:scale-95 transition-all whitespace-nowrap shadow-sm'>
               Registrar-se
-            </a>
+            </Link>
           </div>
         </div>
       </section>
