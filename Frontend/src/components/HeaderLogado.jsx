@@ -30,7 +30,7 @@ const HeaderLogado = () => {
                                 </div>
                             )}
                         </div>
-                        <Link to="#Contatos" className='hover:text-beje-principal transition-colors'>Contatos</Link>
+                        <Link to="/#Contatos" className='hover:text-beje-principal transition-colors'>Contatos</Link>
                     </div>
 
                     {/* Usuário Logado */}

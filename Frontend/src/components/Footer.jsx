@@ -30,11 +30,11 @@ function Footer() {
                 <div className="py-6">
                     <div className="max-w-1200 mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
                         <nav className="flex flex-wrap justify-center gap-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                            <Link to="#" className="hover:text-black transition-colors">Sobre Nós</Link>
-                            <Link to="#" className="hover:text-black transition-colors">Contatos</Link>
-                            <Link to="#" className="hover:text-black transition-colors">Ajuda</Link>
-                            <Link to="#" className="hover:text-black transition-colors">Política de Privacidade</Link>
-                            <Link to="#" className="hover:text-black transition-colors">Disclaimer</Link>
+                            <a href="#" className="hover:text-black transition-colors">Sobre Nós</a>
+                            <a href="#" className="hover:text-black transition-colors">Contatos</a>
+                            <a href="#" className="hover:text-black transition-colors">Ajuda</a>
+                            <a href="#" className="hover:text-black transition-colors">Política de Privacidade</a>
+                            <a href="#" className="hover:text-black transition-colors">Disclaimer</a>
                         </nav>
                         <div className="text-[11px] text-gray-400 font-medium">
                             Copyright © 2018 • Easy Rent
