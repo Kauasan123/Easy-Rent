@@ -70,7 +70,7 @@ export default function Principal() {
   useEffect(() => {
     const carregarImoveis = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/imoveis');
+        const response = await fetch('${import.meta.env.VITE_API_URL}/api/imoveis');
         const data = await response.json();
         setImoveis(data);
       } catch (error) {

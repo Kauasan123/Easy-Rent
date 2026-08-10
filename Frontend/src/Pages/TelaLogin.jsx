@@ -21,7 +21,7 @@ function TelaLogin() {
         setCarregando(true);
 
         try {
-            const resposta = await fetch('http://localhost:5000/api/usuarios');
+            const resposta = await fetch('${import.meta.env.VITE_API_URL}/api/usuarios');
             const usuarios = await resposta.json();
 
             const usuarioValido = usuarios.find(u => u.email === email && u.senha === senha);

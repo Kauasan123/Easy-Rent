@@ -63,7 +63,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
     if (caminho.startsWith('http://') || caminho.startsWith('https://')) {
       return caminho;
     }
-    const urlFinal = `http://localhost:5000${caminho.startsWith('/') ? '' : '/'}${caminho}`;
+    const urlFinal = `${import.meta.env.VITE_API_URL}${caminho.startsWith('/') ? '' : '/'}${caminho}`;
     return urlFinal;
   };
 

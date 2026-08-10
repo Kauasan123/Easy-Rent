@@ -14,7 +14,7 @@ function ControleGeral() {
     useEffect(() => {
         const carregarImoveis = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/imoveis`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis`);
                 const data = await response.json();
 
                 const imoveisDoUsuario = data.filter(
@@ -25,7 +25,7 @@ function ControleGeral() {
                     imoveisDoUsuario.map(async (imovel) => {
                         try {
                             const resReservas = await fetch(
-                                `http://localhost:5000/api/reservas/imovel/${imovel.id}`
+                                `${import.meta.env.VITE_API_URL}/api/reservas/imovel/${imovel.id}`
                             );
                             const reservas = resReservas.ok ? await resReservas.json() : [];
                             return { ...imovel, reservas };

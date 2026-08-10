@@ -33,7 +33,7 @@ function Perfil() {
 
         const buscarDadosDoBanco = async () => {
             try {
-                const resposta = await fetch(`http://localhost:5000/api/usuarios/${usuarioId}`);
+                const resposta = await fetch(`${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`);
                 if (resposta.ok) {
                     const dados = await resposta.json();
                     setNome(dados.nome || '');
@@ -41,7 +41,7 @@ function Perfil() {
                     setTelefone(dados.telefone || '');
                     
                     if (dados.avatarPath) {
-                        setFotoUrl(`http://localhost:5000${dados.avatarPath}`);
+                        setFotoUrl(`${import.meta.env.VITE_API_URL}${dados.avatarPath}`);
                     }
                 }
             } catch (error) {
@@ -75,14 +75,14 @@ function Perfil() {
         formData.append('avatar', arquivo);
 
         try {
-            const resposta = await fetch(`http://localhost:5000/api/usuarios/${usuarioId}/avatar`, {
+            const resposta = await fetch(`${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}/avatar`, {
                 method: 'PUT',
                 body: formData
             });
 
             if (resposta.ok) {
                 const dados = await resposta.json();
-                setFotoUrl(`http://localhost:5000${dados.avatarPath}`);
+                setFotoUrl(`${import.meta.env.VITE_API_URL}${dados.avatarPath}`);
                 setMensagem({ texto: 'Foto de perfil updated com sucesso!', tipo: 'sucesso' });
                 
                 window.dispatchEvent(new Event('focus'));
@@ -102,7 +102,7 @@ function Perfil() {
         const usuarioId = localStorage.getItem('usuarioId');
 
         try {
-            const resposta = await fetch(`http://localhost:5000/api/usuarios/${usuarioId}`, {
+            const resposta = await fetch(`${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, email, telefone, senha })

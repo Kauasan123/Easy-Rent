@@ -20,7 +20,7 @@ const Sidebar = () => {
 
     const buscarDadosDono = async () => {
       try {
-        const resposta = await fetch(`http://localhost:5000/api/usuarios/${usuarioId}`);
+        const resposta = await fetch(`${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`);
         if (resposta.ok) {
           const dados = await resposta.json();
           setNome(dados.nome);
@@ -28,7 +28,7 @@ const Sidebar = () => {
           localStorage.setItem('usuarioNome', dados.nome);
           
           if (dados.avatarPath) {
-            setFotoUrl(`http://localhost:5000${dados.avatarPath}`);
+            setFotoUrl(`${import.meta.env.VITE_API_URL}${dados.avatarPath}`);
           } else {
             setFotoUrl('');
           }

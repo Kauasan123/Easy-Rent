@@ -38,7 +38,7 @@ const HeaderLogado = () => {
                         <div className='w-10 h-10 rounded-full overflow-hidden border-2 border-beje-principal shrink-0'>
                             {usuarioAvatar && !avatarErro ? (
                                 <img
-                                    src={`http://localhost:5000${usuarioAvatar}`}
+                                    src={`${import.meta.env.VITE_API_URL}${usuarioAvatar}`}
                                     alt={usuarioNome}
                                     className='w-full h-full object-cover'
                                     onError={() => setAvatarErro(true)}

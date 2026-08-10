@@ -7,6 +7,7 @@ const reservaRoutes = require('./routes/reservaRoutes');
 const avaliacaoRoutes = require('./routes/avaliacaoRoutes');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json()); 
@@ -21,6 +22,6 @@ app.get('/', (req, res) => {
   return res.json({ status: "Backend EasyRent 100% Operacional!" });
 });
 
-app.listen(5000, () => {
-  console.log("Servidor rodando lindamente na porta 5000!");
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}!`);
 });

@@ -28,7 +28,7 @@ export function ModalDetalhes({ imovel, onClose }) {
   React.useEffect(() => {
     const carregarAvaliacoes = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/avaliacoes/imovel/${imovel.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/avaliacoes/imovel/${imovel.id}`);
         const data = await response.json();
         setAvaliacoes(data.avaliacoes || []);
         setMediaAvaliacoes(data.media || 0);
@@ -54,7 +54,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoAvaliacao(true);
       setErroAvaliacao('');
 
-      const response = await fetch('http://localhost:5000/api/avaliacoes', {
+      const response = await fetch('${import.meta.env.VITE_API_URL}/api/avaliacoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -69,7 +69,7 @@ export function ModalDetalhes({ imovel, onClose }) {
 
       if (response.ok) {
         // Recarrega as avaliações
-        const resAtualizada = await fetch(`http://localhost:5000/api/avaliacoes/imovel/${imovel.id}`);
+        const resAtualizada = await fetch(`${import.meta.env.VITE_API_URL}/api/avaliacoes/imovel/${imovel.id}`);
         const dataAtualizada = await resAtualizada.json();
         setAvaliacoes(dataAtualizada.avaliacoes || []);
         setMediaAvaliacoes(dataAtualizada.media || 0);
@@ -92,7 +92,7 @@ export function ModalDetalhes({ imovel, onClose }) {
     const caminho = typeof imagem === 'string' ? imagem : imagem?.url;
     if (!caminho) return 'https://via.placeholder.com/600x400?text=Sem+Imagem';
     if (caminho.startsWith('http')) return caminho;
-    return `http://localhost:5000${caminho.startsWith('/') ? '' : '/'}${caminho}`;
+    return `${import.meta.env.VITE_API_URL}${caminho.startsWith('/') ? '' : '/'}${caminho}`;
   };
 
   const todasImagens = imovel.imagens || [];
@@ -146,7 +146,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoReserva(true);
       setErroReserva('');
 
-      const response = await fetch('http://localhost:5000/api/reservas', {
+      const response = await fetch('${import.meta.env.VITE_API_URL}/api/reservas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -409,7 +409,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-sm">
                     {imovel.usuario?.avatarPath ? (
-                      <img src={`http://localhost:5000${imovel.usuario.avatarPath}`} alt="Anfitrião" className="w-full h-full object-cover" />
+                      <img src={`${import.meta.env.VITE_API_URL}${imovel.usuario.avatarPath}`} alt="Anfitrião" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                         <Icons.FaUserCircle size={28} className="text-gray-400" />
@@ -521,7 +521,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                     <div className="flex items-center gap-2">
                       <div className="w-12 h-12 rounded-full overflow-hidden border border-zinc-100">
                         {avaliacao.autor?.avatarPath ? (
-                          <img src={`http://localhost:5000${avaliacao.autor.avatarPath}`} className="w-full h-full object-cover" alt={avaliacao.autor.nome} />
+                          <img src={`${import.meta.env.VITE_API_URL}${avaliacao.autor.avatarPath}`} className="w-full h-full object-cover" alt={avaliacao.autor.nome} />
                         ) : (
                           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                             <Icons.FaUserCircle size={28} className="text-gray-400" />

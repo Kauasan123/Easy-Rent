@@ -60,7 +60,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
             setNovasImagens([]);
 
             try {
-                const response = await fetch(`http://localhost:5000/api/imoveis/${imovel.id}`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis/${imovel.id}`);
                 const data = await response.json();
 
                 const dados = data.imoveis ? data.imoveis[0] : data;
@@ -186,7 +186,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
         if (imagensSalvas[index]) {
             const url = imagensSalvas[index].url;
             if (url.startsWith('http')) return url;
-            return `http://localhost:5000${url}`;
+            return `${import.meta.env.VITE_API_URL}${url}`;
         }
 
         const slotNova = index - imagensSalvas.length;
@@ -204,7 +204,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
         } else if (imagensSalvas[index]) {
             const imagem = imagensSalvas[index];
             try {
-                await fetch(`http://localhost:5000/api/imoveis/imagens/${imagem.id}`, {
+                await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis/imagens/${imagem.id}`, {
                     method: 'DELETE'
                 });
                 setImagensSalvas(prev => prev.filter((_, i) => i !== index));
@@ -241,7 +241,7 @@ function ModalEditarAluguel({ isOpen, onClose, imovel, onUpdateSuccess }) {
 
         try {
             setCarregando(true);
-            const response = await fetch(`http://localhost:5000/api/imoveis/${imovel.id}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis/${imovel.id}`, {
                 method: 'PUT',
                 body: formData
             });

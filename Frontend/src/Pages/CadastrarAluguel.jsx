@@ -186,7 +186,7 @@ function CadastrarAluguel() {
                 formData.append('imagens', imagem);
             });
 
-            const response = await fetch('http://localhost:5000/api/imoveis', {
+            const response = await fetch('${import.meta.env.VITE_API_URL}/api/imoveis', {
                 method: 'POST',
                 body: formData,
             });
