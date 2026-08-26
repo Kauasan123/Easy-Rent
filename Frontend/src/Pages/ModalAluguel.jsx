@@ -398,7 +398,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                   disabled={enviandoReserva || !checkIn || !checkOut}
                   className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {enviandoReserva ? 'Enviando...' : checkIn && checkOut ? 'Confirmar Reserva' : 'Enviar disponibilidade'}
+                  {enviandoReserva ? 'Enviando...' : checkIn && checkOut ? 'Confirmar Reserva' : 'Avançar para Reserva'}
                 </button>
               )}
 

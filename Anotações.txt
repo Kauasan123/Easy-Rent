@@ -1,0 +1,30 @@
+Mudanças Feitas:
+- Mudança no texto do botão de confirmar reserva da pagina ModalAluguel
+- Adição do botão ver reservas no headerLogado
+- Adição da tela ver reservas (Ainda Mockada)
+
+Anotações
+reserva atómica
+
+Antes de cobrar a reserva atômica ou a busca espacial, fazer uma checagem na modelagem de dados. Não confundir o conceito de transação no banco (BEGIN...COMMIT, níveis de isolamento ou locks) para que a implementação da reserva atômica seja factível dentro do prazo.
+
+Artigo SBC (Problema vs. Solução): O artigo para a SBC não deve ser um "manual do sistema", mas sim a resolução de um problema real. A narrativa do artigo deve ser: como o sistema se comporta sob alta concorrência ao tentar reservar o mesmo recurso simultaneamente.
+
+Módulo Administrativo: Painel de controle para moderação de imóveis, triagem de denúncias e suporte via chat em tempo real via WebSockets com os usuários.
+
+Trava de Concorrência em Agendamentos: Algoritmo para impedir agendamentos/reservas duplas para o mesmo imóvel na mesma data.
+
+Fluxo Financeiro (Inquilino): Tela de pagamentos de aluguel integrada com confirmação via Webhook.
+
+Dashboard Financeiro (Proprietário): Tela de acompanhamento e controle de entradas de pagamentos por imóvel.
+
+
+
+Escopo e complexidade de concorrência técnica
+O projeto evoluirá do MVP de visualização e agendamento simples para uma plataforma transacional de locação. A complexidade central em PD2 será o desenvolvimento do algoritmo de trava de concorrência (locking) e transações no banco de dados para evitar reservas duplicadas (double-booking) no mesmo intervalo de tempo.
+
+Comunicação em tempo real e Webhooks
+Foi sugerida a integração do suporte administrativo utilizando comunicação bidirecional, preferencialmente em tempo real via WebSockets (Socket.io) e a confirmação do fluxo de pagamentos de aluguel por meio do processamento assíncrono de Webhooks.
+
+Validação de carga e artigo SBC
+Substituição das demonstrações manuais em apresentações por testes de estresse e carga automatizados via k6. A avaliação mensurará a latência das consultas, a taxa de requisições por segundo (RPS) e a resiliência do mecanismo de trava sob acessos simultâneos concorrentes.

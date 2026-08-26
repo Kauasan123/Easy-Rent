@@ -11,6 +11,7 @@ import Perfil from './Pages/Perfil'
 import MeusAlugueis from './Pages/MeusAlugueis';
 import ControleGeral from './Pages/ControleGeral';
 import CadastrarAluguel from './Pages/CadastrarAluguel';
+import VerReservas from './Pages/VerReservas.jsx';
 import ToasterConfig from './components/ToasterConfig.jsx';
 import './index.css'
 
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/login" element={<TelaLogin />} />
         <Route path="/registro" element={<TelaRegistro />} />
         <Route path="/principal" element={<Principal />} />
+        <Route path="/verReservas" element={<VerReservas />} />
 
         <Route element={<LayoutPrivado />}>
           <Route path="/perfil" element={<Perfil />} />

@@ -30,6 +30,7 @@ const HeaderLogado = () => {
                                 </div>
                             )}
                         </div>
+                        <Link to="/VerReservas" className='hover:text-beje-principal transition-colors'>Minhas Reservas</Link>
                         <Link to="/#Contatos" className='hover:text-beje-principal transition-colors'>Contatos</Link>
                     </div>
 

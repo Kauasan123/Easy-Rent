@@ -63,7 +63,7 @@ function App() {
               Registrar-se
             </Link>
             <p className='text-center text-preto-texto-principal max-w-230'>
-              <span className='text-beje-principal'>+5,000 pessoas</span> como tu já usaram este produto.
+              <span className='text-beje-principal'>+5,000 pessoas</span> como você já usaram este site.
             </p>
           </div>
         </div>
