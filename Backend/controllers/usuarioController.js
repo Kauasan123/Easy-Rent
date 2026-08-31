@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const supabase = require('../config/supabase');
 
 const criarUsuario = async (req, res) => {
   try {
@@ -71,26 +72,54 @@ const atualizarAvatar = async (req, res) => {
     const usuarioId = req.params.id;
 
     if (!req.file) {
-      return res.status(400).json({ erro: 'Nenhum arquivo enviado.' });
+      return res.status(400).json({
+        erro: 'Nenhum arquivo enviado.'
+      });
     }
 
-    const avatarPath = `/uploads/avatars/${req.file.filename}`;
+    const extensao = req.file.originalname.split('.').pop();
 
-    await prisma.usuario.update({
+    const nomeArquivo = `avatar-${usuarioId}-${Date.now()}.${extensao}`;
+
+    const { error } = await supabase.storage
+      .from('avatares')
+      .upload(nomeArquivo, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('avatares')
+      .getPublicUrl(nomeArquivo);
+
+    const avatarPath = urlData.publicUrl;
+
+    const usuarioAtualizado = await prisma.usuario.update({
       where: { id: parseInt(usuarioId) },
       data: { avatarPath }
     });
 
-    console.log(`Foto do usuário ${usuarioId} atualizada com sucesso no banco!`);
+    console.log(
+      `Foto do usuário ${usuarioId} atualizada com sucesso no banco!`
+    );
 
     return res.status(200).json({
       mensagem: 'Avatar atualizado com sucesso!',
-      avatarPath: avatarPath
+      avatarPath: avatarPath,
+      usuario: usuarioAtualizado
     });
 
   } catch (error) {
-    console.error("Erro ao atualizar avatar no controller:", error);
-    return res.status(500).json({ erro: 'Erro interno ao salvar a imagem.', detalhes: error.message });
+    console.error("ERRO AO ATUALIZAR AVATAR:", error);
+
+    return res.status(500).json({
+      erro: 'Erro interno ao salvar a imagem.',
+      detalhes: error.message
+    });
   }
 };
 

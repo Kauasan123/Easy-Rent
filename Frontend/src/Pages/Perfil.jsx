@@ -25,7 +25,7 @@ function Perfil() {
 
     useEffect(() => {
         const usuarioId = localStorage.getItem('usuarioId');
-        
+
         if (!usuarioId) {
             navigate('/login');
             return;
@@ -39,9 +39,9 @@ function Perfil() {
                     setNome(dados.nome || '');
                     setEmail(dados.email || '');
                     setTelefone(dados.telefone || '');
-                    
+
                     if (dados.avatarPath) {
-                        setFotoUrl(`${import.meta.env.VITE_API_URL}${dados.avatarPath}`);
+                        setFotoUrl(dados.avatarPath);
                     }
                 }
             } catch (error) {
@@ -82,9 +82,9 @@ function Perfil() {
 
             if (resposta.ok) {
                 const dados = await resposta.json();
-                setFotoUrl(`${import.meta.env.VITE_API_URL}${dados.avatarPath}`);
+                setFotoUrl(dados.avatarPath);
                 setMensagem({ texto: 'Foto de perfil updated com sucesso!', tipo: 'sucesso' });
-                
+
                 window.dispatchEvent(new Event('focus'));
             } else {
                 setMensagem({ texto: 'Erro ao enviar a imagem para o servidor.', tipo: 'erro' });
@@ -110,9 +110,9 @@ function Perfil() {
 
             if (resposta.ok) {
                 const dadosAtualizados = await resposta.json();
-                
+
                 localStorage.setItem('usuarioNome', dadosAtualizados.usuario.nome);
-                
+
                 setMensagem({ texto: 'Perfil atualizado com sucesso!', tipo: 'sucesso' });
                 setEditando({ nome: false, email: false, telefone: false, senha: false });
                 setSenha('');
@@ -141,10 +141,10 @@ function Perfil() {
                         <h1 className='text-preto-texto-principal text-3xl font-bold'>Perfil</h1>
                         <p className='text-cinza-texto-secundario'>Aba para Editar seu Perfil</p>
                     </div>
-                    
+
                     <AnimatePresence>
                         {mensagem.texto && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
@@ -164,33 +164,33 @@ function Perfil() {
 
                         <div className="p-8 pt-4 flex flex-col md:flex-row gap-12 items-start">
                             <div className="flex flex-col items-center gap-2">
-                                <input 
-                                    type="file" 
-                                    id="input-avatar" 
-                                    accept="image/*" 
-                                    className="hidden" 
+                                <input
+                                    type="file"
+                                    id="input-avatar"
+                                    accept="image/*"
+                                    className="hidden"
                                     onChange={handleTrocarFoto}
                                     disabled={carregando}
                                 />
-                                
-                                <div 
+
+                                <div
                                     onClick={() => document.getElementById('input-avatar').click()}
                                     className="w-40 h-40 rounded-full bg-cinza-claro border-2 border-borda-cards flex items-center justify-center overflow-hidden relative group cursor-pointer shadow-inner"
                                 >
                                     {fotoUrl ? (
-                                        <img 
-                                            src={fotoUrl} 
-                                            alt="Foto de perfil do usuário" 
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                                        <img
+                                            src={fotoUrl}
+                                            alt="Foto de perfil do usuário"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                     ) : (
                                         <Icons.FaImage size={40} className="text-cinza-texto-secundario opacity-40 group-hover:scale-110 transition-transform duration-300" />
                                     )}
-                                    
+
                                     <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
                                 </div>
-                                
-                                <button 
+
+                                <button
                                     onClick={() => document.getElementById('input-avatar').click()}
                                     className="text-beje-principal font-bold text-sm underline-offset-4 hover:underline disabled:opacity-50"
                                     disabled={carregando}
@@ -203,18 +203,18 @@ function Perfil() {
                                 <div className="flex flex-col gap-1">
                                     <label className="text-preto-texto-principal font-semibold text-sm">Nome</label>
                                     <div className="flex gap-3">
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={nome}
                                             onChange={(e) => setNome(e.target.value)}
                                             disabled={!editando.nome}
-                                            className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.nome ? 'text-preto-texto-principal/50 bg-gray-50' : 'text-preto-texto-principal'}`} 
+                                            className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.nome ? 'text-preto-texto-principal/50 bg-gray-50' : 'text-preto-texto-principal'}`}
                                         />
-                                        <button 
+                                        <button
                                             onClick={() => alternarEdicao('nome')}
                                             className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.nome ? 'border-red-400 text-red-500 hover:bg-red-50' : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'}`}
                                         >
-                                            {editando.nome ? <Icons.FiEyeOff size={12}/> : <Icons.FaPencilAlt size={12} />} 
+                                            {editando.nome ? <Icons.FiEyeOff size={12} /> : <Icons.FaPencilAlt size={12} />}
                                             {editando.nome ? 'Cancelar' : 'Editar'}
                                         </button>
                                     </div>
@@ -223,18 +223,18 @@ function Perfil() {
                                 <div className="flex flex-col gap-1">
                                     <label className="text-preto-texto-principal font-semibold text-sm">E-mail</label>
                                     <div className="flex gap-3">
-                                        <input 
-                                            type="email" 
+                                        <input
+                                            type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             disabled={!editando.email}
-                                            className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.email ? 'text-preto-texto-principal/50 bg-gray-50' : 'text-preto-texto-principal'}`} 
+                                            className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.email ? 'text-preto-texto-principal/50 bg-gray-50' : 'text-preto-texto-principal'}`}
                                         />
-                                        <button 
+                                        <button
                                             onClick={() => alternarEdicao('email')}
                                             className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.email ? 'border-red-400 text-red-500 hover:bg-red-50' : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'}`}
                                         >
-                                            {editando.email ? <Icons.FiEyeOff size={12}/> : <Icons.FaPencilAlt size={12} />} 
+                                            {editando.email ? <Icons.FiEyeOff size={12} /> : <Icons.FaPencilAlt size={12} />}
                                             {editando.email ? 'Cancelar' : 'Editar'}
                                         </button>
                                     </div>
@@ -243,25 +243,25 @@ function Perfil() {
                                 <div className="flex flex-col gap-1">
                                     <label className="text-preto-texto-principal font-semibold text-sm">Telefone</label>
                                     <div className="flex gap-3">
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={telefone}
                                             onChange={(e) => setTelefone(e.target.value)}
                                             placeholder="(00) 00000-0000"
                                             disabled={!editando.telefone}
-                                            className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.telefone ? 'text-preto-texto-principal/50 bg-gray-50' : 'text-preto-texto-principal'}`} 
+                                            className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.telefone ? 'text-preto-texto-principal/50 bg-gray-50' : 'text-preto-texto-principal'}`}
                                         />
-                                        <button 
+                                        <button
                                             onClick={() => alternarEdicao('telefone')}
                                             className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.telefone ? 'border-red-400 text-red-500 hover:bg-red-50' : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'}`}
                                         >
-                                            {editando.telefone ? <Icons.FiEyeOff size={12}/> : <Icons.FaPencilAlt size={12} />} 
+                                            {editando.telefone ? <Icons.FiEyeOff size={12} /> : <Icons.FaPencilAlt size={12} />}
                                             {editando.telefone ? 'Cancelar' : 'Editar'}
                                         </button>
                                     </div>
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={handleSalvar}
                                     disabled={carregando}
                                     className="mt-4 bg-beje-principal hover:bg-botao-beje-apertado text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-md disabled:opacity-70"
@@ -284,12 +284,12 @@ function Perfil() {
                                 {editando.senha ? (
                                     <div className="flex flex-col gap-1 w-full max-w-md animate-fadeIn">
                                         <label className="text-preto-texto-principal font-semibold text-sm">Nova Senha</label>
-                                        <input 
-                                            type="password" 
+                                        <input
+                                            type="password"
                                             value={senha}
                                             onChange={(e) => setSenha(e.target.value)}
                                             placeholder="Digite a nova senha"
-                                            className="w-full bg-white border border-borda-cards rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:border-beje-principal transition-colors text-preto-texto-principal" 
+                                            className="w-full bg-white border border-borda-cards rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:border-beje-principal transition-colors text-preto-texto-principal"
                                         />
                                     </div>
                                 ) : (
@@ -304,11 +304,11 @@ function Perfil() {
                                 )}
                             </div>
                         </div>
-                        <button 
+                        <button
                             onClick={() => alternarEdicao('senha')}
                             className={`flex items-center gap-2 px-6 py-2 border rounded-xl text-sm font-bold transition-all h-fit ${editando.senha ? 'border-red-400 text-red-500 hover:bg-red-50' : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'}`}
                         >
-                            {editando.senha ? <Icons.FiEyeOff size={14}/> : <Icons.FaPencilAlt size={14} />} 
+                            {editando.senha ? <Icons.FiEyeOff size={14} /> : <Icons.FaPencilAlt size={14} />}
                             {editando.senha ? 'Cancelar' : 'Editar'}
                         </button>
                     </div>

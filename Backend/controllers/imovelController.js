@@ -1,12 +1,39 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const supabase = require('../config/supabase');
 
 const criarImovel = async (req, res) => {
   try {
     const dadosImovel = req.body;
 
     const arquivos = req.files || [];
-    const imagensDados = arquivos.map(file => ({ url: `/uploads/imoveis/${file.filename}` }));
+    const imagensDados = [];
+
+    for (const file of arquivos) {
+      const extensao = file.originalname.split('.').pop();
+
+      const nomeArquivo = `imovel-${Date.now()}-${Math.round(Math.random() * 1E9)}.${extensao}`;
+
+      const { error } = await supabase.storage
+        .from('imoveis')
+        .upload(nomeArquivo, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('imoveis')
+        .getPublicUrl(nomeArquivo);
+
+      imagensDados.push({
+        url: urlData.publicUrl
+      });
+    }
+
     const periodos = dadosImovel.periodos ? JSON.parse(dadosImovel.periodos) : [];
 
     const novoImovel = await prisma.imovel.create({
@@ -74,12 +101,42 @@ const atualizarImovel = async (req, res) => {
   try {
     const { id } = req.params;
     const dadosImovel = req.body;
-    const periodos = dadosImovel.periodos ? JSON.parse(dadosImovel.periodos) : [];
+
+    const periodos = dadosImovel.periodos
+      ? JSON.parse(dadosImovel.periodos)
+      : [];
+
     const arquivos = req.files || [];
-    const novasFotos = arquivos.map(file => ({ url: `/uploads/imoveis/${file.filename}` }));
+    const novasFotos = [];
+
+    for (const file of arquivos) {
+      const extensao = file.originalname.split('.').pop();
+
+      const nomeArquivo = `imovel-${Date.now()}-${Math.round(Math.random() * 1E9)}.${extensao}`;
+
+      const { error } = await supabase.storage
+        .from('imoveis')
+        .upload(nomeArquivo, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('imoveis')
+        .getPublicUrl(nomeArquivo);
+
+      novasFotos.push({
+        url: urlData.publicUrl
+      });
+    }
 
     const imovelAtualizado = await prisma.imovel.update({
       where: { id: parseInt(id) },
+
       data: {
         titulo: dadosImovel.titulo,
         tipo: dadosImovel.tipo,
@@ -91,6 +148,7 @@ const atualizarImovel = async (req, res) => {
         preco: parseFloat(dadosImovel.preco),
         tipoCobranca: dadosImovel.tipoCobranca,
         capacidade: dadosImovel.capacidade,
+
         hasWifi: dadosImovel.hasWifi === 'true',
         hasArCondicionado: dadosImovel.hasArCondicionado === 'true',
         hasEstacionamento: dadosImovel.hasEstacionamento === 'true',
@@ -102,14 +160,22 @@ const atualizarImovel = async (req, res) => {
         hasPortaria24h: dadosImovel.hasPortaria24h === 'true',
         proximoCentro: dadosImovel.proximoCentro === 'true',
         proximoPraia: dadosImovel.proximoPraia === 'true',
+
         quartos: parseInt(dadosImovel.quartos) || 1,
         banheiros: parseInt(dadosImovel.banheiros) || 1,
         vagas: parseInt(dadosImovel.vagas) || 1,
+
         aceitaPets: dadosImovel.aceitaPets === 'true',
         permiteFestas: dadosImovel.permiteFestas === 'true',
         acessibilidade: dadosImovel.acessibilidade === 'true',
         naoFumante: dadosImovel.naoFumante === 'true',
-        ...(novasFotos.length > 0 && { imagens: { create: novasFotos } }),
+
+        ...(novasFotos.length > 0 && {
+          imagens: {
+            create: novasFotos
+          }
+        }),
+
         ...(periodos !== null && {
           periodos: {
             deleteMany: {},
@@ -120,16 +186,25 @@ const atualizarImovel = async (req, res) => {
           }
         })
       },
+
       include: {
         imagens: true,
         periodos: true
       }
     });
 
-    return res.json({ mensagem: "Imóvel atualizado com sucesso!", imovel: imovelAtualizado });
+    return res.json({
+      mensagem: "Imóvel atualizado com sucesso!",
+      imovel: imovelAtualizado
+    });
+
   } catch (error) {
     console.error("ERRO AO ATUALIZAR:", error);
-    return res.status(500).json({ erro: "Erro ao atualizar imóvel", detalhes: error.message });
+
+    return res.status(500).json({
+      erro: "Erro ao atualizar imóvel",
+      detalhes: error.message
+    });
   }
 };
 
@@ -161,15 +236,38 @@ const deletarImagem = async (req, res) => {
       where: { id: parseInt(id) }
     });
 
-    if (!imagem) return res.status(404).json({ erro: "Imagem não encontrada" });
+    if (!imagem) {
+      return res.status(404).json({ erro: "Imagem não encontrada" });
+    }
+
+    const url = new URL(imagem.url);
+    const caminhoArquivo = url.pathname.split('/imoveis/')[1];
+
+    if (caminhoArquivo) {
+      const { error } = await supabase.storage
+        .from('imoveis')
+        .remove([caminhoArquivo]);
+
+      if (error) {
+        throw error;
+      }
+    }
 
     await prisma.imagem.delete({
       where: { id: parseInt(id) }
     });
 
-    return res.json({ mensagem: "Imagem deletada com sucesso!" });
+    return res.json({
+      mensagem: "Imagem deletada com sucesso!"
+    });
+
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao deletar imagem", detalhes: error.message });
+    console.error("ERRO AO DELETAR IMAGEM:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao deletar imagem",
+      detalhes: error.message
+    });
   }
 };
 
@@ -178,18 +276,54 @@ const deletarImovel = async (req, res) => {
     const { id } = req.params;
 
     const imovel = await prisma.imovel.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
+      include: {
+        imagens: true
+      }
     });
 
-    if (!imovel) return res.status(404).json({ erro: "Imóvel não encontrado" });
+    if (!imovel) {
+      return res.status(404).json({
+        erro: "Imóvel não encontrado"
+      });
+    }
+
+    const arquivos = imovel.imagens
+      .map(imagem => {
+        try {
+          const url = new URL(imagem.url);
+          return url.pathname.split('/imoveis/')[1];
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    if (arquivos.length > 0) {
+      const { error } = await supabase.storage
+        .from('imoveis')
+        .remove(arquivos);
+
+      if (error) {
+        throw error;
+      }
+    }
 
     await prisma.imovel.delete({
       where: { id: parseInt(id) }
     });
 
-    return res.json({ mensagem: "Imóvel deletado com sucesso!" });
+    return res.json({
+      mensagem: "Imóvel deletado com sucesso!"
+    });
+
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao deletar imóvel", detalhes: error.message });
+    console.error("ERRO AO DELETAR IMÓVEL:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao deletar imóvel",
+      detalhes: error.message
+    });
   }
 };
 

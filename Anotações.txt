@@ -1,4 +1,7 @@
+Easy-Rent123
+
 Mudanças Feitas:
+- Mudança das Rotas de inserção de Imagem de usuario e imovel, salvando toda as imagens no serviço da Supabase
 - Mudança no texto do botão de confirmar reserva da pagina ModalAluguel
 - Adição do botão ver reservas no headerLogado
 - Adição da tela ver reservas (Ainda Mockada)
