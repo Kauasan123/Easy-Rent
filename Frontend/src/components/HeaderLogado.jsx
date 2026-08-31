@@ -1,14 +1,61 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import * as Icons from '../icons/icons'
 import Logo from "../assets/ImagensExtras/LogoEasy-Rent.png";
 import { Link } from 'react-router-dom';
 
 const HeaderLogado = () => {
-    const usuarioNome = localStorage.getItem('usuarioNome') || 'Usuário';
-    const usuarioAvatar = localStorage.getItem('usuarioAvatar');
 
+    const [usuarioNome, setUsuarioNome] = useState(
+        localStorage.getItem('usuarioNome') || 'Usuário'
+    );
+
+    const [usuarioAvatar, setUsuarioAvatar] = useState('');
     const [avatarErro, setAvatarErro] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+
+        const usuarioId = localStorage.getItem('usuarioId');
+
+        if (!usuarioId) return;
+        const buscarDadosUsuario = async () => {
+            try {
+
+                const resposta = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`
+                );
+
+                if (resposta.ok) {
+                    const dados = await resposta.json();
+
+                    setUsuarioNome(dados.nome || 'Usuário');
+
+                    if (dados.avatarPath) {
+                        setUsuarioAvatar(dados.avatarPath);
+                        setAvatarErro(false);
+                    } else {
+                        setUsuarioAvatar('');
+                    }
+
+                }
+
+            } catch (error) {
+                console.error(
+                    'Erro ao buscar dados do usuário no Header:',
+                    error
+                );
+            }
+        };
+
+        buscarDadosUsuario();
+
+        window.addEventListener('focus', buscarDadosUsuario);
+
+        return () => {
+            window.removeEventListener('focus', buscarDadosUsuario);
+        };
+
+    }, []);
 
     return (
         <>
@@ -38,7 +85,7 @@ const HeaderLogado = () => {
                         <div className='w-10 h-10 rounded-full overflow-hidden border-2 border-beje-principal shrink-0'>
                             {usuarioAvatar && !avatarErro ? (
                                 <img
-                                    src={`${import.meta.env.VITE_API_URL}${usuarioAvatar}`}
+                                    src={usuarioAvatar}
                                     alt={usuarioNome}
                                     className='w-full h-full object-cover'
                                     onError={() => setAvatarErro(true)}

@@ -4,15 +4,15 @@ import * as Icons from '../icons/icons';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  
+
   const [nome, setNome] = useState(localStorage.getItem('usuarioNome') || 'Usuário');
   const [email, setEmail] = useState('');
-  
+
   const [fotoUrl, setFotoUrl] = useState('');
 
   useEffect(() => {
     const usuarioId = localStorage.getItem('usuarioId');
-    
+
     if (!usuarioId) {
       navigate('/login');
       return;
@@ -20,15 +20,20 @@ const Sidebar = () => {
 
     const buscarDadosDono = async () => {
       try {
-        const resposta = await fetch(`${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`);
+        const resposta = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`
+        );
+
         if (resposta.ok) {
           const dados = await resposta.json();
+
           setNome(dados.nome);
           setEmail(dados.email);
+
           localStorage.setItem('usuarioNome', dados.nome);
-          
+
           if (dados.avatarPath) {
-            setFotoUrl(`${import.meta.env.VITE_API_URL}${dados.avatarPath}`);
+            setFotoUrl(dados.avatarPath);
           } else {
             setFotoUrl('');
           }
@@ -80,12 +85,12 @@ const Sidebar = () => {
               strokeDashoffset="210"
             />
           </svg>
-          
+
           <div className="relative w-28 h-28 rounded-full overflow-hidden border-[3px] border-beje-principal shadow-sm z-10 bg-gray-100 flex items-center justify-center">
             {fotoUrl ? (
-              <img 
-                src={fotoUrl} 
-                className="w-full h-full object-cover" 
+              <img
+                src={fotoUrl}
+                className="w-full h-full object-cover"
                 alt="Foto de Perfil"
               />
             ) : (
@@ -110,8 +115,8 @@ const Sidebar = () => {
         {menuItems.map((item) => (
           <NavLink key={item.path} to={item.path} className={({ isActive }) => `
               flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all duration-300 ${isActive
-                ? 'bg-beje-principal text-white shadow-lg shadow-beje-principal/20 scale-[1.02]'
-                : 'text-preto-texto-principal text-opacity-60 hover:bg-beje-principal/5 hover:text-opacity-100'}`}>
+              ? 'bg-beje-principal text-white shadow-lg shadow-beje-principal/20 scale-[1.02]'
+              : 'text-preto-texto-principal text-opacity-60 hover:bg-beje-principal/5 hover:text-opacity-100'}`}>
             <span className="flex items-center justify-center">
               {item.icon}
             </span>
