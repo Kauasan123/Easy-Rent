@@ -1,19 +1,41 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const gerarCodigoReserva = () => {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let codigo = '';
+
+  for (let i = 0; i < 10; i++) {
+    codigo += caracteres.charAt(
+      Math.floor(Math.random() * caracteres.length)
+    );
+  }
+
+  return codigo;
+};
+
 const criarReserva = async (req, res) => {
   try {
-    const { inicio, fim, imovelId, hospedeId } = req.body;
+    const { inicio, fim, hospedes, imovelId, hospedeId } = req.body;
 
     const novaReserva = await prisma.reserva.create({
       data: {
+        codigo: gerarCodigoReserva(),
         inicio: new Date(inicio),
         fim: new Date(fim),
+        hospedes: Number(hospedes),
         status: 'Pendente',
-        imovelId: parseInt(imovelId),
-        hospedeId: parseInt(hospedeId)
+        imovelId: Number(imovelId),
+        hospedeId: Number(hospedeId)
       },
-      include: { imovel: true, hospede: true }
+      include: {
+        imovel: {
+          include: {
+            imagens: true
+          }
+        },
+        hospede: true
+      }
     });
 
     return res.status(201).json({ mensagem: "Reserva criada!", reserva: novaReserva });
@@ -41,16 +63,59 @@ const listarReservasPorImovel = async (req, res) => {
 const listarReservasPorUsuario = async (req, res) => {
   try {
     const { usuarioId } = req.params;
+    const id = parseInt(usuarioId);
+
+    if (isNaN(id)) {
+      return res.status(400).json({
+        erro: "ID de usuário inválido"
+      });
+    }
 
     const reservas = await prisma.reserva.findMany({
-      where: { hospedeId: parseInt(usuarioId) },
-      include: { imovel: { include: { imagens: true } } },
-      orderBy: { inicio: 'asc' }
+      where: {
+        hospedeId: id
+      },
+      include: {
+        imovel: {
+          include: {
+            imagens: true
+          }
+        }
+      },
+      orderBy: {
+        inicio: 'asc'
+      }
     });
 
+    const hoje = new Date();
+
+    for (const reserva of reservas) {
+      if (
+        reserva.status === 'Confirmada' &&
+        new Date(reserva.fim) < hoje
+      ) {
+        await prisma.reserva.update({
+          where: {
+            id: reserva.id
+          },
+          data: {
+            status: 'Finalizado'
+          }
+        });
+
+        reserva.status = 'Finalizado';
+      }
+    }
+
     return res.json(reservas);
+
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao buscar reservas do usuário", detalhes: error.message });
+    console.error("Erro ao buscar reservas do usuário:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao buscar reservas do usuário",
+      detalhes: error.message
+    });
   }
 };
 
@@ -59,7 +124,7 @@ const atualizarStatusReserva = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const statusValidos = ['Pendente', 'Confirmada', 'Cancelada'];
+    const statusValidos = ['Pendente', 'Confirmada', 'Cancelada', 'Finalizado'];
     if (!statusValidos.includes(status)) {
       return res.status(400).json({ erro: "Status inválido" });
     }
@@ -75,9 +140,55 @@ const atualizarStatusReserva = async (req, res) => {
   }
 };
 
+const buscarReservaPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const reservaId = parseInt(id);
+
+    if (isNaN(reservaId)) {
+      return res.status(400).json({
+        erro: "ID de reserva inválido"
+      });
+    }
+
+    const reserva = await prisma.reserva.findUnique({
+      where: {
+        id: reservaId
+      },
+      include: {
+        hospede: true,
+        imovel: {
+          include: {
+            imagens: true,
+            usuario: true
+          }
+        }
+      }
+    });
+
+    if (!reserva) {
+      return res.status(404).json({
+        erro: "Reserva não encontrada"
+      });
+    }
+
+    return res.json(reserva);
+
+  } catch (error) {
+    console.error("Erro ao buscar detalhes da reserva:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao buscar detalhes da reserva",
+      detalhes: error.message
+    });
+  }
+};
+
 module.exports = {
   criarReserva,
   listarReservasPorImovel,
   listarReservasPorUsuario,
-  atualizarStatusReserva
+  atualizarStatusReserva,
+  buscarReservaPorId
 };

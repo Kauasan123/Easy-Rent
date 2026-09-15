@@ -103,10 +103,6 @@ const atualizarAvatar = async (req, res) => {
       data: { avatarPath }
     });
 
-    console.log(
-      `Foto do usuário ${usuarioId} atualizada com sucesso no banco!`
-    );
-
     return res.status(200).json({
       mensagem: 'Avatar atualizado com sucesso!',
       avatarPath: avatarPath,

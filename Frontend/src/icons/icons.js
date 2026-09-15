@@ -66,3 +66,6 @@ export { FaCircleCheck } from "react-icons/fa6"; {/* Ícone de Check Circle */}
 export { FaUserCircle } from "react-icons/fa"; {/* Ícone de Usuario Circulo */}
 export { MdCloudUpload } from 'react-icons/md';
 export { MdImage } from "react-icons/md";
+export { BiSolidBath } from "react-icons/bi";
+export { FaCreditCard } from "react-icons/fa";
+export { MdDone } from "react-icons/md";

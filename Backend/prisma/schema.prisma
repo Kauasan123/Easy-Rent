@@ -8,26 +8,26 @@ generator client {
 }
 
 model Usuario {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  email        String   @unique
-  telefone     String?  
-  senha        String   
-  avatarPath   String?  
-  criadoEm     DateTime @default(now()) 
-  atualizadoEm DateTime @updatedAt      
+  id            Int      @id @default(autoincrement())
+  nome          String
+  email         String   @unique
+  telefone      String?  
+  senha         String   
+  avatarPath    String?  
+  criadoEm      DateTime @default(now()) 
+  atualizadoEm  DateTime @updatedAt      
 
-  imoveis      Imovel[]
-  reservas  Reserva[] @relation("ReservasComoHospede")
-  avaliacoes Avaliacao[] @relation("AvaliacoesFeitas")
+  imoveis       Imovel[]
+  reservas      Reserva[] @relation("ReservasComoHospede")
+  avaliacoes    Avaliacao[] @relation("AvaliacoesFeitas")
 }
 
 model Periodo {
-  id       Int      @id @default(autoincrement())
-  inicio   DateTime
-  fim      DateTime
-  imovelId Int
-  imovel   Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  id            Int      @id @default(autoincrement())
+  inicio        DateTime
+  fim           DateTime
+  imovelId      Int
+  imovel        Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
 }
 
 model Imovel {
@@ -76,10 +76,12 @@ model Imovel {
 
 model Reserva {
   id         Int      @id @default(autoincrement())
+  codigo     String   @unique
   inicio     DateTime
   fim        DateTime
+  hospedes   Int
   status     String   @default("Pendente")
-  criadoEm  DateTime @default(now())
+  criadoEm   DateTime @default(now())
 
   imovelId   Int
   imovel     Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
@@ -99,7 +101,7 @@ model Avaliacao {
   id          Int      @id @default(autoincrement())
   nota        Float
   comentario  String   @db.Text
-  criadoEm   DateTime @default(now())
+  criadoEm    DateTime @default(now())
 
   imovelId    Int
   imovel      Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)

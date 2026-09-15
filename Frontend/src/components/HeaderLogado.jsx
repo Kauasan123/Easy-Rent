@@ -64,7 +64,7 @@ const HeaderLogado = () => {
 
                 <div className='flex flex-row items-center gap-10'>
                     <div className='flex flex-row gap-8 font-medium text-[1.125rem] text-preto-texto-principal'>
-                        <Link to="/" className='hover:text-beje-principal transition-colors'>Home</Link>
+                        <Link to="/principal" className='hover:text-beje-principal transition-colors'>Home</Link>
                         <Link to="/#Sobre" className='hover:text-beje-principal transition-colors'>Sobre</Link>
                         <div className='relative'>
                             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className='flex items-center gap-0.5 hover:text-beje-principal transition-colors'>
@@ -77,6 +77,7 @@ const HeaderLogado = () => {
                                 </div>
                             )}
                         </div>
+                        <Link to="/VerReservas" className='hover:text-beje-principal transition-colors'>Minhas Reservas</Link>
                         <Link to="#Contatos" className='hover:text-beje-principal transition-colors'>Contatos</Link>
                     </div>
 

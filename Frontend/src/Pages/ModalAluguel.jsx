@@ -1,9 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as Icons from '../icons/icons.js';
 import Calendario from '../components/Calendario.jsx';
 
 export function ModalDetalhes({ imovel, onClose }) {
   if (!imovel) return null;
+
+  const navigate = useNavigate();
 
   const [indiceAvaliacao, setIndiceAvaliacao] = React.useState(0);
   const [avaliacoes, setAvaliacoes] = React.useState([]);
@@ -16,6 +19,7 @@ export function ModalDetalhes({ imovel, onClose }) {
   const [erroAvaliacao, setErroAvaliacao] = React.useState('');
   const [checkIn, setCheckIn] = React.useState(null);
   const [checkOut, setCheckOut] = React.useState(null);
+  const [hospedes, setHospedes] = React.useState('1');
   const [calendarioAberto, setCalendarioAberto] = React.useState(null);
   const [enviandoReserva, setEnviandoReserva] = React.useState(false);
   const [erroReserva, setErroReserva] = React.useState('');
@@ -150,8 +154,9 @@ export function ModalDetalhes({ imovel, onClose }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          inicio: checkIn.toISOString(),
-          fim: checkOut.toISOString(),
+          inicio: checkIn,
+          fim: checkOut,
+          hospedes: Number(hospedes),
           imovelId: imovel.id,
           hospedeId: usuarioId
         })
@@ -263,7 +268,7 @@ export function ModalDetalhes({ imovel, onClose }) {
 
           {/* Coluna Direita */}
           <aside className="lg:col-span-4 flex flex-col gap-6">
-            <div className="top-0 border border-borda-cards rounded-3xl p-6 flex flex-col gap-4 bg-fundo-cards">
+            <div className="top-0 border border-borda-cards rounded-3xl p-6 flex flex-col gap-3 bg-fundo-cards">
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-bold">R$ {imovel.preco}</span>
                 <span className="text-cinza-texto-secundario text-sm">/ {imovel.tipoCobranca === 'mes' ? 'Mês' : 'Noite'}</span>
@@ -312,10 +317,10 @@ export function ModalDetalhes({ imovel, onClose }) {
                           return (
                             <div key={i} className="flex flex-col gap-2">
                               <button type="button" onClick={() => {
-                                  setPeriodoSelecionado({ inicio, fim });
-                                  setCheckIn(null);
-                                  setCheckOut(null);
-                                }}
+                                setPeriodoSelecionado({ inicio, fim });
+                                setCheckIn(null);
+                                setCheckOut(null);
+                              }}
                                 className={`text-left px-3 py-2 border rounded-xl text-xs font-semibold transition-all ${selecionado ? 'bg-beje-principal text-white border-beje-principal' : 'border-borda-cards text-preto-texto-principal hover:bg-beje-principal hover:text-white hover:border-beje-principal'}`}
                               >
                                 {inicio.toLocaleDateString('pt-BR')} → {fim.toLocaleDateString('pt-BR')}
@@ -361,6 +366,57 @@ export function ModalDetalhes({ imovel, onClose }) {
                 )}
               </div>
 
+              {/* Hóspedes */}
+              <div className="border border-borda-cards rounded-xl bg-white overflow-hidden">
+                <div className="p-3">
+                  <span className="text-[10px] font-bold uppercase text-preto-texto-principal">
+                    Hóspedes
+                  </span>
+
+                  <div className="flex items-center gap-2 mt-1 border p-2 border-borda-cards rounded-lg">
+                    <input
+                      type="number"
+                      min="1"
+                      max={imovel.capacidade || 99}
+                      value={hospedes}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const valor = e.target.value;
+
+                        if (valor === '') {
+                          setHospedes('');
+                          return;
+                        }
+
+                        const numero = Number(valor);
+
+                        if (numero < 1) {
+                          setHospedes('1');
+                          return;
+                        }
+
+                        if (imovel.capacidade && numero > imovel.capacidade) {
+                          setHospedes(String(imovel.capacidade));
+                          return;
+                        }
+
+                        setHospedes(valor);
+                      }}
+                      onBlur={() => {
+                        if (hospedes === '') {
+                          setHospedes('1');
+                        }
+                      }}
+                      className="w-full text-sm font-medium text-preto-texto-principal outline-none bg-transparent"
+                    />
+
+                    <span className="text-[11px] text-cinza-texto-secundario whitespace-nowrap">
+                      Hóspedes
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Resumo do preço */}
               {checkIn && checkOut && calcularDias() > 0 && (
                 <div className="bg-white border border-borda-cards rounded-xl p-3 flex flex-col gap-1">
@@ -383,22 +439,36 @@ export function ModalDetalhes({ imovel, onClose }) {
               {/* Sucesso */}
               {sucessoReserva ? (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
-                  <p className="text-emerald-700 font-bold text-sm">Reserva enviada com sucesso!</p>
-                  <p className="text-emerald-600 text-xs mt-1">Aguarde a confirmação do anfitrião.</p>
-                  <button
-                    onClick={() => setSucessoReserva(false)}
-                    className="mt-2 text-xs text-emerald-700 font-bold hover:underline"
-                  >
+                  <p className="text-emerald-700 font-bold text-sm">
+                    Reserva enviada com sucesso!
+                  </p>
+
+                  <p className="text-emerald-600 text-xs mt-1">
+                    Aguarde a confirmação do anfitrião.
+                  </p>
+
+                  <button onClick={() => setSucessoReserva(false)} className="mt-2 text-xs text-emerald-700 font-bold hover:underline">
                     Fazer outra reserva
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={handleConfirmarReserva}
-                  disabled={enviandoReserva || !checkIn || !checkOut}
+                  onClick={() =>
+                    navigate('/revisaoReserva', {
+                      state: {
+                        imovel,
+                        checkIn,
+                        checkOut,
+                        hospedes: Number(hospedes)
+                      }
+                    })
+                  }
+                  disabled={!checkIn || !checkOut}
                   className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {enviandoReserva ? 'Enviando...' : checkIn && checkOut ? 'Confirmar Reserva' : 'Enviar disponibilidade'}
+                  {checkIn && checkOut
+                    ? 'Avançar para Reserva'
+                    : 'Avançar para Reserva'}
                 </button>
               )}
 
@@ -551,8 +621,7 @@ export function ModalDetalhes({ imovel, onClose }) {
             {!mostrarFormAvaliacao ? (
               <button
                 onClick={() => setMostrarFormAvaliacao(true)}
-                className="bg-beje-principal text-branco-texto-principal font-bold px-10 py-3.5 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-md"
-              >
+                className="bg-beje-principal text-branco-texto-principal font-bold px-10 py-3.5 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-md">
                 Fazer Avaliação
               </button>
             ) : (

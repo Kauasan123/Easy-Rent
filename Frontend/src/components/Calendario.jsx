@@ -8,6 +8,7 @@ registerLocale('pt-BR', ptBR);
 
 export function Calendario({
   modoVisualizacao = false,
+  modoDataUnica = false,
   reservas = [],
   startDate: propStartDate,
   endDate: propEndDate,
@@ -26,7 +27,14 @@ export function Calendario({
 
   const onChange = (dates) => {
     if (modoVisualizacao) return;
+
+    if (modoDataUnica) {
+      setStartDate(dates);
+      return;
+    }
+
     const [start, end] = dates;
+
     setStartDate(start);
     setEndDate(end);
   };
@@ -159,7 +167,7 @@ export function Calendario({
           onChange={onChange}
           startDate={modoVisualizacao ? null : startDate}
           endDate={modoVisualizacao ? null : endDate}
-          selectsRange={!modoVisualizacao}
+          selectsRange={!modoVisualizacao && !modoDataUnica}
           inline
           monthsShown={1}
           minDate={minDate !== undefined ? minDate : new Date()}
