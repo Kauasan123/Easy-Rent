@@ -33,6 +33,7 @@
       opacity: 0;
       transform: translateX(-20px);
     }
+
     to {
       opacity: 0.9;
       transform: translateX(0);
@@ -40,4 +41,13 @@
   }
 
   --animation-entrada: entrada-onda 1.2s ease-out forwards;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

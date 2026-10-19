@@ -7,6 +7,7 @@ const imovelRoutes = require('./routes/imovelRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const reservaRoutes = require('./routes/reservaRoutes');
 const avaliacaoRoutes = require('./routes/avaliacaoRoutes');
+const pagamentoRoutes = require('./routes/pagamentoRoutes')
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +20,7 @@ app.use('/api', usuarioRoutes);
 app.use('/api', reservaRoutes);
 app.use('/api', avaliacaoRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/api', pagamentoRoutes);
 
 app.get('/', (req, res) => {
   return res.json({ status: "Backend EasyRent 100% Operacional!" });

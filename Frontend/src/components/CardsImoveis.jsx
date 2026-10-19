@@ -80,7 +80,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
   };
 
   return (
-    <div className='relative border h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col bg-white'>
+    <div className='relative border border-borda-cards h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col bg-white'>
       <div className='relative h-[50%] w-full overflow-hidden group'>
         
         <img 

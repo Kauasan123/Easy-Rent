@@ -81,13 +81,20 @@ function ControleGeral() {
             {/* Cards de Métricas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
                 {metricas.map((item) => (
-                    <div key={item.id} className="bg-white border border-borda-cards rounded-2xl p-5 flex items-center gap-4 shadow-sm">
-                        <div className="w-12 h-12 rounded-xl bg-cinza-fundo-x flex items-center justify-center shrink-0">
-                            {item.icon}
-                        </div>
+                    <div key={item.id} className="bg-white p-5 rounded-2xl border border-borda-cards shadow-sm flex items-center justify-between">
+
                         <div className="flex flex-col">
-                            <span className="text-xs font-bold text-cinza-texto-secundario uppercase tracking-wide">{item.title}</span>
-                            <span className="text-2xl font-black text-preto-texto-principal mt-0.5">{item.value}</span>
+                            <span className="text-xs text-cinza-texto-secundario font-medium">
+                                {item.title}
+                            </span>
+
+                            <span className="text-2xl font-bold text-preto-texto-principal mt-1">
+                                {item.value}
+                            </span>
+                        </div>
+
+                        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                            {item.icon}
                         </div>
                     </div>
                 ))}

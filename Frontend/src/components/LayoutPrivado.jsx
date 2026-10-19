@@ -5,8 +5,9 @@ const LayoutPrivado = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 bg-white h-screen overflow-y-auto">
-        <Outlet /> 
+
+      <main className="flex-1 bg-white h-screen overflow-y-auto no-scrollbar">
+        <Outlet />
       </main>
     </div>
   );

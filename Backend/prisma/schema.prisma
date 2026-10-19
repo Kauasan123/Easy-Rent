@@ -88,6 +88,8 @@ model Reserva {
 
   hospedeId  Int
   hospede    Usuario  @relation("ReservasComoHospede", fields: [hospedeId], references: [id], onDelete: Cascade)
+
+  pagamento Pagamento?
 }
 
 model Imagem {
@@ -108,4 +110,16 @@ model Avaliacao {
 
   autorId     Int
   autor       Usuario  @relation("AvaliacoesFeitas", fields: [autorId], references: [id], onDelete: Cascade)
+}
+
+model Pagamento {
+  id            Int       @id @default(autoincrement())
+  valor         Float
+  metodo        String
+  finalCartao   String?
+  status        String    @default("Pendente")
+  dataPagamento DateTime?
+  reservaId     Int       @unique
+
+  reserva       Reserva   @relation(fields: [reservaId], references: [id], onDelete: Cascade)
 }

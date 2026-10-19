@@ -69,3 +69,7 @@ export { MdImage } from "react-icons/md";
 export { BiSolidBath } from "react-icons/bi";
 export { FaCreditCard } from "react-icons/fa";
 export { MdDone } from "react-icons/md";
+export { BsCashStack } from "react-icons/bs";
+export { FaDollarSign } from "react-icons/fa";
+export { FaChartLine } from "react-icons/fa6";
+export { FaExchangeAlt } from "react-icons/fa";

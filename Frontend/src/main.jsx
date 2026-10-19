@@ -11,6 +11,8 @@ import Perfil from './Pages/Perfil'
 import MeusAlugueis from './Pages/MeusAlugueis';
 import ControleGeral from './Pages/ControleGeral';
 import CadastrarAluguel from './Pages/CadastrarAluguel';
+import ControleUnico from './Pages/ControleUnico.jsx';
+import ControlePagamento from './Pages/ControlePagamento.jsx';
 import VerReservas from './Pages/VerReservas.jsx';
 import RevisaoReserva from './Pages/RevisaoReserva.jsx';
 import Pagamento from './Pages/Pagamento.jsx';
@@ -34,9 +36,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
         <Route element={<LayoutPrivado />}>
           <Route path="/perfil" element={<Perfil />} />
-          <Route path='/aluguel' element={<MeusAlugueis />}></Route>
-          <Route path='/controle' element={<ControleGeral />}></Route>
-          <Route path='/cadastro' element={<CadastrarAluguel />}></Route>
+          <Route path='/aluguel' element={<MeusAlugueis />} />
+          <Route path='/controle' element={<ControleGeral />} />
+          <Route path='/cadastro' element={<CadastrarAluguel />} />
+          <Route path='/controleunico' element={<ControleUnico />} />
+          <Route path='/controlepagamento' element={<ControlePagamento />} />
         </Route>
       </Routes>
     </BrowserRouter>

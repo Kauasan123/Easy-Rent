@@ -53,6 +53,8 @@ const Sidebar = () => {
     { name: 'Perfil', path: '/perfil', icon: <Icons.FaUser size={20} /> },
     { name: 'Meus Alugueis', path: '/aluguel', icon: <Icons.FaHouseChimney size={20} /> },
     { name: 'Controle Geral', path: '/controle', icon: <Icons.FaEye size={20} /> },
+    { name: 'Controle Único', path: '/controleunico', icon: <Icons.FaClipboardList size={20} /> },
+    { name: 'Controle Pagamento', path:'/controlepagamento', icon: <Icons.BsCashStack size={20} />},
     { name: 'Cadastrar Aluguel', path: '/cadastro', icon: <Icons.MdOutlineMailOutline size={20} /> },
     { name: 'Página Principal', path: '/principal', icon: <Icons.FaSignOutAlt size={20} /> },
   ];
