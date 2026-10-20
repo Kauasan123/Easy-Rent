@@ -27,7 +27,7 @@ function MeusAlugueis() {
 
     const confirmarExclusao = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis/${imovelParaExcluir}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/imoveis/${imovelParaExcluir}`, {
                 method: 'DELETE'
             });
 
@@ -49,9 +49,9 @@ function MeusAlugueis() {
     const carregarImoveis = async () => {
         try {
             setLoading(true);
-            const usuarioId = localStorage.getItem('usuarioId');
+            const usuarioId = sessionStorage.getItem('usuarioId');
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/imoveis`);
 
             if (!response.ok) throw new Error('Não foi possível carregar os imóveis.');
 

@@ -89,11 +89,26 @@ const criarImovel = async (req, res) => {
 const listarImoveis = async (req, res) => {
   try {
     const imoveis = await prisma.imovel.findMany({
-      include: { imagens: true, periodos: true, usuario: true }
+      include: {
+        imagens: true,
+        periodos: true,
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            avatarPath: true
+          }
+        }
+      }
     });
+
     return res.json(imoveis);
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao buscar imóveis", detalhes: error.message });
+    console.error("Erro ao buscar imóveis:", error);
+    return res.status(500).json({
+      erro: "Erro ao buscar imóveis",
+      detalhes: error.message
+    });
   }
 };
 
@@ -211,20 +226,34 @@ const atualizarImovel = async (req, res) => {
 const buscarImovelPorId = async (req, res) => {
   try {
     const { id } = req.params;
+
     const imovel = await prisma.imovel.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
       include: {
         imagens: true,
         periodos: true,
-        usuario: true
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            avatarPath: true
+          }
+        }
       }
     });
 
-    if (!imovel) return res.status(404).json({ erro: "Imóvel não encontrado" });
+    if (!imovel) {
+      return res.status(404).json({
+        erro: "Imóvel não encontrado"
+      });
+    }
 
     return res.json(imovel);
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao buscar imóvel" });
+    console.error("Erro ao buscar imóvel:", error);
+    return res.status(500).json({
+      erro: "Erro ao buscar imóvel"
+    });
   }
 };
 

@@ -142,7 +142,7 @@ function CadastrarAluguel() {
         e.preventDefault();
         setCarregando(true);
 
-        const usuarioId = localStorage.getItem('usuarioId');
+        const usuarioId = sessionStorage.getItem('usuarioId');
 
         if (!usuarioId) {
             toast.error('Você precisa estar logado para cadastrar um imóvel.');
@@ -186,7 +186,7 @@ function CadastrarAluguel() {
                 formData.append('imagens', imagem);
             });
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/imoveis`, {
                 method: 'POST',
                 body: formData,
             });

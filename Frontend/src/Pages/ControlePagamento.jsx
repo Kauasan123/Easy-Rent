@@ -6,7 +6,7 @@ function ControlePagamento() {
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState('');
 
-    const usuarioId = localStorage.getItem('usuarioId');
+    const usuarioId = sessionStorage.getItem('usuarioId');
 
     const [filtroStatus, setFiltroStatus] = useState('Todos');
     const [imovelSelecionado, setImovelSelecionado] = useState('Todos os imóveis');
@@ -422,7 +422,7 @@ function ControlePagamento() {
                         Todos ({totalTransacoes})
                     </button>
 
-                    <button nClick={() => setFiltroStatus('Pagos')} className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-colors ${filtroStatus === 'Pagos'
+                    <button onClick={() => setFiltroStatus('Pagos')} className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-colors ${filtroStatus === 'Pagos'
                         ? 'bg-beje-principal text-white'
                         : 'bg-white border border-borda-cards text-cinza-texto-secundario hover:bg-fundo-cards'
                         }`}>
@@ -522,12 +522,8 @@ function ControlePagamento() {
                             <div key={pagamento.id} className="grid grid-cols-[1.3fr_1.2fr_1fr_0.7fr_1.3fr_0.8fr] min-h-[82px] border-b border-borda-cards last:border-b-0">
                                 <div className="px-4 py-3 flex items-center gap-3 min-w-0">
 
-                                    <div className="w-11 h-11 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center shrink-0 overflow-hidden">
-                                        {pagamento.avatar ? (
-                                            <img src={pagamento.avatar} alt={pagamento.hospede} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Icons.FaUser size={20} className="text-zinc-500" />
-                                        )}
+                                    <div className="w-11 h-11 rounded-full border border-zinc-300 shrink-0 overflow-hidden">
+                                        <AvatarUsuario nome={pagamento.hospede} src={pagamento.avatar} className="w-full h-full" textoClassName="text-sm"/>
                                     </div>
 
                                     <div className="min-w-0">

@@ -196,7 +196,7 @@ function ControleUnico() {
     const [filtro, setFiltro] = useState('Todos');
     const [carregandoImoveis, setCarregandoImoveis] = useState(true);
     const [carregandoReservas, setCarregandoReservas] = useState(false);
-    const usuarioId = localStorage.getItem('usuarioId');
+    const usuarioId = sessionStorage.getItem('usuarioId');
     const [paginaAtual, setPaginaAtual] = useState(1);
 
     const itensPorPagina = 5;
@@ -207,7 +207,7 @@ function ControleUnico() {
             try {
 
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/imoveis`
+                    `${import.meta.env.VITE_API_URL}/imoveis`
                 );
 
                 if (!response.ok) {
@@ -263,7 +263,7 @@ function ControleUnico() {
                 setCarregandoReservas(true);
 
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/reservas/imovel/${imovelSelecionado}`
+                    `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovelSelecionado}`
                 );
 
                 if (!response.ok) {

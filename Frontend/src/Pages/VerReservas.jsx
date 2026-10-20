@@ -153,13 +153,13 @@ function VerReservas() {
     const [reservas, setReservas] = useState([]);
     const [carregando, setCarregando] = useState(true);
 
-    const usuarioId = localStorage.getItem('usuarioId');
+    const usuarioId = sessionStorage.getItem('usuarioId');
 
     useEffect(() => {
         const carregarReservas = async () => {
             try {
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/reservas/usuario/${usuarioId}`
+                    `${import.meta.env.VITE_API_URL}/reservas/usuario/${usuarioId}`
                 );
 
                 const data = await response.json();

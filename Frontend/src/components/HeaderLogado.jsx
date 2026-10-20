@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import * as Icons from '../icons/icons'
 import Logo from "../assets/ImagensExtras/LogoEasy-Rent.png";
 import { Link } from 'react-router-dom';
+import AvatarUsuario from './AvatarUsuario';
 
 const HeaderLogado = () => {
 
     const [usuarioNome, setUsuarioNome] = useState(
-        localStorage.getItem('usuarioNome') || 'Usuário'
+        sessionStorage.getItem('usuarioNome') || 'Usuário'
     );
 
     const [usuarioAvatar, setUsuarioAvatar] = useState('');
@@ -15,14 +16,14 @@ const HeaderLogado = () => {
 
     useEffect(() => {
 
-        const usuarioId = localStorage.getItem('usuarioId');
+        const usuarioId = sessionStorage.getItem('usuarioId');
 
         if (!usuarioId) return;
         const buscarDadosUsuario = async () => {
             try {
 
                 const resposta = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`
+                    `${import.meta.env.VITE_API_URL}/usuarios/${usuarioId}`
                 );
 
                 if (resposta.ok) {
@@ -83,19 +84,8 @@ const HeaderLogado = () => {
 
                     {/* Usuário Logado */}
                     <div className='flex items-center gap-3'>
-                        <div className='w-10 h-10 rounded-full overflow-hidden border-2 border-beje-principal shrink-0'>
-                            {usuarioAvatar && !avatarErro ? (
-                                <img
-                                    src={usuarioAvatar}
-                                    alt={usuarioNome}
-                                    className='w-full h-full object-cover'
-                                    onError={() => setAvatarErro(true)}
-                                />
-                            ) : (
-                                <div className='w-full h-full bg-gray-200 flex items-center justify-center'>
-                                    <Icons.FaUser size={18} className='text-gray-400' />
-                                </div>
-                            )}
+                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-beje-principal shrink-0">
+                            <AvatarUsuario nome={usuarioNome} src={usuarioAvatar} className="h-full w-full"/>
                         </div>
 
                         <div className='flex flex-col leading-tight'>

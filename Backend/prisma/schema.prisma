@@ -1,6 +1,6 @@
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -8,33 +8,37 @@ generator client {
 }
 
 model Usuario {
-  id            Int      @id @default(autoincrement())
-  nome          String
-  email         String   @unique
-  telefone      String?  
-  senha         String   
-  avatarPath    String?  
-  criadoEm      DateTime @default(now()) 
-  atualizadoEm  DateTime @updatedAt      
+  id           Int      @id @default(autoincrement())
+  nome         String
+  email        String   @unique
+  telefone     String?
+  senha        String
+  avatarPath   String?
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
-  imoveis       Imovel[]
-  reservas      Reserva[] @relation("ReservasComoHospede")
-  avaliacoes    Avaliacao[] @relation("AvaliacoesFeitas")
+  imoveis    Imovel[]
+  reservas   Reserva[]   @relation("ReservasComoHospede")
+  avaliacoes Avaliacao[] @relation("AvaliacoesFeitas")
+
+  conversasComoLocatario    Conversa[] @relation("ConversasLocatario")
+  conversasComoProprietario Conversa[] @relation("ConversasProprietario")
+  mensagensEnviadas         Mensagem[]
 }
 
 model Periodo {
-  id            Int      @id @default(autoincrement())
-  inicio        DateTime
-  fim           DateTime
-  imovelId      Int
-  imovel        Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  id       Int      @id @default(autoincrement())
+  inicio   DateTime
+  fim      DateTime
+  imovelId Int
+  imovel   Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
 }
 
 model Imovel {
-  id            Int      @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   titulo        String
   tipo          String
-  descricao     String   @db.Text
+  descricao     String  @db.Text
   cidade        String
   bairro        String
   endereco      String
@@ -66,28 +70,29 @@ model Imovel {
   naoFumante     Boolean
 
   // Relacionamentos
-  usuarioId Int
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  imagens   Imagem[]
-  periodos  Periodo[]
-  reservas  Reserva[]
+  usuarioId  Int
+  usuario    Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  imagens    Imagem[]
+  periodos   Periodo[]
+  reservas   Reserva[]
   avaliacoes Avaliacao[]
+  conversas  Conversa[]
 }
 
 model Reserva {
-  id         Int      @id @default(autoincrement())
-  codigo     String   @unique
-  inicio     DateTime
-  fim        DateTime
-  hospedes   Int
-  status     String   @default("Pendente")
-  criadoEm   DateTime @default(now())
+  id       Int      @id @default(autoincrement())
+  codigo   String   @unique
+  inicio   DateTime
+  fim      DateTime
+  hospedes Int
+  status   String   @default("Pendente")
+  criadoEm DateTime @default(now())
 
-  imovelId   Int
-  imovel     Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  imovelId Int
+  imovel   Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
 
-  hospedeId  Int
-  hospede    Usuario  @relation("ReservasComoHospede", fields: [hospedeId], references: [id], onDelete: Cascade)
+  hospedeId Int
+  hospede   Usuario @relation("ReservasComoHospede", fields: [hospedeId], references: [id], onDelete: Cascade)
 
   pagamento Pagamento?
 }
@@ -100,16 +105,16 @@ model Imagem {
 }
 
 model Avaliacao {
-  id          Int      @id @default(autoincrement())
-  nota        Float
-  comentario  String   @db.Text
-  criadoEm    DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  nota       Float
+  comentario String   @db.Text
+  criadoEm   DateTime @default(now())
 
-  imovelId    Int
-  imovel      Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  imovelId Int
+  imovel   Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
 
-  autorId     Int
-  autor       Usuario  @relation("AvaliacoesFeitas", fields: [autorId], references: [id], onDelete: Cascade)
+  autorId Int
+  autor   Usuario @relation("AvaliacoesFeitas", fields: [autorId], references: [id], onDelete: Cascade)
 }
 
 model Pagamento {
@@ -121,5 +126,41 @@ model Pagamento {
   dataPagamento DateTime?
   reservaId     Int       @unique
 
-  reserva       Reserva   @relation(fields: [reservaId], references: [id], onDelete: Cascade)
+  reserva Reserva @relation(fields: [reservaId], references: [id], onDelete: Cascade)
+}
+
+model Conversa {
+  id           Int      @id @default(autoincrement())
+  criadaEm     DateTime @default(now())
+  atualizadaEm DateTime @updatedAt
+
+  imovelId       Int
+  locatarioId    Int
+  proprietarioId Int
+
+  imovel       Imovel  @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  locatario    Usuario @relation("ConversasLocatario", fields: [locatarioId], references: [id], onDelete: Cascade)
+  proprietario Usuario @relation("ConversasProprietario", fields: [proprietarioId], references: [id], onDelete: Cascade)
+
+  mensagens Mensagem[]
+
+  @@unique([imovelId, locatarioId])
+  @@index([locatarioId])
+  @@index([proprietarioId])
+}
+
+model Mensagem {
+  id       Int       @id @default(autoincrement())
+  texto    String    @db.Text
+  criadaEm DateTime  @default(now())
+  lidaEm   DateTime?
+
+  conversaId  Int
+  remetenteId Int
+
+  conversa  Conversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+  remetente Usuario  @relation(fields: [remetenteId], references: [id], onDelete: Cascade)
+
+  @@index([conversaId, criadaEm])
+  @@index([remetenteId])
 }

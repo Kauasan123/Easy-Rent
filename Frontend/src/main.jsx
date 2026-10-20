@@ -18,11 +18,13 @@ import RevisaoReserva from './Pages/RevisaoReserva.jsx';
 import Pagamento from './Pages/Pagamento.jsx';
 import ConclusaoPagamento from './Pages/ConclusaoPagamento.jsx';
 import VerDetalhesReserva from './Pages/VerDetalhesReserva.jsx';
+import BotaoChat from './components/Chat';
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
+      <BotaoChat />
       <Routes>
         <Route path="/" element={<LadingPage />} />
         <Route path="/login" element={<TelaLogin />} />

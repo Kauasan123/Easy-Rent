@@ -9,12 +9,12 @@ function ControleGeral() {
     const [carregando, setCarregando] = useState(true);
     const [idExpandido, setIdExpandido] = useState(null);
 
-    const usuarioId = localStorage.getItem('usuarioId');
+    const usuarioId = sessionStorage.getItem('usuarioId');
 
     useEffect(() => {
         const carregarImoveis = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/imoveis`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/imoveis`);
                 const data = await response.json();
 
                 const imoveisDoUsuario = data.filter(
@@ -25,7 +25,7 @@ function ControleGeral() {
                     imoveisDoUsuario.map(async (imovel) => {
                         try {
                             const resReservas = await fetch(
-                                `${import.meta.env.VITE_API_URL}/api/reservas/imovel/${imovel.id}`
+                                `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovel.id}`
                             );
                             const reservas = resReservas.ok ? await resReservas.json() : [];
                             return { ...imovel, reservas };

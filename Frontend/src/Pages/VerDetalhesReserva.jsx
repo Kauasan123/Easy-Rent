@@ -4,6 +4,7 @@ import HeaderLogado from '../components/HeaderLogado'
 import Footer from '../components/Footer'
 import * as Icons from '../icons/icons.js'
 import ModalAviso from '../components/ModalAviso'
+import AvatarUsuario from '../components/AvatarUsuario';
 
 function VerDetalhesReserva() {
 
@@ -20,7 +21,7 @@ function VerDetalhesReserva() {
 
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/reservas/${reserva.id}/status`,
+                `${import.meta.env.VITE_API_URL}/reservas/${reserva.id}/status`,
                 {
                     method: 'PATCH',
                     headers: {
@@ -58,7 +59,7 @@ function VerDetalhesReserva() {
         const carregarReserva = async () => {
             try {
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/reservas/${id}`
+                    `${import.meta.env.VITE_API_URL}/reservas/${id}`
                 )
 
                 const data = await response.json()
@@ -369,19 +370,16 @@ function VerDetalhesReserva() {
                         </h2>
 
                         <div className="flex items-center gap-4">
-                            {reserva.imovel?.usuario?.avatarPath ? (
-                                <img src={`${import.meta.env.VITE_API_URL}${reserva.imovel.usuario.avatarPath}`} alt={reserva.imovel.usuario.nome} className="w-[88px] h-[88px] object-cover rounded-full" />
-                            ) : (
-                                <div className="w-[88px] h-[88px] rounded-full bg-gray-200 flex items-center justify-center">
-                                    <Icons.FaUserCircle size={45} className="text-gray-400" />
-                                </div>
-                            )}
+                            <AvatarUsuario nome={reserva.imovel?.usuario?.nome || 'Anfitrião'} src={reserva.imovel?.usuario?.avatarPath
+                                ? `${import.meta.env.VITE_API_URL}${reserva.imovel.usuario.avatarPath}`
+                                : null} className="w-[88px] h-[88px]" textoClassName="text-3xl" />
+
                             <div>
                                 <h3 className="text-lg font-bold mb-2">
                                     {reserva.imovel?.usuario?.nome || 'Não informado'}
                                 </h3>
 
-                                <button type="button" className="flex items-center gap-2 border border-beje-principal text-beje-principal px-3 py-2 rounded-md font-semibold hover:bg-beje-principal hover:text-white transition-colors">
+                                <button type="button" className="flex items-center gap-2 border border-beje-principal text-beje-principal px-3 py-2 rounded-md font-semibold hover:bg-beje-principal hover:text-white transition-colors" >
                                     <Icons.MdOutlineMailOutline size={20} />
                                     Enviar Mensagem
                                 </button>

@@ -83,11 +83,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
     <div className='relative border border-borda-cards h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col bg-white'>
       <div className='relative h-[50%] w-full overflow-hidden group'>
         
-        <img 
-          src={obterUrlImagem(listaImagens[fotoAtual])} 
-          alt={imovel.titulo} 
-          className='w-full h-full object-cover transition-transform duration-300 hover:scale-110' 
-        />
+        <img src={obterUrlImagem(listaImagens[fotoAtual])} alt={imovel.titulo} className='w-full h-full object-cover transition-transform duration-300 hover:scale-110' />
         
         {listaImagens.length > 1 && (
           <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">

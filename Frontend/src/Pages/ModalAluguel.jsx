@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Icons from '../icons/icons.js';
 import Calendario from '../components/Calendario.jsx';
+import AvatarUsuario from '../components/AvatarUsuario';
 
 export function ModalDetalhes({ imovel, onClose }) {
   if (!imovel) return null;
@@ -25,14 +26,15 @@ export function ModalDetalhes({ imovel, onClose }) {
   const [erroReserva, setErroReserva] = React.useState('');
   const [sucessoReserva, setSucessoReserva] = React.useState(false);
   const [periodoSelecionado, setPeriodoSelecionado] = React.useState(null);
+  const [enviandoMensagem, setEnviandoMensagem] = React.useState(false);
+  const [erroMensagem, setErroMensagem] = React.useState('');
 
-  const usuarioId = localStorage.getItem('usuarioId');
+  const usuarioId = sessionStorage.getItem('usuarioId');
 
-  // Busca avaliações do imóvel
   React.useEffect(() => {
     const carregarAvaliacoes = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/avaliacoes/imovel/${imovel.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/avaliacoes/imovel/${imovel.id}`);
         const data = await response.json();
         setAvaliacoes(data.avaliacoes || []);
         setMediaAvaliacoes(data.media || 0);
@@ -58,7 +60,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoAvaliacao(true);
       setErroAvaliacao('');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/avaliacoes`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/avaliacoes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -72,8 +74,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       const data = await response.json();
 
       if (response.ok) {
-        // Recarrega as avaliações
-        const resAtualizada = await fetch(`${import.meta.env.VITE_API_URL}/api/avaliacoes/imovel/${imovel.id}`);
+        const resAtualizada = await fetch(`${import.meta.env.VITE_API_URL}/avaliacoes/imovel/${imovel.id}`);
         const dataAtualizada = await resAtualizada.json();
         setAvaliacoes(dataAtualizada.avaliacoes || []);
         setMediaAvaliacoes(dataAtualizada.media || 0);
@@ -91,7 +92,6 @@ export function ModalDetalhes({ imovel, onClose }) {
     }
   };
 
-  // Monta URL correta das imagens
   const obterUrl = (imagem) => {
     const caminho = typeof imagem === 'string' ? imagem : imagem?.url;
     if (!caminho) return 'https://via.placeholder.com/600x400?text=Sem+Imagem';
@@ -107,7 +107,6 @@ export function ModalDetalhes({ imovel, onClose }) {
   const proximaAvaliacao = () => { if (indiceAvaliacao + 3 < avaliacoes.length) setIndiceAvaliacao(indiceAvaliacao + 1); };
   const anteriorAvaliacao = () => { if (indiceAvaliacao > 0) setIndiceAvaliacao(indiceAvaliacao - 1); };
 
-  // Renderiza estrelas com base na média
   const renderizarEstrelas = (media) => {
     return [1, 2, 3, 4, 5].map((i) => {
       if (media >= i) return <Icons.FaStar key={i} size={20} />;
@@ -134,7 +133,6 @@ export function ModalDetalhes({ imovel, onClose }) {
       return;
     }
 
-    // Valida se as datas estão dentro de um período disponível
     const dentroDeUmPeriodo = imovel.periodos?.some(p => {
       const inicio = new Date(p.inicio);
       const fim = new Date(p.fim);
@@ -150,7 +148,7 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoReserva(true);
       setErroReserva('');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservas`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/reservas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -178,7 +176,6 @@ export function ModalDetalhes({ imovel, onClose }) {
     }
   };
 
-  // Calcula total de dias e preço
   const calcularDias = () => {
     if (!checkIn || !checkOut) return 0;
     const diff = checkOut.getTime() - checkIn.getTime();
@@ -189,7 +186,6 @@ export function ModalDetalhes({ imovel, onClose }) {
     return (calcularDias() * parseFloat(imovel.preco)).toFixed(2);
   };
 
-  // Verifica se uma data está dentro dos períodos disponíveis
   const dataDisponivel = (data) => {
     if (!imovel.periodos || imovel.periodos.length === 0) return true;
     return imovel.periodos.some(p => {
@@ -202,6 +198,66 @@ export function ModalDetalhes({ imovel, onClose }) {
   const formatarData = (data) => {
     if (!data) return null;
     return data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  };
+
+  const handleEnviarMensagem = async () => {
+    if (!usuarioId) {
+      setErroMensagem('Você precisa estar logado para enviar uma mensagem.');
+      return;
+    }
+
+    if (Number(usuarioId) === Number(imovel.usuarioId)) {
+      setErroMensagem('Você não pode enviar mensagens para si mesmo.');
+      return;
+    }
+
+    try {
+      setEnviandoMensagem(true);
+      setErroMensagem('');
+
+      const token = sessionStorage.getItem('token');
+
+      if (!token) {
+        setErroMensagem('Sua sessão expirou. Entre novamente na sua conta.');
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/chat/conversas`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            imovelId: imovel.id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.erro || 'Não foi possível iniciar a conversa.'
+        );
+      }
+
+      window.dispatchEvent(
+        new CustomEvent('abrirConversaChat', {
+          detail: { conversaId: data.id },
+        })
+      );
+
+      onClose?.();
+    } catch (error) {
+      setErroMensagem(
+        error.message || 'Erro ao conectar com o servidor.'
+      );
+    } finally {
+      setEnviandoMensagem(false);
+    }
   };
 
   return (
@@ -337,12 +393,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                                     minDate={inicio}
                                     maxDate={fim}
                                   />
-                                  <button
-                                    type="button"
-                                    onClick={() => setCalendarioAberto(null)}
-                                    disabled={!checkIn || !checkOut}
-                                    className="w-full mt-1 bg-preto-texto-principal hover:bg-zinc-800 disabled:opacity-50 text-white py-2 rounded-lg text-xs font-bold transition-colors"
-                                  >
+                                  <button type="button" onClick={() => setCalendarioAberto(null)} disabled={!checkIn || !checkOut} className="w-full mt-1 bg-preto-texto-principal hover:bg-zinc-800 disabled:opacity-50 text-white py-2 rounded-lg text-xs font-bold transition-colors">
                                     Confirmar datas
                                   </button>
                                 </div>
@@ -355,11 +406,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                       <p className="text-xs text-cinza-texto-secundario italic">Nenhum período disponível.</p>
                     )}
 
-                    <button
-                      type="button"
-                      onClick={() => { setCalendarioAberto(null); setPeriodoSelecionado(null); }}
-                      className="w-full mt-3 text-xs text-cinza-texto-secundario hover:text-preto-texto-principal font-semibold transition-colors"
-                    >
+                    <button type="button" onClick={() => { setCalendarioAberto(null); setPeriodoSelecionado(null); }} className="w-full mt-3 text-xs text-cinza-texto-secundario hover:text-preto-texto-principal font-semibold transition-colors">
                       Fechar
                     </button>
                   </div>
@@ -374,42 +421,34 @@ export function ModalDetalhes({ imovel, onClose }) {
                   </span>
 
                   <div className="flex items-center gap-2 mt-1 border p-2 border-borda-cards rounded-lg">
-                    <input
-                      type="number"
-                      min="1"
-                      max={imovel.capacidade || 99}
-                      value={hospedes}
-                      onFocus={(e) => e.target.select()}
-                      onChange={(e) => {
-                        const valor = e.target.value;
+                    <input type="number" min="1" max={imovel.capacidade || 99} value={hospedes} onFocus={(e) => e.target.select()} onChange={(e) => {
+                      const valor = e.target.value;
 
-                        if (valor === '') {
-                          setHospedes('');
-                          return;
-                        }
+                      if (valor === '') {
+                        setHospedes('');
+                        return;
+                      }
 
-                        const numero = Number(valor);
+                      const numero = Number(valor);
 
-                        if (numero < 1) {
-                          setHospedes('1');
-                          return;
-                        }
+                      if (numero < 1) {
+                        setHospedes('1');
+                        return;
+                      }
 
-                        if (imovel.capacidade && numero > imovel.capacidade) {
-                          setHospedes(String(imovel.capacidade));
-                          return;
-                        }
+                      if (imovel.capacidade && numero > imovel.capacidade) {
+                        setHospedes(String(imovel.capacidade));
+                        return;
+                      }
 
-                        setHospedes(valor);
-                      }}
+                      setHospedes(valor);
+                    }}
                       onBlur={() => {
                         if (hospedes === '') {
                           setHospedes('1');
                         }
                       }}
-                      className="w-full text-sm font-medium text-preto-texto-principal outline-none bg-transparent"
-                    />
-
+                      className="w-full text-sm font-medium text-preto-texto-principal outline-none bg-transparent" />
                     <span className="text-[11px] text-cinza-texto-secundario whitespace-nowrap">
                       Hóspedes
                     </span>
@@ -477,14 +516,10 @@ export function ModalDetalhes({ imovel, onClose }) {
               {/* Anfitrião */}
               <div className="mt-2 p-4 border border-borda-cards rounded-2xl flex flex-col gap-3 bg-white">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                    {imovel.usuario?.avatarPath ? (
-                      <img src={`${import.meta.env.VITE_API_URL}${imovel.usuario.avatarPath}`} alt="Anfitrião" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <Icons.FaUserCircle size={28} className="text-gray-400" />
-                      </div>
-                    )}
+                  <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
+                    <AvatarUsuario nome={imovel.usuario?.nome || 'Anfitrião'} src={imovel.usuario?.avatarPath
+                      ? `${import.meta.env.VITE_API_URL}${imovel.usuario.avatarPath}`
+                      : null} className="w-full h-full" textoClassName="text-sm" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-preto-texto-principal">Anfitrião: {imovel.usuario?.nome || 'Não informado'}</span>
@@ -493,8 +528,15 @@ export function ModalDetalhes({ imovel, onClose }) {
                     </span>
                   </div>
                 </div>
-                <button className="w-full border border-beje-principal text-beje-principal text-[11px] font-bold py-2.5 rounded-lg hover:bg-botao-beje-apertado hover:text-branco-texto-principal transition-all">
-                  Enviar Mensagem
+
+                {erroMensagem && (
+                  <p className="text-xs font-semibold text-red-500">
+                    {erroMensagem}
+                  </p>
+                )}
+
+                <button type="button" onClick={handleEnviarMensagem} disabled={enviandoMensagem} className="w-full border border-beje-principal text-beje-principal text-[11px] font-bold py-2.5 rounded-lg hover:bg-botao-beje-apertado hover:text-branco-texto-principal transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  {enviandoMensagem ? 'Abrindo conversa...' : 'Enviar Mensagem'}
                 </button>
               </div>
             </div>
@@ -589,14 +631,10 @@ export function ModalDetalhes({ imovel, onClose }) {
                 <div key={avaliacao.id} className="border border-borda-cards rounded-2xl p-6 flex flex-col justify-between min-h-[200px] bg-white hover:shadow-md transition-shadow">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 rounded-full overflow-hidden border border-zinc-100">
-                        {avaliacao.autor?.avatarPath ? (
-                          <img src={`${import.meta.env.VITE_API_URL}${avaliacao.autor.avatarPath}`} className="w-full h-full object-cover" alt={avaliacao.autor.nome} />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <Icons.FaUserCircle size={28} className="text-gray-400" />
-                          </div>
-                        )}
+                      <div className="w-12 h-12 rounded-full overflow-hidden border border-zinc-100 shrink-0">
+                        <AvatarUsuario nome={avaliacao.autor?.nome || 'Usuário'} src={avaliacao.autor?.avatarPath
+                          ? `${import.meta.env.VITE_API_URL}${avaliacao.autor.avatarPath}`
+                          : null} className="w-full h-full" textoClassName="text-base" />
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-sm text-preto-texto-principal">{avaliacao.autor?.nome || 'Usuário'}</span>
@@ -619,9 +657,7 @@ export function ModalDetalhes({ imovel, onClose }) {
           {/* Formulário de Avaliação */}
           <div className="mt-10">
             {!mostrarFormAvaliacao ? (
-              <button
-                onClick={() => setMostrarFormAvaliacao(true)}
-                className="bg-beje-principal text-branco-texto-principal font-bold px-10 py-3.5 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-md">
+              <button onClick={() => setMostrarFormAvaliacao(true)} className="bg-beje-principal text-branco-texto-principal font-bold px-10 py-3.5 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-md">
                 Fazer Avaliação
               </button>
             ) : (
@@ -647,14 +683,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                 {/* Comentário */}
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-semibold text-preto-texto-principal">Comentário</label>
-                  <textarea
-                    value={comentario}
-                    onChange={(e) => setComentario(e.target.value)}
-                    rows={4}
-                    maxLength={500}
-                    placeholder="Conte sua experiência..."
-                    className="w-full bg-white border border-borda-cards rounded-xl p-4 text-sm text-preto-texto-principal outline-none resize-none"
-                  />
+                  <textarea value={comentario} onChange={(e) => setComentario(e.target.value)} rows={4} maxLength={500} placeholder="Conte sua experiência..." className="w-full bg-white border border-borda-cards rounded-xl p-4 text-sm text-preto-texto-principal outline-none resize-none" />
                   <span className="text-[10px] text-gray-400 font-bold text-right">{comentario.length}/500</span>
                 </div>
 
@@ -663,17 +692,10 @@ export function ModalDetalhes({ imovel, onClose }) {
                 )}
 
                 <div className="flex gap-3">
-                  <button
-                    onClick={handleEnviarAvaliacao}
-                    disabled={enviandoAvaliacao}
-                    className="px-6 py-3 bg-beje-principal text-white font-bold rounded-xl hover:bg-botao-beje-apertado transition-all disabled:opacity-50 text-sm"
-                  >
+                  <button onClick={handleEnviarAvaliacao} disabled={enviandoAvaliacao} className="px-6 py-3 bg-beje-principal text-white font-bold rounded-xl hover:bg-botao-beje-apertado transition-all disabled:opacity-50 text-sm">
                     {enviandoAvaliacao ? 'Enviando...' : 'Enviar Avaliação'}
                   </button>
-                  <button
-                    onClick={() => { setMostrarFormAvaliacao(false); setErroAvaliacao(''); setNota(0); setComentario(''); }}
-                    className="px-6 py-3 bg-white border border-preto-texto-principal text-preto-texto-principal font-bold rounded-xl hover:bg-botao-branco-apertado transition-all text-sm"
-                  >
+                  <button onClick={() => { setMostrarFormAvaliacao(false); setErroAvaliacao(''); setNota(0); setComentario(''); }} className="px-6 py-3 bg-white border border-preto-texto-principal text-preto-texto-principal font-bold rounded-xl hover:bg-botao-branco-apertado transition-all text-sm">
                     Cancelar
                   </button>
                 </div>

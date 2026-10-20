@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Icons from '../icons/icons';
+import AvatarUsuario from '../components/AvatarUsuario';
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
-  const [nome, setNome] = useState(localStorage.getItem('usuarioNome') || 'Usuário');
+  const [nome, setNome] = useState(sessionStorage.getItem('usuarioNome') || 'Usuário');
   const [email, setEmail] = useState('');
 
   const [fotoUrl, setFotoUrl] = useState('');
 
   useEffect(() => {
-    const usuarioId = localStorage.getItem('usuarioId');
+    const usuarioId = sessionStorage.getItem('usuarioId');
 
     if (!usuarioId) {
       navigate('/login');
@@ -21,7 +22,7 @@ const Sidebar = () => {
     const buscarDadosDono = async () => {
       try {
         const resposta = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/usuarios/${usuarioId}`
+          `${import.meta.env.VITE_API_URL}/usuarios/${usuarioId}`
         );
 
         if (resposta.ok) {
@@ -30,7 +31,7 @@ const Sidebar = () => {
           setNome(dados.nome);
           setEmail(dados.email);
 
-          localStorage.setItem('usuarioNome', dados.nome);
+          sessionStorage.setItem('usuarioNome', dados.nome);
 
           if (dados.avatarPath) {
             setFotoUrl(dados.avatarPath);
@@ -54,7 +55,7 @@ const Sidebar = () => {
     { name: 'Meus Alugueis', path: '/aluguel', icon: <Icons.FaHouseChimney size={20} /> },
     { name: 'Controle Geral', path: '/controle', icon: <Icons.FaEye size={20} /> },
     { name: 'Controle Único', path: '/controleunico', icon: <Icons.FaClipboardList size={20} /> },
-    { name: 'Controle Pagamento', path:'/controlepagamento', icon: <Icons.BsCashStack size={20} />},
+    { name: 'Controle Pagamento', path: '/controlepagamento', icon: <Icons.BsCashStack size={20} /> },
     { name: 'Cadastrar Aluguel', path: '/cadastro', icon: <Icons.MdOutlineMailOutline size={20} /> },
     { name: 'Página Principal', path: '/principal', icon: <Icons.FaSignOutAlt size={20} /> },
   ];
@@ -88,16 +89,8 @@ const Sidebar = () => {
             />
           </svg>
 
-          <div className="relative w-28 h-28 rounded-full overflow-hidden border-[3px] border-beje-principal shadow-sm z-10 bg-gray-100 flex items-center justify-center">
-            {fotoUrl ? (
-              <img
-                src={fotoUrl}
-                className="w-full h-full object-cover"
-                alt="Foto de Perfil"
-              />
-            ) : (
-              <Icons.FaUser size={40} className="text-cinza-texto-secundario opacity-40" />
-            )}
+          <div className="relative w-28 h-28 rounded-full overflow-hidden border-[3px] border-beje-principal shadow-sm z-10">
+            <AvatarUsuario nome={nome} src={fotoUrl || null} className="w-full h-full" textoClassName="text-4xl"/>
           </div>
         </div>
 

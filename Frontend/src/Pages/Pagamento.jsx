@@ -181,7 +181,7 @@ function Pagamento() {
         }
 
         try {
-            const usuarioId = localStorage.getItem('usuarioId');
+            const usuarioId = sessionStorage.getItem('usuarioId');
 
             if (!usuarioId) {
                 setErro('Você precisa estar logado para realizar a reserva.');
@@ -189,7 +189,7 @@ function Pagamento() {
             }
 
             const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/reservas`,
+                `${import.meta.env.VITE_API_URL}/reservas`,
                 {
                     method: 'POST',
                     headers: {
@@ -214,7 +214,7 @@ function Pagamento() {
 
             // Confirma a reserva após o pagamento
             const atualizarResponse = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/reservas/${data.reserva.id}/status`,
+                `${import.meta.env.VITE_API_URL}/reservas/${data.reserva.id}/status`,
                 {
                     method: 'PATCH',
                     headers: {
