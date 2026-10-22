@@ -126,20 +126,8 @@ function MeusAlugueis() {
             </div>
 
             {/* Modal de Edição */}
-            <ModalEditarAluguel
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                imovel={imovelSelecionado}
-                onUpdateSuccess={carregarImoveis}
-            />
-
-            <ModalConfirmacao
-                isOpen={modalConfirmacaoAberto}
-                onClose={() => setModalConfirmacaoAberto(false)}
-                onConfirm={confirmarExclusao}
-                titulo="Excluir Imóvel"
-                mensagem="Tem certeza que deseja excluir este imóvel? Essa ação não pode ser desfeita."
-            />
+            <ModalEditarAluguel isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} imovel={imovelSelecionado} onUpdateSuccess={carregarImoveis}/>
+            <ModalConfirmacao isOpen={modalConfirmacaoAberto} onClose={() => setModalConfirmacaoAberto(false)} onConfirm={confirmarExclusao} titulo="Excluir Imóvel" mensagem="Tem certeza que deseja excluir este imóvel? Essa ação não pode ser desfeita."/>
         </div>
     );
 }

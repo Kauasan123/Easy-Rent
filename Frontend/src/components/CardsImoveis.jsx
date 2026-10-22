@@ -5,7 +5,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
   const [fotoAtual, setFotoAtual] = useState(0);
 
   const listaImagens = imovel.imagens || (imovel.imagem ? [imovel.imagem] : []);
-  
+
   const obterProximaDataDisponivel = () => {
     if (!imovel.periodos || imovel.periodos.length === 0) {
       return 'Sem datas disponíveis';
@@ -33,7 +33,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
       const dataSelecionadaObj = new Date(dataSelecionada);
       dataSelecionadaObj.setHours(0, 0, 0, 0);
 
-      periodoSelecionado = periodosProcessados.find(p => 
+      periodoSelecionado = periodosProcessados.find(p =>
         p.dataInicio <= dataSelecionadaObj && dataSelecionadaObj <= p.dataFim
       );
 
@@ -47,7 +47,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
     // Formatar as datas
     const diaInicio = periodoSelecionado.dataInicio.getDate();
     const diaFim = periodoSelecionado.dataFim.getDate();
-    
+
     const opcoes = { month: 'short' };
     const mesFim = periodoSelecionado.dataFim.toLocaleDateString('pt-BR', opcoes).replace('.', '');
 
@@ -56,7 +56,7 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
 
   const obterUrlImagem = (imagem) => {
     const caminho = typeof imagem === 'string' ? imagem : imagem?.url;
-    
+
     if (!caminho) {
       return 'https://via.placeholder.com/300x200?text=Sem+Imagem';
     }
@@ -82,9 +82,9 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
   return (
     <div className='relative border border-borda-cards h-[380px] 2xl:h-[420px] w-full max-w-[280px] 2xl:max-w-[300px] mx-auto rounded-xl overflow-hidden shadow-sm flex flex-col bg-white'>
       <div className='relative h-[50%] w-full overflow-hidden group'>
-        
+
         <img src={obterUrlImagem(listaImagens[fotoAtual])} alt={imovel.titulo} className='w-full h-full object-cover transition-transform duration-300 hover:scale-110' />
-        
+
         {listaImagens.length > 1 && (
           <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button onClick={fotoAnterior} className="bg-white/70 p-1 rounded-full hover:bg-white text-preto-texto-principal transition-all active:scale-90">
@@ -120,17 +120,19 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
             <div className='flex flex-row items-center shrink-0'>
               <Icons.FaStar className='text-icone-estrela' size={16} />
               <span className='text-sm 2xl:text-base font-bold ml-1 text-preto-texto-principal'>
-                {imovel.nota || "Novo"}
+                {imovel.totalAvaliacoes > 0
+                  ? imovel.nota.toFixed(1)
+                  : "Novo"}
               </span>
             </div>
           </div>
-          
+
           <div className='leading-tight min-h-[2.5rem] 2xl:min-h-[3rem]'>
             <p className='text-sm 2xl:text-base text-preto-texto-principal/50 line-clamp-2'>
               {imovel.subtitulo || imovel.endereco || imovel.localizacao || "Endereço não informado"}
             </p>
           </div>
-          
+
           <div>
             <span className='text-sm 2xl:text-base text-preto-texto-principal/50'>
               {obterProximaDataDisponivel()}
@@ -161,12 +163,12 @@ export function CardsImoveis({ imovel, isGerenciamento = false, onEdit, dataSele
 
           {isGerenciamento ? (
             <button type="button" onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (onEdit) {
-                  onEdit(imovel);
-                }
-              }}
+              e.preventDefault();
+              e.stopPropagation();
+              if (onEdit) {
+                onEdit(imovel);
+              }
+            }}
               className='text-beje-principal border border-beje-principal rounded-md text-[14px] py-1 px-4 2xl:py-1.5 2xl:px-6 hover:bg-botao-branco-apertado transition-all font-medium whitespace-nowrap active:scale-95'>
               Editar
             </button>

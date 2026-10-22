@@ -7,18 +7,10 @@ function ModalConfirmacao({ isOpen, onClose, onConfirm, titulo, mensagem }) {
                 <h3 className="text-lg font-bold text-preto-texto-principal mb-2">{titulo}</h3>
                 <p className="text-sm text-cinza-texto-secundario mb-6">{mensagem}</p>
                 <div className="flex gap-3">
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl text-sm transition-colors"
-                    >
+                    <button type="button" onClick={onConfirm} className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl text-sm transition-colors" >
                         Excluir
                     </button>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex-1 bg-white border border-preto-texto-principal text-preto-texto-principal font-bold py-2.5 rounded-xl text-sm hover:bg-botao-branco-apertado transition-colors"
-                    >
+                    <button type="button" onClick={onClose} className="flex-1 bg-white border border-preto-texto-principal text-preto-texto-principal font-bold py-2.5 rounded-xl text-sm hover:bg-botao-branco-apertado transition-colors" >
                         Cancelar
                     </button>
                 </div>

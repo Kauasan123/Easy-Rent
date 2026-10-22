@@ -102,9 +102,36 @@ const listarImoveis = async (req, res) => {
       }
     });
 
-    return res.json(imoveis);
+    const imoveisComAvaliacoes = await Promise.all(
+      imoveis.map(async (imovel) => {
+        const resultado = await prisma.avaliacao.aggregate({
+          where: {
+            imovelId: imovel.id
+          },
+          _avg: {
+            nota: true
+          },
+          _count: {
+            nota: true
+          }
+        });
+
+        const media = resultado._avg.nota;
+
+        return {
+          ...imovel,
+          nota: media !== null
+            ? Number(media.toFixed(1))
+            : null,
+          totalAvaliacoes: resultado._count.nota
+        };
+      })
+    );
+
+    return res.json(imoveisComAvaliacoes);
   } catch (error) {
     console.error("Erro ao buscar imóveis:", error);
+
     return res.status(500).json({
       erro: "Erro ao buscar imóveis",
       detalhes: error.message

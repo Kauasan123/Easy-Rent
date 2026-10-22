@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import * as Icons from '../icons/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarUsuario from '../components/AvatarUsuario';
+import ModalConfirmacao from '../components/ModalConfirmacao';
 
 function Perfil() {
     const navigate = useNavigate();
@@ -11,7 +12,6 @@ function Perfil() {
     const [email, setEmail] = useState('');
     const [telefone, setTelefone] = useState('');
     const [senha, setSenha] = useState('');
-
     const [fotoUrl, setFotoUrl] = useState('');
 
     const [editando, setEditando] = useState({
@@ -27,6 +27,8 @@ function Perfil() {
     });
 
     const [carregando, setCarregando] = useState(false);
+    const [modalExclusaoAberta, setModalExclusaoAberta] = useState(false);
+    const [excluindoConta, setExcluindoConta] = useState(false);
 
     useEffect(() => {
         const usuarioId = sessionStorage.getItem('usuarioId');
@@ -93,6 +95,7 @@ function Perfil() {
         setCarregando(true);
 
         const usuarioId = sessionStorage.getItem('usuarioId');
+        const token = sessionStorage.getItem('token');
 
         const formData = new FormData();
         formData.append('avatar', arquivo);
@@ -210,6 +213,67 @@ function Perfil() {
         navigate('/login');
     };
 
+    const handleExcluirConta = async () => {
+        if (excluindoConta) return;
+
+        const usuarioId = sessionStorage.getItem('usuarioId');
+        const token = sessionStorage.getItem('token');
+
+        if (!usuarioId || !token) {
+            setModalExclusaoAberta(false);
+            navigate('/login', { replace: true });
+            return;
+        }
+
+
+        setExcluindoConta(true);
+        setMensagem({ texto: '', tipo: '' });
+
+        try {
+            const resposta = await fetch(
+                `${import.meta.env.VITE_API_URL}/usuarios/${usuarioId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const dados = await resposta.json().catch(() => ({}));
+
+            if (!resposta.ok) {
+                throw new Error(
+                    dados.erro || 'Não foi possível excluir sua conta.'
+                );
+            }
+
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('usuarioId');
+            sessionStorage.removeItem('usuarioNome');
+            sessionStorage.removeItem('usuarioAvatar');
+
+            setModalExclusaoAberta(false);
+
+            navigate('/login', { replace: true });
+        } catch (error) {
+            console.error('Erro ao excluir conta:', error);
+
+            setModalExclusaoAberta(false);
+
+            setMensagem({
+                texto: error.message || 'Erro de conexão ao excluir a conta.',
+                tipo: 'erro'
+            });
+
+            setTimeout(() => {
+                setMensagem({ texto: '', tipo: '' });
+            }, 4000);
+        } finally {
+            setExcluindoConta(false);
+        }
+    };
+
     return (
         <div className="px-12 py-10 flex flex-col gap-10">
             <div className="flex justify-between items-start">
@@ -225,10 +289,14 @@ function Perfil() {
 
                 <AnimatePresence>
                     {mensagem.texto && (
-                        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className={`px-4 py-2 rounded-lg font-bold text-sm shadow-md ${mensagem.tipo === 'sucesso'
-                            ? 'bg-green-100 text-green-700 border border-green-200'
-                            : 'bg-red-100 text-red-700 border border-red-200'
-                            }`}
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className={`px-4 py-2 rounded-lg font-bold text-sm shadow-md ${mensagem.tipo === 'sucesso'
+                                ? 'bg-green-100 text-green-700 border border-green-200'
+                                : 'bg-red-100 text-red-700 border border-red-200'
+                                }`}
                         >
                             {mensagem.texto}
                         </motion.div>
@@ -246,23 +314,42 @@ function Perfil() {
 
                     <div className="p-8 pt-4 flex flex-col md:flex-row gap-12 items-start">
                         <div className="flex flex-col items-center gap-2">
-                            <input type="file" id="input-avatar" accept="image/*" className="hidden" onChange={handleTrocarFoto} disabled={carregando} />
+                            <input
+                                type="file"
+                                id="input-avatar"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleTrocarFoto}
+                                disabled={carregando || excluindoConta}
+                            />
 
-                            <div onClick={() => {
-                                if (!carregando) {
-                                    document.getElementById('input-avatar').click();
-                                }
-                            }} className="w-40 h-40 rounded-full bg-cinza-claro border-2 border-borda-cards flex items-center justify-center overflow-hidden relative group cursor-pointer shadow-inner" >
-                                <AvatarUsuario nome={nome} src={fotoUrl || null} className="w-full h-full group-hover:scale-105 transition-transform duration-300" textoClassName="text-5xl" />
+                            <div
+                                onClick={() => {
+                                    if (!carregando && !excluindoConta) {
+                                        document.getElementById('input-avatar').click();
+                                    }
+                                }}
+                                className="w-40 h-40 rounded-full bg-cinza-claro border-2 border-borda-cards flex items-center justify-center overflow-hidden relative group cursor-pointer shadow-inner"
+                            >
+                                <AvatarUsuario
+                                    nome={nome}
+                                    src={fotoUrl || null}
+                                    className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                    textoClassName="text-5xl"
+                                />
 
                                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
                             </div>
 
-                            <button onClick={() => {
-                                if (!carregando) {
-                                    document.getElementById('input-avatar').click();
-                                }
-                            }} className="text-beje-principal font-bold text-sm underline-offset-4 hover:underline disabled:opacity-50" disabled={carregando}>
+                            <button
+                                onClick={() => {
+                                    if (!carregando && !excluindoConta) {
+                                        document.getElementById('input-avatar').click();
+                                    }
+                                }}
+                                className="text-beje-principal font-bold text-sm underline-offset-4 hover:underline disabled:opacity-50"
+                                disabled={carregando || excluindoConta}
+                            >
                                 {carregando ? 'Enviando...' : 'Alterar Foto'}
                             </button>
                         </div>
@@ -274,15 +361,25 @@ function Perfil() {
                                 </label>
 
                                 <div className="flex gap-3">
-                                    <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} disabled={!editando.nome} className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.nome
-                                        ? 'text-preto-texto-principal/50 bg-gray-50'
-                                        : 'text-preto-texto-principal'
-                                        }`} />
+                                    <input
+                                        type="text"
+                                        value={nome}
+                                        onChange={(e) => setNome(e.target.value)}
+                                        disabled={!editando.nome || excluindoConta}
+                                        className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.nome
+                                            ? 'text-preto-texto-principal/50 bg-gray-50'
+                                            : 'text-preto-texto-principal'
+                                            }`}
+                                    />
 
-                                    <button onClick={() => alternarEdicao('nome')} className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.nome
-                                        ? 'border-red-400 text-red-500 hover:bg-red-50'
-                                        : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'
-                                        }`} >
+                                    <button
+                                        onClick={() => alternarEdicao('nome')}
+                                        disabled={excluindoConta}
+                                        className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.nome
+                                            ? 'border-red-400 text-red-500 hover:bg-red-50'
+                                            : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'
+                                            }`}
+                                    >
                                         {editando.nome
                                             ? <Icons.FiEyeOff size={12} />
                                             : <Icons.FaPencilAlt size={12} />}
@@ -298,15 +395,25 @@ function Perfil() {
                                 </label>
 
                                 <div className="flex gap-3">
-                                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!editando.email} className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.email
-                                        ? 'text-preto-texto-principal/50 bg-gray-50'
-                                        : 'text-preto-texto-principal'
-                                        }`} />
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        disabled={!editando.email || excluindoConta}
+                                        className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.email
+                                            ? 'text-preto-texto-principal/50 bg-gray-50'
+                                            : 'text-preto-texto-principal'
+                                            }`}
+                                    />
 
-                                    <button onClick={() => alternarEdicao('email')} className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.email
-                                        ? 'border-red-400 text-red-500 hover:bg-red-50'
-                                        : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'
-                                        }`} >
+                                    <button
+                                        onClick={() => alternarEdicao('email')}
+                                        disabled={excluindoConta}
+                                        className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.email
+                                            ? 'border-red-400 text-red-500 hover:bg-red-50'
+                                            : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'
+                                            }`}
+                                    >
                                         {editando.email
                                             ? <Icons.FiEyeOff size={12} />
                                             : <Icons.FaPencilAlt size={12} />}
@@ -322,15 +429,26 @@ function Perfil() {
                                 </label>
 
                                 <div className="flex gap-3">
-                                    <input type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="(00) 00000-0000" disabled={!editando.telefone} className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.telefone
-                                        ? 'text-preto-texto-principal/50 bg-gray-50'
-                                        : 'text-preto-texto-principal'
-                                        }`} />
+                                    <input
+                                        type="text"
+                                        value={telefone}
+                                        onChange={(e) => setTelefone(e.target.value)}
+                                        placeholder="(00) 00000-0000"
+                                        disabled={!editando.telefone || excluindoConta}
+                                        className={`flex-1 bg-white border border-borda-cards rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-beje-principal transition-colors ${!editando.telefone
+                                            ? 'text-preto-texto-principal/50 bg-gray-50'
+                                            : 'text-preto-texto-principal'
+                                            }`}
+                                    />
 
-                                    <button onClick={() => alternarEdicao('telefone')}
-                                        className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.telefone ? 'border-red-400 text-red-500 hover:bg-red-50'
+                                    <button
+                                        onClick={() => alternarEdicao('telefone')}
+                                        disabled={excluindoConta}
+                                        className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all ${editando.telefone
+                                            ? 'border-red-400 text-red-500 hover:bg-red-50'
                                             : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'
-                                            }`} >
+                                            }`}
+                                    >
                                         {editando.telefone
                                             ? <Icons.FiEyeOff size={12} />
                                             : <Icons.FaPencilAlt size={12} />}
@@ -340,7 +458,11 @@ function Perfil() {
                                 </div>
                             </div>
 
-                            <button onClick={handleSalvar} disabled={carregando} className="mt-4 bg-beje-principal hover:bg-botao-beje-apertado text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-md disabled:opacity-70" >
+                            <button
+                                onClick={handleSalvar}
+                                disabled={carregando || excluindoConta}
+                                className="mt-4 bg-beje-principal hover:bg-botao-beje-apertado text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-md disabled:opacity-70"
+                            >
                                 <Icons.FaSave size={18} />
                                 {carregando ? 'Salvando...' : 'Salvar Alterações'}
                             </button>
@@ -367,7 +489,14 @@ function Perfil() {
                                         Nova Senha
                                     </label>
 
-                                    <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Digite a nova senha" className="w-full bg-white border border-borda-cards rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:border-beje-principal transition-colors text-preto-texto-principal" />
+                                    <input
+                                        type="password"
+                                        value={senha}
+                                        onChange={(e) => setSenha(e.target.value)}
+                                        placeholder="Digite a nova senha"
+                                        className="w-full bg-white border border-borda-cards rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:border-beje-principal transition-colors text-preto-texto-principal"
+                                        disabled={excluindoConta}
+                                    />
                                 </div>
                             ) : (
                                 <>
@@ -385,6 +514,7 @@ function Perfil() {
 
                     <button
                         onClick={() => alternarEdicao('senha')}
+                        disabled={excluindoConta}
                         className={`flex items-center gap-2 px-6 py-2 border rounded-xl text-sm font-bold transition-all h-fit ${editando.senha
                             ? 'border-red-400 text-red-500 hover:bg-red-50'
                             : 'border-beje-principal text-beje-principal hover:text-branco-texto-principal hover:bg-beje-principal'
@@ -405,7 +535,10 @@ function Perfil() {
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div onClick={handleSair} className="border border-borda-cards bg-fundo-cards rounded-3xl p-6 flex items-center gap-4 cursor-pointer hover:bg-gray-100 transition-colors shadow-sm">
+                    <div
+                        onClick={handleSair}
+                        className="border border-borda-cards bg-fundo-cards rounded-3xl p-6 flex items-center gap-4 cursor-pointer hover:bg-gray-100 transition-colors shadow-sm"
+                    >
                         <div className="w-12 h-12 bg-cinza-claro/50 rounded-full flex items-center justify-center text-cinza-texto-secundario">
                             <Icons.FaSignOutAlt size={20} />
                         </div>
@@ -421,14 +554,24 @@ function Perfil() {
                         </div>
                     </div>
 
-                    <div className="border border-red-200 bg-red-50 rounded-3xl p-6 flex items-center gap-4 cursor-pointer hover:bg-red-100 transition-colors shadow-sm">
+                    <div
+                        onClick={() => {
+                            if (!excluindoConta) {
+                                setModalExclusaoAberta(true);
+                            }
+                        }}
+                        className={`border border-red-200 bg-red-50 rounded-3xl p-6 flex items-center gap-4 transition-colors shadow-sm ${excluindoConta
+                            ? 'opacity-60 cursor-wait'
+                            : 'cursor-pointer hover:bg-red-100'
+                            }`}
+                    >
                         <div className="w-12 h-12 bg-red-200/50 rounded-full flex items-center justify-center text-vermelho-cancelar">
                             <Icons.FaTrashAlt size={20} />
                         </div>
 
                         <div>
                             <p className="font-bold text-vermelho-cancelar">
-                                Excluir Conta
+                                {excluindoConta ? 'Excluindo Conta...' : 'Excluir Conta'}
                             </p>
 
                             <p className="text-xs text-vermelho-cancelar">
@@ -438,6 +581,18 @@ function Perfil() {
                     </div>
                 </div>
             </section>
+
+            <ModalConfirmacao
+                isOpen={modalExclusaoAberta}
+                onClose={() => {
+                    if (!excluindoConta) {
+                        setModalExclusaoAberta(false);
+                    }
+                }}
+                onConfirm={handleExcluirConta}
+                titulo="Excluir sua conta?"
+                mensagem="Tem certeza de que deseja excluir sua conta? Essa ação é permanente e os dados relacionados à conta poderão ser perdidos."
+            />
         </div>
     );
 }

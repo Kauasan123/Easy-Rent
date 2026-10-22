@@ -115,6 +115,10 @@ export default function Principal() {
       return capacidades.includes(imovel.capacidade);
     })
     .filter(imovel => {
+      if (rating === 0) return true;
+      return imovel.nota != null && imovel.nota >= rating;
+    })
+    .filter(imovel => {
       if (comodidades.length === 0) return true;
       return comodidades.every(c => imovel[c] === true);
     })
