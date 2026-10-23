@@ -7,18 +7,30 @@ const API_URL = `${import.meta.env.VITE_API_URL}/chat`;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 const obterUrlAvatar = (avatarPath) => {
-    if (!avatarPath) return null;
-
-    if (
-        avatarPath.startsWith('http://') ||
-        avatarPath.startsWith('https://')
-    ) {
-        return avatarPath;
+    if (!avatarPath || typeof avatarPath !== 'string') {
+        return null;
     }
 
-    const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+    const caminho = avatarPath.trim();
 
-    return `${baseUrl}/${avatarPath.replace(/^\/+/, '')}`;
+    if (!caminho) {
+        return null;
+    }
+
+    if (/^https?:\/\//i.test(caminho)) {
+        return caminho;
+    }
+
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const baseUrl = apiUrl
+        .replace(/\/api\/?$/, '')
+        .replace(/\/+$/, '');
+
+    const caminhoLimpo = caminho.replace(/^\/+/, '');
+
+    return baseUrl
+        ? `${baseUrl}/${caminhoLimpo}`
+        : `/${caminhoLimpo}`;
 };
 
 const obterHora = (data) => {
@@ -70,11 +82,7 @@ const Chat = () => {
                 block: 'end',
             });
         });
-    }, [
-        conversaAtiva,
-        conversas,
-        carregandoMensagens,
-    ]);
+    }, [conversaAtiva, conversas, carregandoMensagens]);
 
     const requisicaoChat = async (caminho, opcoes = {}) => {
         if (!token) {
@@ -139,7 +147,8 @@ const Chat = () => {
                     return {
                         id: conversa.id,
                         nome,
-                        avatarPath: conversa.outroUsuario?.avatarPath || null,
+                        avatarPath:
+                            conversa.outroUsuario?.avatarPath || null,
                         imovel: conversa.imovel?.titulo || 'Imóvel',
                         ultimaMensagem:
                             ultima?.texto || 'Nenhuma mensagem ainda',
@@ -216,16 +225,12 @@ const Chat = () => {
 
                     const jaExiste = conversa.mensagens.some(
                         (mensagemExistente) =>
-                            Number(mensagemExistente.id) ===
-                            Number(item.id)
+                            Number(mensagemExistente.id) === Number(item.id)
                     );
 
                     const mensagensAtualizadas =
                         conversaEstaAberta && !jaExiste
-                            ? [
-                                ...conversa.mensagens,
-                                mensagemFormatada,
-                            ]
+                            ? [...conversa.mensagens, mensagemFormatada]
                             : conversa.mensagens;
 
                     return {
@@ -357,7 +362,8 @@ const Chat = () => {
                     return {
                         id: conversa.id,
                         nome,
-                        avatarPath: conversa.outroUsuario?.avatarPath || null,
+                        avatarPath:
+                            conversa.outroUsuario?.avatarPath || null,
                         imovel: conversa.imovel?.titulo || 'Imóvel',
                         ultimaMensagem:
                             ultima?.texto || 'Nenhuma mensagem ainda',
@@ -450,16 +456,14 @@ const Chat = () => {
             setConversas((atuais) =>
                 atuais.map((conversa) => {
                     if (
-                        Number(conversa.id) !==
-                        Number(conversaIdEnvio)
+                        Number(conversa.id) !== Number(conversaIdEnvio)
                     ) {
                         return conversa;
                     }
 
                     const jaExiste = conversa.mensagens.some(
                         (itemExistente) =>
-                            Number(itemExistente.id) ===
-                            Number(novaMensagem.id)
+                            Number(itemExistente.id) === Number(novaMensagem.id)
                     );
 
                     return {
@@ -485,22 +489,20 @@ const Chat = () => {
     return (
         <>
             {chatAberto && (
-                <section className="fixed bottom-24 right-6 z-[1000] flex h-[min(560px,calc(100dvh-7.5rem))] w-[390px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[#E8DED2] bg-white shadow-[0_12px_50px_rgba(45,35,25,0.20)]" aria-label="Mensagens do Easy Rent">
+                <section className="fixed bottom-24 right-6 z-[1000] flex h-[min(560px,calc(100dvh-7.5rem))] w-[390px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[#E8DED2] bg-white shadow-[0_12px_50px_rgba(45,35,25,0.20)]" aria-label="Mensagens do Easy Rent" >
                     <header className="flex shrink-0 items-center gap-3 bg-[#A57849] px-4 py-4 text-white">
                         {conversaSelecionada ? (
                             <>
-                                <button type="button" onClick={voltarParaLista} className="rounded-full p-1.5 transition hover:bg-white/15" aria-label="Voltar para conversas">
+                                <button type="button" onClick={voltarParaLista} className="rounded-full p-1.5 transition hover:bg-white/15" aria-label="Voltar para conversas" >
                                     <span className="text-2xl leading-none">
-                                        ‹
+                                        <Icons.IoIosArrowBack size={14} />
                                     </span>
                                 </button>
 
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/30">
-                                    {conversaSelecionada.avatarPath && (
-                                        <img src={obterUrlAvatar(conversaSelecionada.avatarPath)} alt={`Foto de ${conversaSelecionada.nome}`} className="h-full w-full object-cover" onError={(evento) => {
-                                            evento.currentTarget.style.display = 'none';
-                                        }} />
-                                    )}
+                                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white/30">
+                                    <AvatarUsuario nome={conversaSelecionada.nome} src={obterUrlAvatar(
+                                        conversaSelecionada.avatarPath
+                                    )} className="h-full w-full" />
                                 </div>
 
                                 <div className="min-w-0 flex-1">
@@ -529,7 +531,7 @@ const Chat = () => {
                             </>
                         )}
 
-                        <button type="button" onClick={fecharChat} className="rounded-full p-2 transition hover:bg-white/15" aria-label="Fechar chat">
+                        <button type="button" onClick={fecharChat} className="rounded-full p-2 transition hover:bg-white/15" aria-label="Fechar chat" >
                             <Icons.IoIosClose size={27} />
                         </button>
                     </header>
@@ -559,11 +561,13 @@ const Chat = () => {
                                     </p>
                                 ) : conversasFiltradas.length > 0 ? (
                                     conversasFiltradas.map((conversa) => (
-                                        <button type="button" key={conversa.id} onClick={() => abrirConversa(conversa.id)} className="flex w-full items-center gap-3 border-b border-[#F3EEE8] px-4 py-4 text-left transition hover:bg-[#FAF7F3]">
+                                        <button type="button" key={conversa.id} onClick={() =>
+                                            abrirConversa(conversa.id)
+                                        } className="flex w-full items-center gap-3 border-b border-[#F3EEE8] px-4 py-4 text-left transition hover:bg-[#FAF7F3]" >
                                             <div className="relative h-12 w-12 shrink-0">
-                                                <AvatarUsuario nome={conversa.nome} src={conversa.avatarPath
-                                                    ? obterUrlAvatar(conversa.avatarPath)
-                                                    : null} className="h-full w-full" />
+                                                <AvatarUsuario nome={conversa.nome} src={obterUrlAvatar(
+                                                    conversa.avatarPath
+                                                )} className="h-full w-full" />
 
                                                 {conversa.naoLidas > 0 && (
                                                     <span className="absolute right-0.5 top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#A57849]" />
@@ -639,7 +643,8 @@ const Chat = () => {
                                 backgroundImage:
                                     'radial-gradient(#E7DCCF 0.6px, transparent 0.6px)',
                                 backgroundSize: '16px 16px',
-                            }}>
+                            }}
+                            >
                                 {carregandoMensagens && (
                                     <p className="text-center text-xs text-[#94877A]">
                                         Carregando mensagens...
@@ -662,11 +667,12 @@ const Chat = () => {
                                     <div key={item.id} className={`flex ${item.enviada
                                         ? 'justify-end'
                                         : 'justify-start'
-                                        }`}>
+                                        }`} >
                                         <div className={`max-w-[84%] rounded-2xl px-3 py-2 shadow-sm ${item.enviada
                                             ? 'rounded-br-sm bg-[#E9D8C5] text-[#493727]'
                                             : 'rounded-bl-sm border border-[#EEE5DB] bg-white text-[#493D32]'
                                             }`}>
+
                                             <p className="whitespace-pre-wrap break-words text-sm leading-5">
                                                 {item.texto}
                                             </p>
@@ -686,7 +692,7 @@ const Chat = () => {
                                 <div ref={finalMensagensRef} className="h-px w-full" aria-hidden="true" />
                             </div>
 
-                            <form onSubmit={enviarMensagem} className="flex shrink-0 items-end gap-2 border-t border-[#EDE4DA] bg-white p-3">
+                            <form onSubmit={enviarMensagem} className="flex shrink-0 items-end gap-2 border-t border-[#EDE4DA] bg-white p-3" >
                                 <textarea rows={1} value={mensagem} onChange={(evento) =>
                                     setMensagem(evento.target.value)
                                 } onKeyDown={(evento) => {
@@ -699,7 +705,7 @@ const Chat = () => {
                                     }
                                 }} placeholder="Digite uma mensagem..." aria-label="Digite uma mensagem" className="max-h-24 min-h-10 flex-1 resize-none rounded-xl bg-[#F7F4F0] px-3 py-2.5 text-sm text-[#493D32] outline-none placeholder:text-[#A79B8F] focus:ring-1 focus:ring-[#C5A17B]" />
 
-                                <button type="submit" disabled={!mensagem.trim() || enviando} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#A57849] text-white transition hover:bg-[#8D653D] disabled:cursor-not-allowed disabled:opacity-40" aria-label="Enviar mensagem">
+                                <button type="submit" disabled={!mensagem.trim() || enviando} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#A57849] text-white transition hover:bg-[#8D653D] disabled:cursor-not-allowed disabled:opacity-40" aria-label="Enviar mensagem" >
                                     <span className="text-lg">➤</span>
                                 </button>
                             </form>
@@ -708,9 +714,7 @@ const Chat = () => {
                 </section>
             )}
 
-            <button type="button" onClick={() => setChatAberto((aberto) => !aberto)} className="fixed bottom-6 right-6 z-[1001] flex h-14 w-14 items-center justify-center rounded-full bg-[#A57849] text-white shadow-[0_5px_20px_rgba(76,51,30,0.25)] transition duration-200 hover:scale-105 hover:bg-[#8D653D] active:scale-95" aria-label={
-                chatAberto ? 'Fechar mensagens' : 'Abrir mensagens'
-            } title="Mensagens">
+            <button type="button" onClick={() => setChatAberto((aberto) => !aberto)} className="fixed bottom-6 right-6 z-[1001] flex h-14 w-14 items-center justify-center rounded-full bg-[#A57849] text-white shadow-[0_5px_20px_rgba(76,51,30,0.25)] transition duration-200 hover:scale-105 hover:bg-[#8D653D] active:scale-95" aria-label={chatAberto ? 'Fechar mensagens' : 'Abrir mensagens'} title="Mensagens" >
                 {chatAberto ? (
                     <Icons.IoIosClose size={30} />
                 ) : (

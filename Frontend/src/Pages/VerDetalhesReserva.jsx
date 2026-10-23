@@ -4,10 +4,9 @@ import HeaderLogado from '../components/HeaderLogado'
 import Footer from '../components/Footer'
 import * as Icons from '../icons/icons.js'
 import ModalAviso from '../components/ModalAviso'
-import AvatarUsuario from '../components/AvatarUsuario';
+import AvatarUsuario from '../components/AvatarUsuario'
 
 function VerDetalhesReserva() {
-
     const navigate = useNavigate()
     const { id } = useParams()
 
@@ -15,6 +14,9 @@ function VerDetalhesReserva() {
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState('')
     const [telaCancelar, setTelaCancelar] = useState(null)
+
+    const [enviandoMensagem, setEnviandoMensagem] = useState(false)
+    const [erroMensagem, setErroMensagem] = useState('')
 
     const handleCancelarReserva = async () => {
         setTelaCancelar('carregando')
@@ -47,7 +49,6 @@ function VerDetalhesReserva() {
             }))
 
             setTelaCancelar('sucesso')
-
         } catch (error) {
             console.error('Erro ao cancelar reserva:', error)
             setTelaCancelar(null)
@@ -70,7 +71,6 @@ function VerDetalhesReserva() {
                 }
 
                 setReserva(data)
-
             } catch (error) {
                 console.error('Erro ao carregar reserva:', error)
                 setErro('Erro ao conectar com o servidor.')
@@ -81,6 +81,9 @@ function VerDetalhesReserva() {
 
         if (id) {
             carregarReserva()
+        } else {
+            setErro('Identificador da reserva não informado.')
+            setCarregando(false)
         }
     }, [id])
 
@@ -94,6 +97,94 @@ function VerDetalhesReserva() {
         return () => clearTimeout(timer)
     }, [telaCancelar, navigate])
 
+    const handleEnviarMensagem = async () => {
+        const imovel = reserva?.imovel
+
+        if (!imovel?.id) {
+            setErroMensagem(
+                'Não foi possível identificar o imóvel desta reserva.'
+            )
+            return
+        }
+
+        const usuarioId = sessionStorage.getItem('usuarioId')
+
+        if (!usuarioId) {
+            setErroMensagem(
+                'Você precisa estar logado para enviar uma mensagem.'
+            )
+            return
+        }
+
+        const proprietarioId = imovel.usuarioId ?? imovel.usuario?.id
+
+        if (
+            proprietarioId != null &&
+            Number(usuarioId) === Number(proprietarioId)
+        ) {
+            setErroMensagem(
+                'Você não pode enviar mensagens para si mesmo.'
+            )
+            return
+        }
+
+        try {
+            setEnviandoMensagem(true)
+            setErroMensagem('')
+
+            const token = sessionStorage.getItem('token')
+
+            if (!token) {
+                setErroMensagem(
+                    'Sua sessão expirou. Entre novamente na sua conta.'
+                )
+                return
+            }
+
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/chat/conversas`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        imovelId: imovel.id
+                    })
+                }
+            )
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(
+                    data.erro || 'Não foi possível iniciar a conversa.'
+                )
+            }
+
+            if (!data.id) {
+                throw new Error(
+                    'O servidor não retornou o identificador da conversa.'
+                )
+            }
+
+            window.dispatchEvent(
+                new CustomEvent('abrirConversaChat', {
+                    detail: {
+                        conversaId: data.id
+                    }
+                })
+            )
+        } catch (error) {
+            setErroMensagem(
+                error.message || 'Erro ao conectar com o servidor.'
+            )
+        } finally {
+            setEnviandoMensagem(false)
+        }
+    }
+
     const formatarData = (data) => {
         if (!data) return ''
 
@@ -105,15 +196,14 @@ function VerDetalhesReserva() {
     }
 
     const calcularDias = () => {
-        if (!reserva) return 0;
+        if (!reserva) return 0
 
-        const inicio = new Date(reserva.inicio);
-        const fim = new Date(reserva.fim);
+        const inicio = new Date(reserva.inicio)
+        const fim = new Date(reserva.fim)
+        const diferenca = fim - inicio
 
-        const diferenca = fim - inicio;
-
-        return Math.ceil(diferenca / (1000 * 60 * 60 * 24));
-    };
+        return Math.ceil(diferenca / (1000 * 60 * 60 * 24))
+    }
 
     const formatarMoeda = (valor) => {
         return Number(valor || 0).toLocaleString('pt-BR', {
@@ -121,7 +211,6 @@ function VerDetalhesReserva() {
             maximumFractionDigits: 2
         })
     }
-
 
     const obterUrlImagem = (imagem) => {
         const caminho = typeof imagem === 'string'
@@ -159,7 +248,6 @@ function VerDetalhesReserva() {
         )
     }
 
-
     if (erro || !reserva) {
         return (
             <>
@@ -177,11 +265,7 @@ function VerDetalhesReserva() {
                             {erro || 'Não foi possível encontrar esta reserva.'}
                         </p>
 
-                        <button
-                            type="button"
-                            onClick={() => navigate('/detalhesReserva')}
-                            className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-semibold px-6 py-3 rounded-xl"
-                        >
+                        <button type="button" onClick={() => navigate('/detalhesReserva')} className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-semibold px-6 py-3 rounded-xl">
                             Voltar para Minhas Reservas
                         </button>
                     </div>
@@ -217,14 +301,13 @@ function VerDetalhesReserva() {
 
                 <section className="border border-borda-cards rounded-xl p-4 md:p-5 mb-4">
                     <div className="flex flex-col md:flex-row gap-6">
-
-                        <img src={imagemImovel} alt={reserva.imovel.titulo} className="w-full md:w-[272px] h-[250px] object-cover rounded-xl" />
+                        <img src={imagemImovel} alt={reserva.imovel?.titulo || 'Imóvel reservado'} className="w-full md:w-[272px] h-[250px] object-cover rounded-xl"/>
 
                         <div className="flex-1 min-w-0">
                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                                 <div>
                                     <h2 className="text-2xl font-bold text-preto-texto-principal">
-                                        {reserva.imovel.titulo}
+                                        {reserva.imovel?.titulo}
                                     </h2>
 
                                     <div className="flex items-center gap-1.5 mt-1 text-cinza-texto-secundario">
@@ -238,13 +321,12 @@ function VerDetalhesReserva() {
                                         <Icons.FaStar size={18} className="text-icone-estrela" />
 
                                         <span className="text-sm font-semibold">
-                                            {reserva.imovel.avaliacao}
+                                            {reserva.imovel?.avaliacao}
                                         </span>
 
                                         <span className="text-sm font-semibold">
-                                            ({reserva.imovel.quantidadeAvaliacoes} Avaliação)
+                                            ({reserva.imovel?.quantidadeAvaliacoes} Avaliação)
                                         </span>
-
                                     </div>
                                 </div>
 
@@ -257,31 +339,22 @@ function VerDetalhesReserva() {
                             <div className="flex flex-wrap items-center gap-x-7 gap-y-3 mt-7 pb-3 border-b border-borda-cards">
                                 <div className="flex items-center gap-2 font-semibold">
                                     <Icons.FaWifi size={17} />
-                                    <span className="text-sm">
-                                        Wi-Fi
-                                    </span>
+                                    <span className="text-sm">Wi-Fi</span>
                                 </div>
 
                                 <div className="flex items-center gap-2 font-semibold">
                                     <Icons.LuWind size={18} />
-                                    <span className="text-sm">
-                                        Ar-Condicionado
-                                    </span>
+                                    <span className="text-sm">Ar-Condicionado</span>
                                 </div>
-
 
                                 <div className="flex items-center gap-2 font-semibold">
                                     <Icons.FaCar size={17} />
-                                    <span className="text-sm">
-                                        Estacionamento
-                                    </span>
+                                    <span className="text-sm">Estacionamento</span>
                                 </div>
 
                                 <div className="flex items-center gap-2 font-semibold">
                                     <Icons.FaSwimmingPool size={18} />
-                                    <span className="text-sm">
-                                        Piscina
-                                    </span>
+                                    <span className="text-sm">Piscina</span>
                                 </div>
 
                                 <span className="text-sm font-semibold">
@@ -293,8 +366,9 @@ function VerDetalhesReserva() {
                                 <h3 className="font-bold text-sm mb-1">
                                     Descrição:
                                 </h3>
+
                                 <p className="text-sm leading-5 text-preto-texto-principal max-w-[700px]">
-                                    {reserva.imovel.descricao}
+                                    {reserva.imovel?.descricao}
                                 </p>
                             </div>
                         </div>
@@ -308,49 +382,37 @@ function VerDetalhesReserva() {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 mt-1">
                         <div className="py-2 md:pr-6 md:border-r border-borda-cards">
-                            <h3 className="font-bold mb-1">
-                                Check-in
-                            </h3>
+                            <h3 className="font-bold mb-1">Check-in</h3>
 
                             <div className="flex items-center gap-2 font-semibold">
                                 <Icons.FaCalendarAlt size={17} />
-                                <span>
-                                    {formatarData(reserva.inicio)}
-                                </span>
+                                <span>{formatarData(reserva.inicio)}</span>
                             </div>
                         </div>
 
                         <div className="py-2 md:px-6 md:border-r border-borda-cards">
-                            <h3 className="font-bold mb-1">
-                                Check-out
-                            </h3>
+                            <h3 className="font-bold mb-1">Check-out</h3>
 
                             <div className="flex items-center gap-2 font-semibold">
                                 <Icons.FaCalendarAlt size={17} />
-                                <span>
-                                    {formatarData(reserva.fim)}
-                                </span>
+                                <span>{formatarData(reserva.fim)}</span>
                             </div>
-
                         </div>
 
                         <div className="py-2 md:px-6 md:border-r border-borda-cards">
-                            <h3 className="font-bold mb-1">
-                                Hóspedes
-                            </h3>
+                            <h3 className="font-bold mb-1">Hóspedes</h3>
 
                             <div className="flex items-center gap-2 font-semibold">
                                 <Icons.IoPeopleSharp size={19} />
                                 <span>
-                                    {reserva.hospedes} {reserva.hospedes === 1 ? 'Hóspede' : 'Hóspedes'}
+                                    {reserva.hospedes}{' '}
+                                    {reserva.hospedes === 1 ? 'Hóspede' : 'Hóspedes'}
                                 </span>
                             </div>
                         </div>
 
                         <div className="py-2 md:pl-6">
-                            <h3 className="font-bold mb-1">
-                                Duração
-                            </h3>
+                            <h3 className="font-bold mb-1">Duração</h3>
 
                             <div className="flex items-center gap-2 font-semibold">
                                 <Icons.LuTimer size={19} />
@@ -364,24 +426,27 @@ function VerDetalhesReserva() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <section className="border border-borda-cards rounded-xl px-12 py-4 min-h-[220px]">
-
                         <h2 className="text-2xl font-bold mb-5">
                             Anfitrião
                         </h2>
 
                         <div className="flex items-center gap-4">
-                            <AvatarUsuario nome={reserva.imovel?.usuario?.nome || 'Anfitrião'} src={reserva.imovel?.usuario?.avatarPath
-                                ? `${import.meta.env.VITE_API_URL}${reserva.imovel.usuario.avatarPath}`
-                                : null} className="w-[88px] h-[88px]" textoClassName="text-3xl" />
+                            <AvatarUsuario nome={reserva.imovel?.usuario?.nome || 'Anfitrião'} src={
+                                    reserva.imovel?.usuario?.avatarPath
+                                        ? `${import.meta.env.VITE_API_URL}${reserva.imovel.usuario.avatarPath}`
+                                        : null
+                                } className="w-[88px] h-[88px]" textoClassName="text-3xl" />
 
                             <div>
                                 <h3 className="text-lg font-bold mb-2">
                                     {reserva.imovel?.usuario?.nome || 'Não informado'}
                                 </h3>
 
-                                <button type="button" className="flex items-center gap-2 border border-beje-principal text-beje-principal px-3 py-2 rounded-md font-semibold hover:bg-beje-principal hover:text-white transition-colors" >
+                                <button type="button" onClick={handleEnviarMensagem} disabled={enviandoMensagem} className="flex items-center gap-2 border border-beje-principal text-beje-principal px-3 py-2 rounded-md font-semibold hover:bg-beje-principal hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" >
                                     <Icons.MdOutlineMailOutline size={20} />
-                                    Enviar Mensagem
+                                    {enviandoMensagem
+                                        ? 'Abrindo conversa...'
+                                        : 'Enviar Mensagem'}
                                 </button>
                             </div>
                         </div>
@@ -404,9 +469,7 @@ function VerDetalhesReserva() {
                             </div>
 
                             <div className="flex justify-between">
-                                <span>
-                                    Taxa de Serviço 5%
-                                </span>
+                                <span>Taxa de Serviço 5%</span>
 
                                 <span>
                                     R$ {formatarMoeda(taxaServico)}
@@ -415,9 +478,7 @@ function VerDetalhesReserva() {
                         </div>
 
                         <div className="border-t border-borda-cards mt-2 pt-2 flex justify-between items-center">
-                            <span className="text-base">
-                                Total Pago
-                            </span>
+                            <span className="text-base">Total Pago</span>
 
                             <span className="text-xl font-extrabold">
                                 R$ {formatarMoeda(total)}
@@ -430,7 +491,6 @@ function VerDetalhesReserva() {
                                 Pagamento Confirmado
                             </span>
                         </div>
-
                     </section>
 
                     <section className="border border-borda-cards rounded-xl px-12 py-4 min-h-[220px]">
@@ -480,24 +540,31 @@ function VerDetalhesReserva() {
                         </p>
 
                         <div className="space-y-2 mt-6">
-                            <button type="button" className="w-[85%] mx-auto flex items-center justify-center gap-2 border border-beje-principal text-beje-principal px-4 py-2 rounded-md font-semibold hover:bg-beje-principal hover:text-white transition-colors">
+                            <button type="button" onClick={handleEnviarMensagem} disabled={enviandoMensagem} className="w-[85%] mx-auto flex items-center justify-center gap-2 border border-beje-principal text-beje-principal px-4 py-2 rounded-md font-semibold hover:bg-beje-principal hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" >
                                 <Icons.MdOutlineMailOutline size={20} />
-                                Falar com o Anfitrião
+                                {enviandoMensagem
+                                    ? 'Abrindo conversa...'
+                                    : 'Falar com o Anfitrião'}
                             </button>
+
+                            {erroMensagem && (
+                                <p role="alert" className="mt-2 text-sm text-red-600">
+                                    {erroMensagem}
+                                </p>
+                            )}
                         </div>
                     </section>
                 </div>
 
                 <div className="flex justify-center items-center gap-5 mt-5">
-                    <button type="button" onClick={() => navigate('/principal')} className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-semibold px-8 py-3 rounded-xl transition-colors">
+                    <button type="button" onClick={() => navigate('/principal')} className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-semibold px-8 py-3 rounded-xl transition-colors" >
                         Voltar a tela Inicial
                     </button>
 
-                    <button type="button" onClick={() => setTelaCancelar('confirmacao')} className="bg-white hover:bg-gray-50 text-preto-texto-principal border border-gray-700 font-semibold px-8 py-3 rounded-xl transition-colors">
+                    <button type="button" onClick={() => setTelaCancelar('confirmacao')} className="bg-white hover:bg-gray-50 text-preto-texto-principal border border-gray-700 font-semibold px-8 py-3 rounded-xl transition-colors" >
                         Cancelar Reserva
                     </button>
                 </div>
-
             </main>
 
             <footer>
