@@ -962,6 +962,101 @@ async function main() {
         });
     }
 
+    // ==================== PAGAMENTOS ====================
+
+    const pagamentosCriados = [];
+
+    for (let i = 0; i < reservasCriadas.length; i++) {
+        const reserva = reservasCriadas[i];
+
+        // Encontra o imóvel e seu preço por noite
+        const indiceImovel = imoveisCriados.findIndex(
+            imovel => imovel.id === reserva.imovelId
+        );
+
+        if (indiceImovel === -1) {
+            throw new Error(
+                `Imóvel não encontrado para a reserva ${reserva.codigo}`
+            );
+        }
+
+        const precoPorNoite = dadosImoveis[indiceImovel].preco;
+
+        // Calcula a quantidade de noites usando datas UTC
+        const inicio = new Date(reserva.inicio);
+        const fim = new Date(reserva.fim);
+
+        const noites = Math.round(
+            (
+                Date.UTC(
+                    fim.getUTCFullYear(),
+                    fim.getUTCMonth(),
+                    fim.getUTCDate()
+                ) -
+                Date.UTC(
+                    inicio.getUTCFullYear(),
+                    inicio.getUTCMonth(),
+                    inicio.getUTCDate()
+                )
+            ) / (1000 * 60 * 60 * 24)
+        );
+
+        if (noites <= 0) {
+            throw new Error(
+                `Período inválido na reserva ${reserva.codigo}`
+            );
+        }
+
+        // Valor do aluguel sem a taxa de serviço
+        const valor = precoPorNoite * noites;
+
+        let statusPagamento;
+        let criarPagamento = true;
+
+        if (reserva.status === 'Finalizado') {
+            statusPagamento = 'Pago';
+        } else if (reserva.status === 'Confirmada') {
+            // Alterna entre Pago e Pendente para testar os filtros
+            statusPagamento = i % 2 === 0 ? 'Pago' : 'Pendente';
+        } else {
+            // Reservas canceladas ou com outros status ficam sem pagamento
+            criarPagamento = false;
+        }
+
+        if (!criarPagamento) {
+            continue;
+        }
+
+        // Define a data do pagamento
+        const dataPagamento = statusPagamento === 'Pendente'
+            ? null
+            : new Date(
+                Date.UTC(
+                    inicio.getUTCFullYear(),
+                    inicio.getUTCMonth(),
+                    inicio.getUTCDate(),
+                    12
+                )
+            );
+
+        // Cria o pagamento vinculado à reserva
+        const pagamento = await prisma.pagamento.create({
+            data: {
+                valor,
+                metodo: i % 2 === 0
+                    ? 'Cartão de Crédito'
+                    : 'Pix',
+                status: statusPagamento,
+                dataPagamento,
+                reservaId: reserva.id
+            }
+        });
+
+        pagamentosCriados.push(pagamento);
+    }
+
+    console.log(`💳 ${pagamentosCriados.length} pagamentos criados`);
+
     // ==================== AVALIAÇÕES ====================
 
     const comentarios = [

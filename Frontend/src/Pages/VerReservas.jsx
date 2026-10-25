@@ -156,17 +156,28 @@ function VerReservas() {
     const usuarioId = sessionStorage.getItem('usuarioId');
 
     useEffect(() => {
+
         const carregarReservas = async () => {
             try {
+                console.log('ID do usuário:', usuarioId);
+
                 const response = await fetch(
                     `${import.meta.env.VITE_API_URL}/reservas/usuario/${usuarioId}`
                 );
 
+                console.log('Status da resposta:', response.status);
+
                 const data = await response.json();
 
-                setReservas(data);
+                console.log('Reservas recebidas:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.erro || 'Erro ao buscar reservas');
+                }
+
+                setReservas(Array.isArray(data) ? data : []);
             } catch (error) {
-                console.error("Erro ao carregar reservas:", error);
+                console.error('Erro ao carregar reservas:', error);
             } finally {
                 setCarregando(false);
             }

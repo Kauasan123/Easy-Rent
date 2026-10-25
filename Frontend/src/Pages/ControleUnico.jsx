@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as Icons from '../icons/icons';
+import AvatarUsuario from '../components/AvatarUsuario';
 
 function CardReserva({ reserva, imovel }) {
 
@@ -71,15 +72,7 @@ function CardReserva({ reserva, imovel }) {
             <div className="grid grid-cols-5 gap-6 items-center">
                 {/* Hóspede */}
                 <div className="flex items-center gap-3 min-w-0">
-                    {reserva.hospede?.avatarPath ? (
-                        <img src={reserva.hospede.avatarPath} alt={reserva.hospede.nome} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-
-                    ) : (
-
-                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            <Icons.IoPeopleSharp size={20} className="text-gray-500" />
-                        </div>
-                    )}
+                    <AvatarUsuario nome={reserva.hospede?.nome || 'Hóspede'} src={reserva.hospede?.avatarPath || null} className="w-12 h-12 rounded-full flex-shrink-0" />
 
                     <div className="min-w-0">
                         <h4 className="font-bold text-preto-texto-principal text-sm truncate">
@@ -198,6 +191,11 @@ function ControleUnico() {
     const [carregandoReservas, setCarregandoReservas] = useState(false);
     const usuarioId = sessionStorage.getItem('usuarioId');
     const [paginaAtual, setPaginaAtual] = useState(1);
+    const [avaliacoes, setAvaliacoes] = useState({
+        avaliacoes: [],
+        media: null,
+        total: 0
+    });
 
     const itensPorPagina = 5;
 
@@ -294,6 +292,51 @@ function ControleUnico() {
 
     }, [imovelSelecionado]);
 
+
+    useEffect(() => {
+        const carregarAvaliacoes = async () => {
+            if (!imovelSelecionado) {
+                setAvaliacoes({
+                    avaliacoes: [],
+                    media: null,
+                    total: 0
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/avaliacoes/imovel/${imovelSelecionado}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Erro ao buscar avaliações: ${response.status}`
+                    );
+                }
+
+                const data = await response.json();
+
+                setAvaliacoes({
+                    avaliacoes: data.avaliacoes || [],
+                    media: data.media ?? null,
+                    total: data.total ?? 0
+                });
+            } catch (error) {
+                console.error('Erro ao carregar avaliações:', error);
+
+                setAvaliacoes({
+                    avaliacoes: [],
+                    media: null,
+                    total: 0
+                });
+            }
+        };
+
+        carregarAvaliacoes();
+    }, [imovelSelecionado]);
+
+
     const imovelAtual = imoveis.find(
         (imovel) =>
             imovel.id === Number(imovelSelecionado)
@@ -307,7 +350,7 @@ function ControleUnico() {
             reserva.status === 'Pendente'
     ).length;
 
-    const avaliacaoMedia = '—';
+    const avaliacaoMedia = avaliacoes.media ?? '—';
 
     const metricas = [
 

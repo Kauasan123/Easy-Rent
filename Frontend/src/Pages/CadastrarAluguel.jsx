@@ -122,11 +122,21 @@ function CadastrarAluguel() {
     const handleAdicionarPeriodo = () => {
         if (!dataInicio || !dataFim) return;
 
+
+        const formatarData = (data) => {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+
+            return `${ano}-${mes}-${dia}`;
+        };
+
         const novoPeriodo = {
             id: Date.now(),
-            inicio: dataInicio.toISOString().split('T')[0],
-            fim: dataFim.toISOString().split('T')[0]
+            inicio: formatarData(dataInicio),
+            fim: formatarData(dataFim)
         };
+
 
         setPeriodosDisponiveis([...periodosDisponiveis, novoPeriodo]);
 

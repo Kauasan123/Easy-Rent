@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as Icons from '../icons/icons.js';
+import AvatarUsuario from '../components/AvatarUsuario';
 
 function ControlePagamento() {
     const [pagamentos, setPagamentos] = useState([]);

@@ -5,8 +5,6 @@ import Calendario from '../components/Calendario.jsx';
 import AvatarUsuario from '../components/AvatarUsuario';
 
 export function ModalDetalhes({ imovel, onClose }) {
-  if (!imovel) return null;
-
   const navigate = useNavigate();
 
   const [indiceAvaliacao, setIndiceAvaliacao] = React.useState(0);
@@ -28,6 +26,9 @@ export function ModalDetalhes({ imovel, onClose }) {
   const [periodoSelecionado, setPeriodoSelecionado] = React.useState(null);
   const [enviandoMensagem, setEnviandoMensagem] = React.useState(false);
   const [erroMensagem, setErroMensagem] = React.useState('');
+  const [reservas, setReservas] = React.useState([]);
+  const [carregandoReservas, setCarregandoReservas] = React.useState(true);
+  const [erroCarregarReservas, setErroCarregarReservas] = React.useState('');
 
   const usuarioId = sessionStorage.getItem('usuarioId');
 
@@ -91,6 +92,56 @@ export function ModalDetalhes({ imovel, onClose }) {
       setEnviandoAvaliacao(false);
     }
   };
+
+
+  React.useEffect(() => {
+    if (!imovel?.id) {
+      setReservas([]);
+      setCarregandoReservas(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const carregarReservas = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovel.id}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error('Não foi possível carregar as reservas.');
+        }
+
+        const data = await response.json();
+
+        setReservas(Array.isArray(data) ? data : []);
+        setErroCarregarReservas('');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Erro ao carregar reservas:', error);
+          setErroCarregarReservas(
+            'Não foi possível verificar a disponibilidade.'
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCarregandoReservas(false);
+        }
+      }
+    };
+
+    setReservas([]);
+    setCarregandoReservas(true);
+    setErroCarregarReservas('');
+
+    carregarReservas();
+
+    return () => controller.abort();
+  }, [imovel?.id]);
+
+  if (!imovel) return null;
 
   const obterUrl = (imagem) => {
     const caminho = typeof imagem === 'string' ? imagem : imagem?.url;
@@ -260,6 +311,25 @@ export function ModalDetalhes({ imovel, onClose }) {
     }
   };
 
+  const intervaloPossuiConflito = (inicio, fim) => {
+    if (!inicio || !fim) return true;
+
+    return reservas.some(reserva => {
+      if (
+        reserva.status !== 'Confirmada' ||
+        !reserva.inicio ||
+        !reserva.fim
+      ) {
+        return false;
+      }
+
+      const inicioReserva = new Date(reserva.inicio);
+      const fimReserva = new Date(reserva.fim);
+
+      return inicio < fimReserva && fim > inicioReserva;
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-preto-principal/60 backdrop-blur-sm p-4 overflow-hidden">
       <div className="bg-white w-full max-w-[1150px] h-[95vh] rounded-3xl relative overflow-y-auto p-6 md:p-10 shadow-2xl">
@@ -382,10 +452,14 @@ export function ModalDetalhes({ imovel, onClose }) {
                                 {inicio.toLocaleDateString('pt-BR')} → {fim.toLocaleDateString('pt-BR')}
                               </button>
 
-                              {/* Inputs de data aparecem ao selecionar o período */}
                               {selecionado && (
                                 <div className="flex flex-col gap-2 p-3 bg-fundo-cards border border-borda-cards rounded-xl">
                                   <Calendario
+                                    reservas={reservas.map(reserva => ({
+                                      start: reserva.inicio,
+                                      end: reserva.fim,
+                                      status: reserva.status
+                                    }))}
                                     startDate={checkIn}
                                     endDate={checkOut}
                                     setStartDate={setCheckIn}
@@ -491,23 +565,31 @@ export function ModalDetalhes({ imovel, onClose }) {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() =>
-                    navigate('/revisaoReserva', {
-                      state: {
-                        imovel,
-                        checkIn,
-                        checkOut,
-                        hospedes: Number(hospedes)
-                      }
-                    })
+                <button onClick={() => {
+                  if (intervaloPossuiConflito(checkIn, checkOut)) {
+                    setErroReserva(
+                      'As datas selecionadas coincidem com uma reserva confirmada. Escolha outro período.'
+                    );
+                    return;
                   }
-                  disabled={!checkIn || !checkOut}
-                  className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {checkIn && checkOut
-                    ? 'Avançar para Reserva'
-                    : 'Avançar para Reserva'}
+
+                  navigate('/revisaoReserva', {
+                    state: {
+                      imovel,
+                      checkIn,
+                      checkOut,
+                      hospedes: Number(hospedes)
+                    }
+                  });
+                }}
+                  disabled={
+                    carregandoReservas ||
+                    Boolean(erroCarregarReservas) ||
+                    !checkIn ||
+                    !checkOut ||
+                    checkIn >= checkOut
+                  } className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Avançar para Reserva
                 </button>
               )}
 

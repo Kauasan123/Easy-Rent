@@ -2,9 +2,40 @@ import React, { useState } from 'react';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from 'date-fns/locale/pt-BR';
-import { isWithinInterval } from 'date-fns';
 
 registerLocale('pt-BR', ptBR);
+
+const normalizarDataCalendario = (valor) => {
+  if (!valor) return null;
+
+  if (typeof valor === 'string') {
+    const correspondencia = valor.match(
+      /^(\d{4})-(\d{2})-(\d{2})/
+    );
+
+    if (correspondencia) {
+      const [, ano, mes, dia] = correspondencia;
+
+      return new Date(
+        Number(ano),
+        Number(mes) - 1,
+        Number(dia)
+      );
+    }
+  }
+
+  const data = new Date(valor);
+
+  if (Number.isNaN(data.getTime())) {
+    return null;
+  }
+
+  return new Date(
+    data.getFullYear(),
+    data.getMonth(),
+    data.getDate()
+  );
+};
 
 export function Calendario({
   modoVisualizacao = false,
@@ -17,6 +48,7 @@ export function Calendario({
   minDate,
   maxDate
 }) {
+
   const [internalStartDate, setInternalStartDate] = useState(null);
   const [internalEndDate, setInternalEndDate] = useState(null);
 
@@ -39,25 +71,60 @@ export function Calendario({
     setEndDate(end);
   };
 
-  const intervalosParaBloquear = reservas
-    .filter(r => r.start && r.end)
-    .map(r => ({ start: r.start, end: r.end }));
+  const reservasConfirmadas = reservas.filter(
+    reserva => reserva.status === 'Confirmada' &&
+      reserva.start &&
+      reserva.end
+  );
+
+  const dataPodeSerSelecionada = (date) => {
+    const dia = normalizarDataCalendario(date);
+
+    if (!dia) return false;
+
+    // Bloqueia datas fora do período selecionado.
+    const inicioPeriodo = normalizarDataCalendario(minDate);
+    const fimPeriodo = normalizarDataCalendario(maxDate);
+
+    if (inicioPeriodo && dia < inicioPeriodo) return false;
+    if (fimPeriodo && dia > fimPeriodo) return false;
+
+    // Bloqueia dias ocupados por reservas confirmadas.
+    return !reservasConfirmadas.some(reserva => {
+      const diaInicio = normalizarDataCalendario(reserva.start);
+      const diaCheckout = normalizarDataCalendario(reserva.end);
+
+      if (!diaInicio || !diaCheckout || diaCheckout <= diaInicio) {
+        return false;
+      }
+
+      return dia >= diaInicio && dia < diaCheckout;
+    });
+  };
 
   const obterClasseStatusDia = (date) => {
-    if (!modoVisualizacao || !reservas.length) return '';
+    if (!reservasConfirmadas.length) return '';
 
-    const reservaEncontrada = reservas.find(reserva => {
-      if (!reserva.start || !reserva.end) return false;
-      return isWithinInterval(date, { start: reserva.start, end: reserva.end });
+    const diaAtual = normalizarDataCalendario(date);
+
+    if (!diaAtual) return '';
+
+    const reservaEncontrada = reservasConfirmadas.find(reserva => {
+      const diaInicio = normalizarDataCalendario(reserva.start);
+      const diaCheckout = normalizarDataCalendario(reserva.end);
+
+      if (!diaInicio || !diaCheckout || diaCheckout <= diaInicio) {
+        return false;
+      }
+
+      return diaAtual >= diaInicio && diaAtual < diaCheckout;
     });
 
-    if (reservaEncontrada) {
-      if (reservaEncontrada.status === 'Confirmada') return 'reserva-confirmada';
-      if (reservaEncontrada.status === 'Pendente') return 'reserva-pendente';
-      if (reservaEncontrada.status === 'Cancelada') return 'reserva-cancelada';
-    }
+    if (!reservaEncontrada) return '';
 
-    return '';
+    return modoVisualizacao
+      ? 'reserva-confirmada'
+      : 'reserva-ocupada';
   };
 
   return (
@@ -100,9 +167,15 @@ export function Calendario({
           cursor: not-allowed !important;
         }
 
-        /* --- CORES DOS STATUS DAS RESERVAS --- */
+        .react-datepicker__day--excluded {
+            background-color: #fef2f2 !important;
+            color: #b91c1c !important;
+            border: 1px solid #fca5a5 !important;
+            border-radius: 4px !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+        }
 
-        /* 1. CONFIRMADA (Verde suave) */
         .reserva-confirmada {
           background-color: #e6f4ea !important;
           color: #137333 !important;
@@ -112,7 +185,6 @@ export function Calendario({
           cursor: not-allowed !important;
         }
 
-        /* 2. PENDENTE (Amarelo suave) */
         .reserva-pendente {
           background-color: #fffbeb !important;
           color: #b45309 !important;
@@ -122,7 +194,6 @@ export function Calendario({
           cursor: not-allowed !important;
         }
 
-        /* 3. CANCELADA (Vermelho suave) */
         .reserva-cancelada {
           background-color: #fef2f2 !important;
           color: #b91c1c !important;
@@ -132,7 +203,15 @@ export function Calendario({
           cursor: not-allowed !important;
         }
 
-        /* Ajustes de Hovers no Modo Dashboard */
+        .reserva-ocupada {
+          background-color: #fef2f2 !important;
+          color: #b91c1c !important;
+          border: 1px solid #fca5a5 !important;
+          border-radius: 4px !important;
+          font-weight: 700 !important;
+          cursor: not-allowed !important;
+        }
+
         ${modoVisualizacao ? `
           .react-datepicker__day--today {
             background-color: transparent !important;
@@ -174,7 +253,11 @@ export function Calendario({
           maxDate={maxDate !== undefined ? maxDate : undefined}
           locale="pt-BR"
           dateFormat="dd/MM/yyyy"
-          excludeDateIntervals={intervalosParaBloquear}
+          filterDate={
+            modoVisualizacao
+              ? undefined
+              : dataPodeSerSelecionada
+          }
           dayClassName={obterClasseStatusDia}
         />
       </div>

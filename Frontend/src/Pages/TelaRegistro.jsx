@@ -21,7 +21,7 @@ function TelaRegistro() {
 
     const preencherAutomatico = () => {
         setNome('Eduardo');
-        setEmail(`teste@gmail.com`);
+        setEmail(`eduardo28@gmail.com`);
         setSenha('123456');
         setConfirmarSenha('123456');
     };

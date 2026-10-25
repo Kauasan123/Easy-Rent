@@ -212,9 +212,8 @@ function Pagamento() {
                 return;
             }
 
-            // Confirma a reserva após o pagamento
             const atualizarResponse = await fetch(
-                `${import.meta.env.VITE_API_URL}/reservas/${data.reserva.id}/status`,
+                `${import.meta.env.VITE_API_URL}/reservas/${data.id}/status`,
                 {
                     method: 'PATCH',
                     headers: {
@@ -233,6 +232,36 @@ function Pagamento() {
                 return;
             }
 
+            const pagamentoResponse = await fetch(
+                `${import.meta.env.VITE_API_URL}/pagamentos`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        valor: Number(total),
+                        metodo: metodoPagamento,
+                        finalCartao:
+                            metodoPagamento === 'Cartão de Crédito'
+                                ? numeroCartao.replace(/\D/g, '').slice(-4)
+                                : null,
+                        status: 'Pago',
+                        dataPagamento: new Date().toISOString(),
+                        reservaId: data.id
+                    })
+                }
+            );
+
+            const pagamentoData = await pagamentoResponse.json();
+
+            if (!pagamentoResponse.ok) {
+                setErro(
+                    pagamentoData.erro || 'Erro ao registrar o pagamento.'
+                );
+                return;
+            }
+
             navigate('/conclusaoPagamento', {
                 state: {
                     imovel,
@@ -246,8 +275,8 @@ function Pagamento() {
                     metodoPagamento,
                     nome,
                     sobrenome,
-                    reservaId: data.reserva.id,
-                    reservaCodigo: data.reserva.codigo
+                    reservaId: data.id,
+                    reservaCodigo: data.codigo
                 }
             });
 

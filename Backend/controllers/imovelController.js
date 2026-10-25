@@ -144,9 +144,12 @@ const atualizarImovel = async (req, res) => {
     const { id } = req.params;
     const dadosImovel = req.body;
 
-    const periodos = dadosImovel.periodos
+    const periodosEnviados =
+      Object.prototype.hasOwnProperty.call(dadosImovel, 'periodos');
+
+    const periodos = periodosEnviados
       ? JSON.parse(dadosImovel.periodos)
-      : [];
+      : null;
 
     const arquivos = req.files || [];
     const novasFotos = [];
@@ -218,7 +221,7 @@ const atualizarImovel = async (req, res) => {
           }
         }),
 
-        ...(periodos !== null && {
+        ...(periodosEnviados && {
           periodos: {
             deleteMany: {},
             create: periodos.map(p => ({
