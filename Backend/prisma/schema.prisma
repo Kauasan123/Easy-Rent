@@ -8,14 +8,15 @@ generator client {
 }
 
 model Usuario {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  email        String   @unique
-  telefone     String?
-  senha        String
-  avatarPath   String?
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  nome            String
+  email           String   @unique
+  telefone        String?
+  senha           String
+  avatarPath      String?
+  asaasCustomerId String?  @unique
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
 
   imoveis    Imovel[]
   reservas   Reserva[]   @relation("ReservasComoHospede")
@@ -125,6 +126,12 @@ model Pagamento {
   status        String    @default("Pendente")
   dataPagamento DateTime?
   reservaId     Int       @unique
+
+  asaasPaymentId String?   @unique
+  invoiceUrl     String?
+  pixQrCode      String?   @db.Text
+  pixCopiaECola  String?   @db.Text
+  expiraEm       DateTime?
 
   reserva Reserva @relation(fields: [reservaId], references: [id], onDelete: Cascade)
 }

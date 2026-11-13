@@ -105,9 +105,16 @@ export function ModalDetalhes({ imovel, onClose }) {
 
     const carregarReservas = async () => {
       try {
+        const token = sessionStorage.getItem('token');
+
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovel.id}`,
-          { signal: controller.signal }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            signal: controller.signal,
+          }
         );
 
         if (!response.ok) {

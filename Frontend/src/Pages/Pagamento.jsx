@@ -34,6 +34,10 @@ function Pagamento() {
     const [menuPagamentoAberto, setMenuPagamentoAberto] = useState(false);
 
     const [erro, setErro] = useState('');
+    const [carregando, setCarregando] = useState(false);
+    const [dadosPix, setDadosPix] = useState(null);
+
+    const reservaId = 31;
 
     if (!imovel || !checkIn || !checkOut || !hospedes) {
         return (
@@ -135,6 +139,7 @@ function Pagamento() {
     const confirmarPagamento = async (e) => {
         e.preventDefault();
         setErro('');
+        setDadosPix(null);
 
         if (!nome.trim()) {
             setErro('Informe seu nome.');
@@ -151,6 +156,11 @@ function Pagamento() {
             return;
         }
 
+        if (cpf.replace(/\D/g, '').length !== 11) {
+            setErro('Informe um CPF válido.');
+            return;
+        }
+
         if (!telefone.trim()) {
             setErro('Informe seu telefone.');
             return;
@@ -161,94 +171,40 @@ function Pagamento() {
             return;
         }
 
-        if (metodoPagamento === 'Cartão de Crédito') {
-            const numeroLimpo = numeroCartao.replace(/\D/g, '');
-
-            if (numeroLimpo.length !== 16) {
-                setErro('Informe um número de cartão válido.');
-                return;
-            }
-
-            if (validade.length !== 5) {
-                setErro('Informe uma validade válida.');
-                return;
-            }
-
-            if (cvv.length !== 3) {
-                setErro('Informe um CVV válido.');
-                return;
-            }
+        if (metodoPagamento !== 'Pix') {
+            setErro('A integração com o Asaas está disponível somente para Pix no momento.');
+            return;
         }
 
         try {
-            const usuarioId = sessionStorage.getItem('usuarioId');
+            setCarregando(true);
 
-            if (!usuarioId) {
-                setErro('Você precisa estar logado para realizar a reserva.');
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+                setErro('Sua sessão expirou. Faça login novamente.');
                 return;
             }
 
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/reservas`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        inicio: checkIn,
-                        fim: checkOut,
-                        hospedes: Number(hospedes),
-                        imovelId: imovel.id,
-                        hospedeId: Number(usuarioId)
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                setErro(data.erro || 'Erro ao criar reserva.');
+            // Utilizar a reserva que já existe no banco de dados
+            if (!reservaId) {
+                setErro('Reserva não encontrada.');
                 return;
             }
 
-            const atualizarResponse = await fetch(
-                `${import.meta.env.VITE_API_URL}/reservas/${data.id}/status`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: 'Confirmada'
-                    })
-                }
-            );
-
-            const atualizarData = await atualizarResponse.json();
-
-            if (!atualizarResponse.ok) {
-                setErro(atualizarData.erro || 'Erro ao confirmar a reserva.');
-                return;
-            }
-
+            // Criar a cobrança Pix no Asaas
             const pagamentoResponse = await fetch(
                 `${import.meta.env.VITE_API_URL}/pagamentos`,
                 {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        valor: Number(total),
-                        metodo: metodoPagamento,
-                        finalCartao:
-                            metodoPagamento === 'Cartão de Crédito'
-                                ? numeroCartao.replace(/\D/g, '').slice(-4)
-                                : null,
-                        status: 'Pago',
-                        dataPagamento: new Date().toISOString(),
-                        reservaId: data.id
+                        reservaId: reservaId,
+                        metodo: 'Pix',
+                        cpf: cpf.replace(/\D/g, '')
                     })
                 }
             );
@@ -257,33 +213,42 @@ function Pagamento() {
 
             if (!pagamentoResponse.ok) {
                 setErro(
-                    pagamentoData.erro || 'Erro ao registrar o pagamento.'
+                    pagamentoData.erro || 'Erro ao gerar cobrança.'
                 );
                 return;
             }
 
-            navigate('/conclusaoPagamento', {
-                state: {
-                    imovel,
-                    checkIn,
-                    checkOut,
-                    hospedes,
-                    diarias,
-                    subtotal,
-                    taxaServico,
-                    total,
-                    metodoPagamento,
-                    nome,
-                    sobrenome,
-                    reservaId: data.id,
-                    reservaCodigo: data.codigo
-                }
+            if (
+                !pagamentoData.pagamento?.pixQrCode ||
+                !pagamentoData.pagamento?.pixCopiaECola
+            ) {
+                setErro('A cobrança foi criada, mas não foi possível obter o QR Code.');
+                return;
+            }
+
+            // 3. Guardar os dados para exibir o Pix
+            setDadosPix({
+                ...pagamentoData.pagamento,
+                reservaId: reservaId
             });
 
         } catch (error) {
-            console.error('Erro ao criar reserva:', error);
+            console.error('Erro ao gerar pagamento Pix:', error);
             setErro('Erro ao conectar com o servidor.');
+        } finally {
+            setCarregando(false);
         }
+    };
+
+    const preencherDadosDemonstracao = () => {
+        setNome('Eduardo');
+        setSobrenome('Santos');
+        setCpf(formatarCpf('52998224725'));
+        setTelefone(formatarTelefone('53991234567'));
+
+        const nascimento = new Date(1998, 4, 15);
+        setDataNascimento(nascimento);
+        setTextoDataNascimento('15/05/1998');
     };
 
     return (
@@ -315,154 +280,127 @@ function Pagamento() {
 
                 </div>
 
-
-
                 <div className="grid grid-cols-12 gap-12">
-
                     {/* COLUNA ESQUERDA */}
                     <section className="col-span-7">
-
                         <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                            Revisão de Reserva
+                            <span onClick={preencherDadosDemonstracao} className="cursor-pointer hover:text-beje-principal transition-colors" title="Preencher dados de demonstração" >
+                                Revisão
+                            </span>{' '}
+                            de Reserva
                         </h1>
 
-                        <form onSubmit={confirmarPagamento}>
 
-                            {/* MÉTODO DE PAGAMENTO */}
-                            <div className="relative border border-borda-cards rounded-xl mb-10">
-
-                                {/* Cabeçalho clicável */}
-                                <button
-                                    type="button"
-                                    onClick={() =>
+                        {!dadosPix ? (
+                            <form onSubmit={confirmarPagamento}>
+                                {/* MÉTODO DE PAGAMENTO */}
+                                <div className="relative border border-borda-cards rounded-xl mb-10">
+                                    {/* Cabeçalho clicável */}
+                                    <button type="button" onClick={() =>
                                         setMenuPagamentoAberto(!menuPagamentoAberto)
-                                    }
-                                    className="w-full flex items-center justify-between px-7 py-4 text-left"
-                                >
-                                    <div className="flex items-center gap-4 text-xl">
-                                        <Icons.FaCreditCard size={20} className="text-preto-principal" />
+                                    } className="w-full flex items-center justify-between px-7 py-4 text-left" >
+                                        <div className="flex items-center gap-4 text-xl">
+                                            <Icons.FaCreditCard size={20} className="text-preto-principal" />
 
-                                        <span>
-                                            {metodoPagamento}
-                                        </span>
-                                    </div>
-
-                                    <Icons.LuChevronDown size={20} className={`text-preto-principal transition-transform duration-200 ${menuPagamentoAberto ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                {/* Opções */}
-                                {menuPagamentoAberto && (
-                                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-borda-cards rounded-xl shadow-lg z-50 overflow-hidden">
-
-                                        <button type="button" onClick={() => {
-                                            setMetodoPagamento('Cartão de Crédito');
-                                            setMenuPagamentoAberto(false);
-                                        }}
-                                            className="w-full text-left px-7 py-4 text-xl hover:bg-gray-200 transition-colors">
-                                            Cartão de Crédito
-                                        </button>
-
-                                        <button type="button" onClick={() => {
-                                            setMetodoPagamento('Pix');
-                                            setMenuPagamentoAberto(false);
-                                        }}
-                                            className="w-full text-left px-7 py-4 text-xl hover:bg-gray-200 transition-colors">
-                                            Pix
-                                        </button>
-
-                                        <button type="button" onClick={() => {
-                                            setMetodoPagamento('Boleto');
-                                            setMenuPagamentoAberto(false);
-                                        }}
-                                            className="w-full text-left px-7 py-4 text-xl hover:bg-gray-200 transition-colors">
-                                            Boleto
-                                        </button>
-
-                                    </div>
-                                )}
-
-                            </div>
-
-                            {/* DADOS DO CARTÃO */}
-                            {metodoPagamento === 'Cartão de Crédito' && (
-                                <div className="border border-borda-cards rounded-xl overflow-hidden mb-10">
-
-                                    <div className="flex items-center justify-between px-7 py-4 border-b border-borda-cards">
-                                        <div className="flex items-center gap-4 text-xl flex-1">
-                                            <Icons.IoIosUnlock size={20} className="text-preto-principal" />
-
-                                            <input type="text" placeholder="Número do Cartão" value={numeroCartao} onChange={(e) =>
-                                                setNumeroCartao(
-                                                    formatarNumeroCartao(e.target.value)
-                                                )
-                                            }
-                                                className="flex-1 bg-transparent outline-none text-xl placeholder:text-gray-900"
-                                                maxLength={19} />
+                                            <span>
+                                                {metodoPagamento}
+                                            </span>
                                         </div>
-                                    </div>
 
-                                    <div className="grid grid-cols-2">
-                                        <input type="text" placeholder="Validade" value={validade} onChange={(e) =>
-                                            setValidade(
+                                        <Icons.LuChevronDown size={20} className={`text-preto-principal transition-transform duration-200 ${menuPagamentoAberto ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {/* Opções */}
+                                    {menuPagamentoAberto && (
+                                        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-borda-cards rounded-xl shadow-lg z-50 overflow-hidden">
+                                            <button type="button" onClick={() => {
+                                                setMetodoPagamento('Cartão de Crédito');
+                                                setMenuPagamentoAberto(false);
+                                            }} className="w-full text-left px-7 py-4 text-xl hover:bg-gray-200 transition-colors">
+                                                Cartão de Crédito
+                                            </button>
+
+                                            <button type="button" onClick={() => {
+                                                setMetodoPagamento('Pix');
+                                                setMenuPagamentoAberto(false);
+                                            }} className="w-full text-left px-7 py-4 text-xl hover:bg-gray-200 transition-colors">
+                                                Pix
+                                            </button>
+
+                                            <button type="button" onClick={() => {
+                                                setMetodoPagamento('Boleto');
+                                                setMenuPagamentoAberto(false);
+                                            }} className="w-full text-left px-7 py-4 text-xl hover:bg-gray-200 transition-colors">
+                                                Boleto
+                                            </button>
+
+                                        </div>
+                                    )}
+
+                                </div>
+
+                                {/* DADOS DO CARTÃO */}
+                                {metodoPagamento === 'Cartão de Crédito' && (
+                                    <div className="border border-borda-cards rounded-xl overflow-hidden mb-10">
+
+                                        <div className="flex items-center justify-between px-7 py-4 border-b border-borda-cards">
+                                            <div className="flex items-center gap-4 text-xl flex-1">
+                                                <Icons.IoIosUnlock size={20} className="text-preto-principal" />
+
+                                                <input type="text" placeholder="Número do Cartão" value={numeroCartao} onChange={(e) =>
+                                                    setNumeroCartao(
+                                                        formatarNumeroCartao(e.target.value)
+                                                    )
+                                                } className="flex-1 bg-transparent outline-none text-xl placeholder:text-gray-900" maxLength={19} />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2">
+                                            <input type="text" placeholder="Validade" value={validade} onChange={(e) => setValidade(
                                                 formatarValidade(
                                                     e.target.value
                                                 )
                                             )
-                                        }
-                                            className="px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-r border-borda-cards"
-                                            maxLength={5} />
+                                            } className="px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-r border-borda-cards" maxLength={5} />
 
-                                        <input type="text" placeholder="CVV" value={cvv} onChange={(e) =>
-                                            setCvv(
+                                            <input type="text" placeholder="CVV" value={cvv} onChange={(e) => setCvv(
                                                 e.target.value
                                                     .replace(/\D/g, '')
                                                     .slice(0, 3)
                                             )
-                                        }
-                                            className="px-7 py-4 text-xl outline-none placeholder:text-gray-900"
-                                            maxLength={3} />
+                                            } className="px-7 py-4 text-xl outline-none placeholder:text-gray-900" maxLength={3} />
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* DADOS PESSOAIS */}
-                            <div className="border border-borda-cards rounded-xl overflow-visible">
+                                {/* DADOS PESSOAIS */}
+                                <div className="border border-borda-cards rounded-xl overflow-visible">
 
-                                <input type="text" placeholder="Nome" value={nome} onChange={(e) =>
-                                    setNome(e.target.value)
-                                }
-                                    className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards" />
+                                    <input type="text" placeholder="Nome" value={nome} onChange={(e) =>
+                                        setNome(e.target.value)
+                                    }
+                                        className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards" />
 
-                                <input type="text" placeholder="Sobrenome" value={sobrenome} onChange={(e) =>
-                                    setSobrenome(e.target.value)
-                                }
-                                    className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards" />
+                                    <input type="text" placeholder="Sobrenome" value={sobrenome} onChange={(e) =>
+                                        setSobrenome(e.target.value)
+                                    }
+                                        className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards" />
 
-                                <input type="text" placeholder="CPF" value={cpf} onChange={(e) =>
-                                    setCpf(
+                                    <input type="text" placeholder="CPF" value={cpf} onChange={(e) => setCpf(
                                         formatarCpf(e.target.value)
                                     )
-                                }
-                                    className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards"
-                                    maxLength={14} />
+                                    } className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards" maxLength={14} />
 
-                                <input type="text" placeholder="Telefone" value={telefone} onChange={(e) =>
-                                    setTelefone(
+                                    <input type="text" placeholder="Telefone" value={telefone} onChange={(e) => setTelefone(
                                         formatarTelefone(
                                             e.target.value
                                         )
                                     )
-                                }
-                                    className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards"
-                                    maxLength={15} />
+                                    } className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-b border-borda-cards" maxLength={15} />
 
-                                <div className="relative">
-                                    <div className="flex items-center">
-                                        <input
-                                            type="text"
-                                            placeholder="Data de nascimento"
-                                            value={textoDataNascimento}
-                                            onChange={(e) => {
+                                    <div className="relative">
+                                        <div className="flex items-center">
+                                            <input type="text" placeholder="Data de nascimento" value={textoDataNascimento} onChange={(e) => {
                                                 let valor = e.target.value
                                                     .replace(/\D/g, '')
                                                     .slice(0, 8);
@@ -509,67 +447,106 @@ function Pagamento() {
                                                     setDataNascimento(null);
                                                 }
                                             }}
-                                            className="flex-1 px-7 py-4 text-xl outline-none text-gray-900 placeholder:text-gray-900"
-                                            maxLength={10}
-                                        />
+                                                className="flex-1 px-7 py-4 text-xl outline-none text-gray-900 placeholder:text-gray-900"
+                                                maxLength={10}
+                                            />
 
-                                        <button
-                                            type="button"
-                                            onClick={() =>
+                                            <button type="button" onClick={() =>
                                                 setCalendarioNascimentoAberto(
                                                     !calendarioNascimentoAberto
                                                 )
-                                            }
-                                            className="px-6 py-4 text-gray-900 hover:text-beje-principal transition-colors"
-                                        >
-                                            <Icons.FaCalendarAlt size={20} />
-                                        </button>
-                                    </div>
-
-                                    {calendarioNascimentoAberto && (
-                                        <div className="absolute right-0 bottom-full mb-[-5px] bg-white border border-borda-cards rounded-xl shadow-lg z-50 p-4">
-                                            <Calendario
-                                                modoDataUnica={true}
-                                                startDate={dataNascimento}
-                                                setStartDate={(data) => {
-                                                    setDataNascimento(data);
-
-                                                    if (data) {
-                                                        setTextoDataNascimento(
-                                                            data.toLocaleDateString('pt-BR')
-                                                        );
-                                                    }
-
-                                                    setCalendarioNascimentoAberto(false);
-                                                }}
-                                                minDate={new Date(1900, 0, 1)}
-                                                maxDate={new Date()}
-                                            />
+                                            } className="px-6 py-4 text-gray-900 hover:text-beje-principal transition-colors" >
+                                                <Icons.FaCalendarAlt size={20} />
+                                            </button>
                                         </div>
-                                    )}
+
+                                        {calendarioNascimentoAberto && (
+                                            <div className="absolute right-0 bottom-full mb-[-5px] bg-white border border-borda-cards rounded-xl shadow-lg z-50 p-4">
+                                                <Calendario
+                                                    modoDataUnica={true}
+                                                    startDate={dataNascimento}
+                                                    setStartDate={(data) => {
+                                                        setDataNascimento(data);
+
+                                                        if (data) {
+                                                            setTextoDataNascimento(
+                                                                data.toLocaleDateString('pt-BR')
+                                                            );
+                                                        }
+
+                                                        setCalendarioNascimentoAberto(false);
+                                                    }}
+                                                    minDate={new Date(1900, 0, 1)}
+                                                    maxDate={new Date()}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* ERRO */}
-                            {erro && (
-                                <p className="text-red-600 text-sm font-medium mt-4">
-                                    {erro}
+                                {/* ERRO */}
+                                {erro && (
+                                    <p className="text-red-600 text-sm font-medium mt-4">
+                                        {erro}
+                                    </p>
+                                )}
+
+                                {/* BOTÕES */}
+                                <div className="flex items-center gap-5 mt-8">
+
+                                    <button type="submit" disabled={carregando} className="bg-beje-principal hover:bg-botao-beje-apertado disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium px-8 py-3.5 rounded-xl transition-colors shadow-sm" >
+                                        {carregando ? 'Gerando cobrança...' : 'Concluir Pagamento'}
+                                    </button>
+
+                                    <button type="button" onClick={() => navigate(-1)} className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium px-8 py-3.5 rounded-xl transition-colors">
+                                        Cancelar Pagamento
+                                    </button>
+
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="border border-borda-cards rounded-xl p-6 mt-6 text-center">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                                    Pague com PIX
+                                </h2>
+
+                                <p className="text-gray-600 mb-6">
+                                    Escaneie o QR Code abaixo com o aplicativo do seu banco.
                                 </p>
-                            )}
 
-                            {/* BOTÕES */}
-                            <div className="flex items-center gap-5 mt-8">
+                                <img src={
+                                    dadosPix.pixQrCode.startsWith('data:')
+                                        ? dadosPix.pixQrCode
+                                        : `data:image/png;base64,${dadosPix.pixQrCode}`
+                                } alt="QR Code PIX" className="w-64 h-64 object-contain mx-auto mb-6" />
 
-                                <button type="submit" className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-8 py-3.5 rounded-xl transition-colors shadow-sm">
-                                    Concluir Pagamento
+                                <p className="font-semibold text-gray-900 mb-2">
+                                    PIX Copia e Cola
+                                </p>
+
+                                <textarea readOnly value={dadosPix.pixCopiaECola} className="w-full h-24 p-3 border border-borda-cards rounded-lg text-sm resize-none" />
+
+                                <button type="button" onClick={() =>
+                                    navigator.clipboard.writeText(dadosPix.pixCopiaECola)
+                                } className="w-full mt-3 bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-6 py-3 rounded-xl transition-colors">
+                                    Copiar código PIX
                                 </button>
 
-                                <button type="button" onClick={() => navigate(-1)} className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium px-8 py-3.5 rounded-xl transition-colors">
-                                    Cancelar Pagamento
-                                </button>
+                                <p className="text-lg font-bold text-gray-900 mt-6">
+                                    Valor: R$ {formatarMoeda(dadosPix.valor)}
+                                </p>
 
+                                {dadosPix.expiraEm && (
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        Expira em: {formatarData(dadosPix.expiraEm)}
+                                    </p>
+                                )}
+
+                                <p className="text-sm text-gray-500 mt-4">
+                                    Sua reserva permanecerá pendente até a confirmação do pagamento.
+                                </p>
                             </div>
-                        </form>
+                        )}
                     </section>
 
                     {/* COLUNA DIREITA */}

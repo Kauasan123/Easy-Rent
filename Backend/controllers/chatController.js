@@ -238,11 +238,16 @@ const enviarMensagem = async (req, res) => {
             return novaMensagem;
         });
 
+
         const io = req.app.get('io');
 
         if (io) {
             io.to(`conversa:${conversaId}`).emit('novaMensagem', mensagem);
+
+            io.to(`usuario:${conversa.locatarioId}`).emit('atualizarConversas');
+            io.to(`usuario:${conversa.proprietarioId}`).emit('atualizarConversas');
         }
+
 
         return res.status(201).json(mensagem);
     } catch (error) {

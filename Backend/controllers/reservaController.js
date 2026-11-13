@@ -119,12 +119,11 @@ const criarReserva = async (req, res) => {
       inicio,
       fim,
       hospedes,
-      imovelId,
-      hospedeId
+      imovelId
     } = req.body;
 
     const idImovel = Number(imovelId);
-    const idHospede = Number(hospedeId);
+    const idHospede = Number(req.usuarioId);
     const quantidadeHospedes = Number(hospedes);
 
     if (
@@ -237,22 +236,68 @@ const criarReserva = async (req, res) => {
 const listarReservasPorImovel = async (req, res) => {
   try {
     const { imovelId } = req.params;
+    const idImovel = Number(imovelId);
+    const idUsuario = Number(req.usuarioId);
 
+    if (!Number.isInteger(idImovel) || idImovel <= 0) {
+      return res.status(400).json({
+        erro: "ID do imóvel inválido."
+      });
+    }
+
+    const imovel = await prisma.imovel.findUnique({
+      where: { id: idImovel },
+      select: { usuarioId: true }
+    });
+
+    if (!imovel) {
+      return res.status(404).json({
+        erro: "Imóvel não encontrado."
+      });
+    }
+
+    const ehProprietario = imovel.usuarioId === idUsuario;
+
+    // O proprietário pode consultar as reservas completas.
+    if (ehProprietario) {
+      const reservas = await prisma.reserva.findMany({
+        where: { imovelId: idImovel },
+        include: { hospede: true },
+        orderBy: { inicio: 'asc' }
+      });
+
+      return res.json(reservas);
+    }
+
+    // Outros usuários recebem somente as datas ocupadas.
     const reservas = await prisma.reserva.findMany({
-      where: { imovelId: parseInt(imovelId) },
-      include: { hospede: true },
+      where: {
+        imovelId: idImovel,
+        status: 'Confirmada'
+      },
+      select: {
+        id: true,
+        inicio: true,
+        fim: true,
+        status: true
+      },
       orderBy: { inicio: 'asc' }
     });
 
     return res.json(reservas);
+
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao buscar reservas", detalhes: error.message });
+    console.error("Erro ao buscar reservas do imóvel:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao buscar reservas.",
+      detalhes: error.message
+    });
   }
 };
 
 const listarReservasPorUsuario = async (req, res) => {
   try {
-    const { usuarioId } = req.params;
     const id = parseInt(usuarioId);
 
     if (isNaN(id)) {
@@ -313,13 +358,7 @@ const atualizarStatusReserva = async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { status } = req.body;
-
-    const statusPermitidos = [
-      'Pendente',
-      'Confirmada',
-      'Cancelada',
-      'Finalizado'
-    ];
+    const usuarioId = req.usuarioId;
 
     if (!Number.isInteger(id) || id <= 0) {
       return res.status(400).json({
@@ -327,9 +366,9 @@ const atualizarStatusReserva = async (req, res) => {
       });
     }
 
-    if (!statusPermitidos.includes(status)) {
+    if (status !== 'Cancelada') {
       return res.status(400).json({
-        erro: 'Status de reserva inválido.'
+        erro: 'Esta rota permite apenas cancelar uma reserva.'
       });
     }
 
@@ -345,6 +384,13 @@ const atualizarStatusReserva = async (req, res) => {
         };
       }
 
+      if (reservaInicial.hospedeId !== usuarioId) {
+        return {
+          erro: 'Você não tem permissão para cancelar esta reserva.',
+          status: 403
+        };
+      }
+
       const bloqueado = await bloquearImovel(
         tx,
         reservaInicial.imovelId
@@ -357,6 +403,7 @@ const atualizarStatusReserva = async (req, res) => {
         };
       }
 
+      // Consulta novamente após o bloqueio para verificar o status atual.
       const reserva = await tx.reserva.findUnique({
         where: { id }
       });
@@ -368,36 +415,23 @@ const atualizarStatusReserva = async (req, res) => {
         };
       }
 
-      if (status === 'Confirmada') {
-        if (
-          reserva.status === 'Cancelada' ||
-          reserva.status === 'Finalizado'
-        ) {
-          return {
-            erro: 'Não é possível confirmar uma reserva cancelada ou finalizada.',
-            status: 409
-          };
-        }
+      if (reserva.hospedeId !== usuarioId) {
+        return {
+          erro: 'Você não tem permissão para cancelar esta reserva.',
+          status: 403
+        };
+      }
 
-        const disponibilidade = await verificarDisponibilidade(
-          tx,
-          reserva.imovelId,
-          reserva.inicio,
-          reserva.fim,
-          reserva.id
-        );
-
-        if (!disponibilidade.disponivel) {
-          return {
-            erro: disponibilidade.motivo,
-            status: 409
-          };
-        }
+      if (reserva.status !== 'Confirmada') {
+        return {
+          erro: 'Somente reservas confirmadas podem ser canceladas.',
+          status: 409
+        };
       }
 
       const reservaAtualizada = await tx.reserva.update({
         where: { id },
-        data: { status },
+        data: { status: 'Cancelada' },
         include: {
           imovel: {
             include: {
@@ -418,6 +452,7 @@ const atualizarStatusReserva = async (req, res) => {
     }
 
     return res.json(resultado.reserva);
+
   } catch (error) {
     console.error('Erro ao atualizar status da reserva:', error);
 
@@ -431,10 +466,9 @@ const atualizarStatusReserva = async (req, res) => {
 const buscarReservaPorId = async (req, res) => {
   try {
     const { id } = req.params;
+    const reservaId = Number(id);
 
-    const reservaId = parseInt(id);
-
-    if (isNaN(reservaId)) {
+    if (!Number.isInteger(reservaId)) {
       return res.status(400).json({
         erro: "ID de reserva inválido"
       });
@@ -458,6 +492,16 @@ const buscarReservaPorId = async (req, res) => {
     if (!reserva) {
       return res.status(404).json({
         erro: "Reserva não encontrada"
+      });
+    }
+
+    const usuarioAutenticado = req.usuarioId;
+    const ehHospede = reserva.hospedeId === usuarioAutenticado;
+    const ehProprietario = reserva.imovel.usuarioId === usuarioAutenticado;
+
+    if (!ehHospede && !ehProprietario) {
+      return res.status(403).json({
+        erro: "Você não tem permissão para visualizar esta reserva."
       });
     }
 

@@ -217,25 +217,34 @@ const Chat = () => {
                 enviada: remetenteId === usuarioAtual,
             };
 
+            const conversaExiste = conversasRef.current.some(
+                (conversa) => Number(conversa.id) === conversaId
+            );
+
+            if (!conversaExiste) {
+                socket.emit('solicitarAtualizacaoConversas');
+                return;
+            }
+
             setConversas((atuais) =>
                 atuais.map((conversa) => {
                     if (Number(conversa.id) !== conversaId) {
                         return conversa;
                     }
 
-                    const jaExiste = conversa.mensagens.some(
+                    const mensagensAtuais = conversa.mensagens || [];
+
+                    const jaExiste = mensagensAtuais.some(
                         (mensagemExistente) =>
                             Number(mensagemExistente.id) === Number(item.id)
                     );
 
-                    const mensagensAtualizadas =
-                        conversaEstaAberta && !jaExiste
-                            ? [...conversa.mensagens, mensagemFormatada]
-                            : conversa.mensagens;
-
                     return {
                         ...conversa,
-                        mensagens: mensagensAtualizadas,
+                        mensagens:
+                            conversaEstaAberta && !jaExiste
+                                ? [...mensagensAtuais, mensagemFormatada]
+                                : mensagensAtuais,
                         ultimaMensagem: item.texto,
                         horario: mensagemFormatada.hora,
                         naoLidas: mensagemFormatada.enviada
@@ -246,12 +255,41 @@ const Chat = () => {
                     };
                 })
             );
+        });
 
-            if (conversaEstaAberta && remetenteId !== usuarioAtual) {
-                requisicaoChat(
-                    `/conversas/${conversaId}/lidas`,
-                    { method: 'PATCH' }
-                ).catch(() => { });
+        socket.on('atualizarConversas', async () => {
+            try {
+                const dados = await requisicaoChat('/conversas');
+
+                const conversasFormatadas = dados.map((conversa) => {
+                    const ultima = conversa.mensagens?.[0];
+
+                    const mensagensExistentes =
+                        conversasRef.current.find(
+                            (item) => Number(item.id) === Number(conversa.id)
+                        )?.mensagens || [];
+
+                    return {
+                        id: conversa.id,
+                        nome: conversa.outroUsuario?.nome || 'Usuário',
+                        avatarPath: conversa.outroUsuario?.avatarPath || null,
+                        imovel: conversa.imovel?.titulo || 'Imóvel',
+                        ultimaMensagem:
+                            ultima?.texto || 'Nenhuma mensagem ainda',
+                        horario: ultima ? obterHora(ultima.criadaEm) : '',
+                        naoLidas: conversa.naoLidas ?? 0,
+                        mensagens: mensagensExistentes,
+                    };
+                });
+
+                conversasRef.current = conversasFormatadas;
+                setConversas(conversasFormatadas);
+
+                conversasFormatadas.forEach((conversa) => {
+                    socket.emit('entrarConversa', conversa.id);
+                });
+            } catch (erro) {
+                console.error('Erro ao atualizar lista de conversas:', erro);
             }
         });
 

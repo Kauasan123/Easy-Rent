@@ -71,6 +71,12 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
+  socket.join(`usuario:${socket.data.usuarioId}`);
+
+  socket.on('solicitarAtualizacaoConversas', () => {
+    socket.emit('atualizarConversas');
+  });
+
   socket.on('entrarConversa', async (conversaIdRecebido) => {
     try {
       const conversaId = Number(conversaIdRecebido);
