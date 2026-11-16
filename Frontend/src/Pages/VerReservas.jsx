@@ -159,17 +159,18 @@ function VerReservas() {
 
         const carregarReservas = async () => {
             try {
-                console.log('ID do usuário:', usuarioId);
+                const token = sessionStorage.getItem('token');
 
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/reservas/usuario/${usuarioId}`
+                    `${import.meta.env.VITE_API_URL}/reservas/usuario/${usuarioId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
                 );
 
-                console.log('Status da resposta:', response.status);
-
                 const data = await response.json();
-
-                console.log('Reservas recebidas:', data);
 
                 if (!response.ok) {
                     throw new Error(data.erro || 'Erro ao buscar reservas');

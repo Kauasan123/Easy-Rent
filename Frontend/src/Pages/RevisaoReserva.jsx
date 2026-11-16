@@ -14,7 +14,8 @@ function RevisaoReserva() {
         imovel,
         checkIn: checkInInicial,
         checkOut: checkOutInicial,
-        hospedes: hospedesInicial
+        hospedes: hospedesInicial,
+        reservaId
     } = location.state || {};
 
     const [checkIn, setCheckIn] = useState(
@@ -276,8 +277,8 @@ function RevisaoReserva() {
                                                                                 setCheckOut(null);
                                                                             }}
                                                                             className={`text-left px-3 py-2 border rounded-xl text-xs font-semibold transition-all ${selecionado
-                                                                                    ? 'bg-beje-principal text-white border-beje-principal'
-                                                                                    : 'border-borda-cards text-preto-texto-principal hover:bg-beje-principal hover:text-white hover:border-beje-principal'
+                                                                                ? 'bg-beje-principal text-white border-beje-principal'
+                                                                                : 'border-borda-cards text-preto-texto-principal hover:bg-beje-principal hover:text-white hover:border-beje-principal'
                                                                                 }`}
                                                                         >
                                                                             {inicio.toLocaleDateString(
@@ -489,10 +490,11 @@ function RevisaoReserva() {
                                         diarias,
                                         subtotal,
                                         taxaServico,
-                                        total
+                                        total,
+                                        reservaId
                                     }
                                 });
-                                }} className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-8 py-3.5 rounded-xl transition-colors shadow-sm" >
+                            }} className="bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-8 py-3.5 rounded-xl transition-colors shadow-sm" >
                                 Ir para o Pagamento
                             </button>
 

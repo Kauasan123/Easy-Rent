@@ -24,8 +24,15 @@ function ControleGeral() {
                 const imoveisComReservas = await Promise.all(
                     imoveisDoUsuario.map(async (imovel) => {
                         try {
+                            const token = sessionStorage.getItem('token');
+
                             const resReservas = await fetch(
-                                `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovel.id}`
+                                `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovel.id}`,
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`
+                                    }
+                                }
                             );
                             const reservas = resReservas.ok ? await resReservas.json() : [];
                             return { ...imovel, reservas };

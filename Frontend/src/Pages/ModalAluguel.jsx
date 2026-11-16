@@ -572,7 +572,7 @@ export function ModalDetalhes({ imovel, onClose }) {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => {
+                <button onClick={async () => {
                   if (intervaloPossuiConflito(checkIn, checkOut)) {
                     setErroReserva(
                       'As datas selecionadas coincidem com uma reserva confirmada. Escolha outro período.'
@@ -580,23 +580,64 @@ export function ModalDetalhes({ imovel, onClose }) {
                     return;
                   }
 
-                  navigate('/revisaoReserva', {
-                    state: {
-                      imovel,
-                      checkIn,
-                      checkOut,
-                      hospedes: Number(hospedes)
+                  if (!usuarioId) {
+                    setErroReserva('Você precisa estar logado para fazer uma reserva.');
+                    return;
+                  }
+
+                  try {
+                    setEnviandoReserva(true);
+                    setErroReserva('');
+
+                    const token = sessionStorage.getItem('token');
+
+                    const response = await fetch(
+                      `${import.meta.env.VITE_API_URL}/reservas`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                          inicio: checkIn,
+                          fim: checkOut,
+                          hospedes: Number(hospedes),
+                          imovelId: imovel.id,
+                        }),
+                      }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                      throw new Error(data.erro || 'Erro ao criar reserva.');
                     }
-                  });
+
+                    navigate('/revisaoReserva', {
+                      state: {
+                        imovel,
+                        checkIn,
+                        checkOut,
+                        hospedes: Number(hospedes),
+                        reservaId: data.id,
+                      },
+                    });
+                  } catch (error) {
+                    setErroReserva(error.message || 'Erro ao conectar com o servidor.');
+                  } finally {
+                    setEnviandoReserva(false);
+                  }
                 }}
                   disabled={
+                    enviandoReserva ||
                     carregandoReservas ||
                     Boolean(erroCarregarReservas) ||
                     !checkIn ||
                     !checkOut ||
                     checkIn >= checkOut
                   } className="w-full bg-beje-principal text-branco-texto-principal font-bold py-4 rounded-xl hover:bg-botao-beje-apertado transition-all active:scale-95 shadow-lg shadow-beje-principal/20 disabled:opacity-50 disabled:cursor-not-allowed">
-                  Avançar para Reserva
+                  {enviandoReserva ? 'Criando reserva...' : 'Avançar para Reserva'}
                 </button>
               )}
 

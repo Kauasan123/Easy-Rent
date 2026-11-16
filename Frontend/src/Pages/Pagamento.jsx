@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import HeaderLogado from '../components/HeaderLogado.jsx';
 import Footer from '../components/Footer.jsx';
@@ -17,7 +17,8 @@ function Pagamento() {
         diarias,
         subtotal,
         taxaServico,
-        total
+        total,
+        reservaId
     } = location.state || {};
 
     const [metodoPagamento, setMetodoPagamento] = useState('Cartão de Crédito');
@@ -29,6 +30,11 @@ function Pagamento() {
     const [cpf, setCpf] = useState('');
     const [telefone, setTelefone] = useState('');
     const [dataNascimento, setDataNascimento] = useState(null);
+    const [email, setEmail] = useState('');
+    const [cep, setCep] = useState('');
+    const [rua, setRua] = useState('');
+    const [numero, setNumero] = useState('');
+    const [bairro, setBairro] = useState('');
     const [textoDataNascimento, setTextoDataNascimento] = useState('');
     const [calendarioNascimentoAberto, setCalendarioNascimentoAberto] = useState(false);
     const [menuPagamentoAberto, setMenuPagamentoAberto] = useState(false);
@@ -36,8 +42,70 @@ function Pagamento() {
     const [erro, setErro] = useState('');
     const [carregando, setCarregando] = useState(false);
     const [dadosPix, setDadosPix] = useState(null);
+    const [urlAutenticacaoCartao, setUrlAutenticacaoCartao] = useState(null);
 
-    const reservaId = 31;
+    useEffect(() => {
+        if (!dadosPix || !reservaId) return;
+
+        const token = sessionStorage.getItem('token');
+
+        if (!token) return;
+
+        let ativo = true;
+        let consultando = false;
+        let pagamentoConfirmado = false;
+
+        const verificarPagamento = async () => {
+            if (consultando || pagamentoConfirmado) return;
+
+            consultando = true;
+
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/pagamentos/reserva/${reservaId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                if (!response.ok || !ativo) return;
+
+                const data = await response.json();
+
+                if (data.status === 'Confirmado' && ativo) {
+                    pagamentoConfirmado = true;
+
+                    navigate('/conclusaoPagamento', {
+                        replace: true,
+                        state: {
+                            imovel,
+                            checkIn,
+                            checkOut,
+                            hospedes,
+                            reservaCodigo: reservaId
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Erro ao verificar pagamento:', error);
+            } finally {
+                consultando = false;
+            }
+        };
+
+        verificarPagamento();
+
+        const intervalo = setInterval(verificarPagamento, 4000);
+
+        return () => {
+            ativo = false;
+            clearInterval(intervalo);
+        };
+
+    }, [dadosPix, reservaId, navigate, imovel, checkIn, checkOut, hospedes]);
 
     if (!imovel || !checkIn || !checkOut || !hospedes) {
         return (
@@ -136,8 +204,20 @@ function Pagamento() {
         )}-${numeros.slice(7)}`;
     };
 
+    const formatarCep = (valor) => {
+        const numeros = valor.replace(/\D/g, '').slice(0, 8);
+
+        return numeros.replace(/(\d{5})(\d)/, '$1-$2');
+    };
+
     const confirmarPagamento = async (e) => {
         e.preventDefault();
+
+        if (!reservaId || !Number.isInteger(Number(reservaId)) || Number(reservaId) <= 0) {
+            setErro('Reserva inválida. Volte e tente realizar a reserva novamente.');
+            return;
+        }
+
         setErro('');
         setDadosPix(null);
 
@@ -171,9 +251,82 @@ function Pagamento() {
             return;
         }
 
-        if (metodoPagamento !== 'Pix') {
-            setErro('A integração com o Asaas está disponível somente para Pix no momento.');
+        if (!['Cartão de Crédito', 'Pix', 'Boleto'].includes(metodoPagamento)) {
+            setErro('Método de pagamento inválido.');
             return;
+        }
+
+        if (metodoPagamento === 'Boleto') {
+            if (!email.trim() || !email.includes('@')) {
+                setErro('Informe um e-mail válido.');
+                return;
+            }
+
+            if (cep.replace(/\D/g, '').length !== 8) {
+                setErro('Informe um CEP válido.');
+                return;
+            }
+
+            if (!rua.trim()) {
+                setErro('Informe sua rua.');
+                return;
+            }
+
+            if (!numero.trim()) {
+                setErro('Informe o número do endereço.');
+                return;
+            }
+
+            if (!bairro.trim()) {
+                setErro('Informe seu bairro.');
+                return;
+            }
+        }
+
+        if (metodoPagamento === 'Cartão de Crédito') {
+            if (numeroCartao.replace(/\D/g, '').length !== 16) {
+                setErro('Informe um número de cartão válido.');
+                return;
+            }
+
+            if (!/^\d{2}\/\d{2}$/.test(validade)) {
+                setErro('Informe a validade do cartão no formato MM/AA.');
+                return;
+            }
+
+            const [mes, ano] = validade.split('/').map(Number);
+            const anoCompleto = 2000 + ano;
+            const hoje = new Date();
+            const validadeCartao = new Date(anoCompleto, mes);
+
+            if (
+                mes < 1 ||
+                mes > 12 ||
+                validadeCartao <= new Date(hoje.getFullYear(), hoje.getMonth())
+            ) {
+                setErro('O cartão está vencido ou possui validade inválida.');
+                return;
+            }
+
+            if (cvv.length !== 3) {
+                setErro('Informe um CVV válido.');
+                return;
+            }
+
+            if (!email.trim() || !email.includes('@')) {
+                setErro('Informe um e-mail válido.');
+                return;
+            }
+
+            if (cep.replace(/\D/g, '').length !== 8) {
+                setErro('Informe um CEP válido.');
+                return;
+            }
+
+            if (!numero.trim()) {
+                setErro('Informe o número do endereço.');
+                return;
+            }
         }
 
         try {
@@ -186,13 +339,6 @@ function Pagamento() {
                 return;
             }
 
-            // Utilizar a reserva que já existe no banco de dados
-            if (!reservaId) {
-                setErro('Reserva não encontrada.');
-                return;
-            }
-
-            // Criar a cobrança Pix no Asaas
             const pagamentoResponse = await fetch(
                 `${import.meta.env.VITE_API_URL}/pagamentos`,
                 {
@@ -203,8 +349,27 @@ function Pagamento() {
                     },
                     body: JSON.stringify({
                         reservaId: reservaId,
-                        metodo: 'Pix',
-                        cpf: cpf.replace(/\D/g, '')
+                        metodo: metodoPagamento,
+                        nome: nome.trim(),
+                        sobrenome: sobrenome.trim(),
+                        cpf: cpf.replace(/\D/g, ''),
+                        telefone: telefone.replace(/\D/g, ''),
+                        dataNascimento: dataNascimento.toISOString().split('T')[0],
+                        ...(metodoPagamento === 'Boleto' && {
+                            email: email.trim(),
+                            cep: cep.replace(/\D/g, ''),
+                            rua: rua.trim(),
+                            numero: numero.trim(),
+                            bairro: bairro.trim()
+                        }),
+                        ...(metodoPagamento === 'Cartão de Crédito' && {
+                            numeroCartao: numeroCartao.replace(/\D/g, ''),
+                            validade: validade,
+                            cvv: cvv,
+                            email: email.trim(),
+                            cep: cep.replace(/\D/g, ''),
+                            numero: numero.trim()
+                        })
                     })
                 }
             );
@@ -218,23 +383,50 @@ function Pagamento() {
                 return;
             }
 
+            if (metodoPagamento === 'Pix') {
+                if (
+                    !pagamentoData.pagamento?.pixQrCode ||
+                    !pagamentoData.pagamento?.pixCopiaECola
+                ) {
+                    setErro('A cobrança foi criada, mas não foi possível obter o QR Code.');
+                    return;
+                }
+            }
+
+            if (metodoPagamento === 'Boleto') {
+                if (!pagamentoData.pagamento?.invoiceUrl) {
+                    setErro('O boleto foi criado, mas não foi possível obter o link para pagamento.');
+                    return;
+                }
+            }
+
             if (
-                !pagamentoData.pagamento?.pixQrCode ||
-                !pagamentoData.pagamento?.pixCopiaECola
+                metodoPagamento === 'Cartão de Crédito' &&
+                !pagamentoData.pagamento
             ) {
-                setErro('A cobrança foi criada, mas não foi possível obter o QR Code.');
+                setErro('Não foi possível obter os dados da cobrança do cartão.');
                 return;
             }
 
-            // 3. Guardar os dados para exibir o Pix
+            if (
+                metodoPagamento === 'Cartão de Crédito' &&
+                pagamentoData.threeDSecureChallengeUrl
+            ) {
+                setUrlAutenticacaoCartao(
+                    pagamentoData.threeDSecureChallengeUrl
+                );
+                return;
+            }
+
             setDadosPix({
                 ...pagamentoData.pagamento,
-                reservaId: reservaId
+                reservaId: reservaId,
+                threeDSecureChallengeUrl: pagamentoData.threeDSecureChallengeUrl || null
             });
 
         } catch (error) {
-            console.error('Erro ao gerar pagamento Pix:', error);
-            setErro('Erro ao conectar com o servidor.');
+            console.error('Erro ao gerar pagamento:', error);
+            setErro('Erro ao conectar com o servidor ou gerar a cobrança.');
         } finally {
             setCarregando(false);
         }
@@ -482,6 +674,21 @@ function Pagamento() {
                                             </div>
                                         )}
                                     </div>
+
+                                    {['Boleto', 'Cartão de Crédito'].includes(metodoPagamento) && (
+                                        <>
+                                            <input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-t border-borda-cards" />
+                                            <input type="text" placeholder="CEP" value={cep} onChange={(e) => setCep(formatarCep(e.target.value))} className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-t border-borda-cards" maxLength={9} />
+                                            <input type="text" placeholder="Número do endereço" value={numero} onChange={(e) => setNumero(e.target.value)} className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-t border-borda-cards" />
+
+                                            {metodoPagamento === 'Boleto' && (
+                                                <>
+                                                    <input type="text" placeholder="Rua" value={rua} onChange={(e) => setRua(e.target.value)} className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-t border-borda-cards" />
+                                                    <input type="text" placeholder="Bairro" value={bairro} onChange={(e) => setBairro(e.target.value)} className="w-full px-7 py-4 text-xl outline-none placeholder:text-gray-900 border-t border-borda-cards" />
+                                                </>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
 
                                 {/* ERRO */}
@@ -504,33 +711,71 @@ function Pagamento() {
 
                                 </div>
                             </form>
+
                         ) : (
                             <div className="border border-borda-cards rounded-xl p-6 mt-6 text-center">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                                    Pague com PIX
-                                </h2>
+                                {dadosPix.metodo === 'Pix' ? (
+                                    <>
+                                        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                                            Pague com PIX
+                                        </h2>
 
-                                <p className="text-gray-600 mb-6">
-                                    Escaneie o QR Code abaixo com o aplicativo do seu banco.
-                                </p>
+                                        <p className="text-gray-600 mb-6">
+                                            Escaneie o QR Code abaixo com o aplicativo do seu banco.
+                                        </p>
 
-                                <img src={
-                                    dadosPix.pixQrCode.startsWith('data:')
-                                        ? dadosPix.pixQrCode
-                                        : `data:image/png;base64,${dadosPix.pixQrCode}`
-                                } alt="QR Code PIX" className="w-64 h-64 object-contain mx-auto mb-6" />
+                                        <img src={
+                                            dadosPix.pixQrCode.startsWith('data:')
+                                                ? dadosPix.pixQrCode
+                                                : `data:image/png;base64,${dadosPix.pixQrCode}`
+                                        } alt="QR Code PIX" className="w-64 h-64 object-contain mx-auto mb-6"
+                                        />
 
-                                <p className="font-semibold text-gray-900 mb-2">
-                                    PIX Copia e Cola
-                                </p>
+                                        <p className="font-semibold text-gray-900 mb-2">
+                                            PIX Copia e Cola
+                                        </p>
 
-                                <textarea readOnly value={dadosPix.pixCopiaECola} className="w-full h-24 p-3 border border-borda-cards rounded-lg text-sm resize-none" />
+                                        <textarea readOnly value={dadosPix.pixCopiaECola} className="w-full h-24 p-3 border border-borda-cards rounded-lg text-sm resize-none" />
 
-                                <button type="button" onClick={() =>
-                                    navigator.clipboard.writeText(dadosPix.pixCopiaECola)
-                                } className="w-full mt-3 bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-6 py-3 rounded-xl transition-colors">
-                                    Copiar código PIX
-                                </button>
+                                        <button type="button" onClick={() =>
+                                            navigator.clipboard.writeText(dadosPix.pixCopiaECola)
+                                        } className="w-full mt-3 bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-6 py-3 rounded-xl transition-colors"
+                                        >
+                                            Copiar código PIX
+                                        </button>
+                                    </>
+                                ) : dadosPix.metodo === 'Boleto' ? (
+                                    <>
+                                        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                                            Boleto gerado!
+                                        </h2>
+
+                                        <p className="text-gray-600 mb-6">
+                                            Seu boleto foi gerado com sucesso. Clique no botão abaixo
+                                            para abrir e realizar o pagamento.
+                                        </p>
+
+                                        <a href={dadosPix.invoiceUrl} target="_blank" rel="noopener noreferrer" className="block w-full bg-beje-principal hover:bg-botao-beje-apertado text-white font-medium px-6 py-3 rounded-xl transition-colors" >
+                                            Abrir e imprimir boleto
+                                        </a>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                                            Pagamento com cartão em processamento
+                                        </h2>
+
+                                        <p className="text-gray-600 mb-6">
+                                            Estamos aguardando a confirmação do pagamento. Você não precisa realizar outra tentativa.
+                                        </p>
+
+                                        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-beje-principal border-t-transparent" />
+
+                                        <p className="text-gray-700">
+                                            Verificando pagamento...
+                                        </p>
+                                    </>
+                                )}
 
                                 <p className="text-lg font-bold text-gray-900 mt-6">
                                     Valor: R$ {formatarMoeda(dadosPix.valor)}
@@ -538,7 +783,7 @@ function Pagamento() {
 
                                 {dadosPix.expiraEm && (
                                     <p className="text-sm text-gray-500 mt-2">
-                                        Expira em: {formatarData(dadosPix.expiraEm)}
+                                        Vencimento: {formatarData(dadosPix.expiraEm)}
                                     </p>
                                 )}
 
@@ -547,6 +792,7 @@ function Pagamento() {
                                 </p>
                             </div>
                         )}
+
                     </section>
 
                     {/* COLUNA DIREITA */}

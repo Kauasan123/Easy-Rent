@@ -30,8 +30,15 @@ function ControlePagamento() {
                 setCarregando(true);
                 setErro('');
 
+                const token = sessionStorage.getItem('token');
+
                 const resposta = await fetch(
-                    `http://localhost:5000/api/pagamentos/usuario/${encodeURIComponent(usuarioId)}`
+                    `http://localhost:5000/api/pagamentos/usuario/${encodeURIComponent(usuarioId)}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
                 );
 
                 if (!resposta.ok) {
@@ -524,7 +531,7 @@ function ControlePagamento() {
                                 <div className="px-4 py-3 flex items-center gap-3 min-w-0">
 
                                     <div className="w-11 h-11 rounded-full border border-zinc-300 shrink-0 overflow-hidden">
-                                        <AvatarUsuario nome={pagamento.hospede} src={pagamento.avatar} className="w-full h-full" textoClassName="text-sm"/>
+                                        <AvatarUsuario nome={pagamento.hospede} src={pagamento.avatar} className="w-full h-full" textoClassName="text-sm" />
                                     </div>
 
                                     <div className="min-w-0">

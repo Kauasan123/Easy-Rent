@@ -21,4 +21,10 @@ router.post(
     pagamentoController.processarWebhookAsaas
 );
 
+router.get(
+    '/pagamentos/reserva/:reservaId',
+    verificaToken,
+    pagamentoController.buscarPagamentoPorReserva
+);
+
 module.exports = router;

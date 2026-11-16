@@ -260,8 +260,15 @@ function ControleUnico() {
 
                 setCarregandoReservas(true);
 
+                const token = sessionStorage.getItem('token');
+
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovelSelecionado}`
+                    `${import.meta.env.VITE_API_URL}/reservas/imovel/${imovelSelecionado}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
                 );
 
                 if (!response.ok) {

@@ -298,7 +298,7 @@ const listarReservasPorImovel = async (req, res) => {
 
 const listarReservasPorUsuario = async (req, res) => {
   try {
-    const id = parseInt(usuarioId);
+    const id = Number(req.params.usuarioId);
 
     if (isNaN(id)) {
       return res.status(400).json({
