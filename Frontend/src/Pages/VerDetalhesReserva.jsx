@@ -59,9 +59,21 @@ function VerDetalhesReserva() {
     useEffect(() => {
         const carregarReserva = async () => {
             try {
+                const token = sessionStorage.getItem('token');
+
+                if (!token) {
+                    setErro('Autenticação necessária. Entre novamente na sua conta.');
+                    return;
+                }
+
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/reservas/${id}`
-                )
+                    `${import.meta.env.VITE_API_URL}/reservas/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
                 const data = await response.json()
 
@@ -301,7 +313,7 @@ function VerDetalhesReserva() {
 
                 <section className="border border-borda-cards rounded-xl p-4 md:p-5 mb-4">
                     <div className="flex flex-col md:flex-row gap-6">
-                        <img src={imagemImovel} alt={reserva.imovel?.titulo || 'Imóvel reservado'} className="w-full md:w-[272px] h-[250px] object-cover rounded-xl"/>
+                        <img src={imagemImovel} alt={reserva.imovel?.titulo || 'Imóvel reservado'} className="w-full md:w-[272px] h-[250px] object-cover rounded-xl" />
 
                         <div className="flex-1 min-w-0">
                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
@@ -432,10 +444,10 @@ function VerDetalhesReserva() {
 
                         <div className="flex items-center gap-4">
                             <AvatarUsuario nome={reserva.imovel?.usuario?.nome || 'Anfitrião'} src={
-                                    reserva.imovel?.usuario?.avatarPath
-                                        ? `${import.meta.env.VITE_API_URL}${reserva.imovel.usuario.avatarPath}`
-                                        : null
-                                } className="w-[88px] h-[88px]" textoClassName="text-3xl" />
+                                reserva.imovel?.usuario?.avatarPath
+                                    ? `${import.meta.env.VITE_API_URL}${reserva.imovel.usuario.avatarPath}`
+                                    : null
+                            } className="w-[88px] h-[88px]" textoClassName="text-3xl" />
 
                             <div>
                                 <h3 className="text-lg font-bold mb-2">
